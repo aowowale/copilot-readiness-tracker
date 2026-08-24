@@ -190,12 +190,16 @@
     .overview-panel-header { padding: 18px 20px; border-bottom: 1px solid var(--cp-border); }
     .overview-panel-header h3 { margin: 0; font-size: 17px; }
     .overview-panel-header p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 13px; }
-    .phase-overview-row { display: grid; grid-template-columns: 34px minmax(150px, 1fr) minmax(120px, 1.2fr) 68px; gap: 14px; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--cp-border); }
+    .phase-overview-row { display: grid; grid-template-columns: 34px minmax(150px, 1fr) minmax(120px, 1.2fr) 68px 18px; gap: 14px; align-items: center; width: 100%; padding: 16px 20px; border: 0; border-bottom: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text); text-align: left; cursor: pointer; }
     .phase-overview-row:last-child { border-bottom: 0; }
+    .phase-overview-row:hover { background: var(--cp-accent-soft); }
+    .phase-overview-row:focus-visible { position: relative; z-index: 1; outline: 2px solid var(--cp-accent); outline-offset: -2px; }
     .phase-overview-number { color: var(--cp-accent); }
     .phase-overview-title { font-weight: 600; }
     .phase-overview-title span { display: block; margin-top: 3px; color: var(--cp-text-muted); font-size: 12px; font-weight: 400; }
     .phase-overview-count { text-align: right; font-size: 12px; }
+    .phase-overview-arrow { color: var(--cp-text-muted); font-size: 18px; line-height: 1; }
+    .phase-overview-row:hover .phase-overview-arrow { color: var(--cp-accent); }
     .status-stack { display: flex; height: 12px; overflow: hidden; background: var(--cp-border); }
     .status-stack span { min-width: 0; }
     .status-stack .progress { background: var(--cp-warning); }
@@ -360,7 +364,7 @@
       .metric-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
       .metric { min-height: 116px; padding: 16px; }
       .metric-value { font-size: 27px; }
-      .phase-overview-row { grid-template-columns: 28px minmax(0, 1fr) 52px; padding: 14px 16px; }
+      .phase-overview-row { grid-template-columns: 28px minmax(0, 1fr) 52px 14px; padding: 14px 16px; }
       .phase-overview-row .status-stack { grid-column: 2 / -1; }
       .phase-nav { grid-template-columns: 1fr; }
       .phase-header { grid-template-columns: 38px 1fr; padding: 20px 16px; }
@@ -907,12 +911,13 @@
       const phaseRows = phases.map((phase, phaseIndex) => {
         const stats = phaseStats(phaseIndex);
         const width = status => (stats[status] / phase.tasks.length) * 100;
-        return `<div class="phase-overview-row">
+        return `<button class="phase-overview-row" type="button" data-jump-phase="${phase.number}" aria-label="Open ${escapeHtml(phase.title)} in the detailed tracker">
           <div class="phase-overview-number mono">${phase.number}</div>
           <div class="phase-overview-title">${phase.title}<span>${phase.duration}</span></div>
           <div class="status-stack" aria-label="${stats.done} done, ${stats.progress} in progress, ${stats.blocked} blocked"><span class="progress" style="width:${width("progress")}%"></span><span class="blocked" style="width:${width("blocked")}%"></span><span class="done" style="width:${width("done")}%"></span></div>
           <div class="phase-overview-count mono">${stats.done}/${phase.tasks.length}</div>
-        </div>`;
+          <span class="phase-overview-arrow" aria-hidden="true">›</span>
+        </button>`;
       }).join("");
       const attention = active.length ? active.map(task => `<button class="attention-item" type="button" data-jump-task="${task.id}" data-phase="${task.phase.number}">
         <span class="attention-meta"><span class="attention-status ${isOverdue(task) ? "overdue" : task.data.status} mono">${isOverdue(task) ? "Overdue" : statusLabels[task.data.status]} · Phase ${task.phase.number}</span><span class="attention-owner">${escapeHtml(task.data.owner || "Unassigned")}</span></span>
@@ -1006,6 +1011,13 @@
       toastTimer = setTimeout(() => toast.classList.remove("visible"), 1800);
     }
 
+    function navigateToPhase(phaseNumber) {
+      setView("tracker", false);
+      const phaseId = `phase-${phaseNumber}`;
+      history.replaceState(null, "", `#${phaseId}`);
+      document.getElementById(phaseId).scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     document.addEventListener("click", event => {
       const action = event.target.closest("[data-action]");
       if (action) {
@@ -1032,6 +1044,12 @@
         return;
       }
 
+      const phaseJump = event.target.closest("[data-jump-phase]");
+      if (phaseJump) {
+        navigateToPhase(phaseJump.dataset.jumpPhase);
+        return;
+      }
+
       const statusButton = event.target.closest(".status-btn");
       if (statusButton) {
         const task = statusButton.closest(".task");
@@ -1052,6 +1070,13 @@
         toggle.textContent = expanded ? "Show steps" : "Hide steps";
         details.hidden = expanded;
       }
+    });
+
+    document.addEventListener("keydown", event => {
+      const phaseJump = event.target.closest("[data-jump-phase]");
+      if (!phaseJump || (event.key !== "Enter" && event.key !== " ")) return;
+      event.preventDefault();
+      navigateToPhase(phaseJump.dataset.jumpPhase);
     });
 
     document.addEventListener("input", event => {
