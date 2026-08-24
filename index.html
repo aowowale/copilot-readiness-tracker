@@ -140,6 +140,8 @@
       margin: 0 auto;
       padding: 28px clamp(20px, 3vw, 48px) 64px;
     }
+    .layout.all-phases-collapsed { grid-template-columns: 1fr; }
+    .layout.all-phases-collapsed .sidebar { display: none; }
     .sidebar { position: sticky; top: 108px; align-self: start; }
     .side-panel, .phase {
       background: var(--cp-surface);
@@ -179,6 +181,16 @@
     .overview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
     .command-btn { min-height: 35px; padding: 0 12px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); cursor: pointer; font-size: 11px; text-transform: uppercase; }
     .command-btn:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .program-guide { display: grid; grid-template-columns: minmax(230px, 0.8fr) minmax(0, 2.2fr); margin-bottom: 16px; border: 1px solid var(--cp-border); background: var(--cp-surface); }
+    .program-guide-intro { padding: 22px; border-right: 1px solid var(--cp-border); }
+    .program-guide-intro h3 { margin: 7px 0 8px; font-size: 20px; }
+    .program-guide-intro p { margin: 0; color: var(--cp-text-muted); font-size: 14px; }
+    .program-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .program-step { padding: 22px 24px; border-right: 1px solid var(--cp-border); }
+    .program-step:last-child { border-right: 0; }
+    .program-step-number { color: var(--cp-accent); font-size: 11px; }
+    .program-step h4 { margin: 8px 0 6px; font-size: 15px; }
+    .program-step p { margin: 0; color: var(--cp-text-muted); font-size: 13px; }
     .metric-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
     .metric, .overview-panel { background: var(--cp-surface); border: 1px solid var(--cp-border); box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
     .metric { min-height: 132px; padding: 20px; }
@@ -222,10 +234,14 @@
     .rollout-gate.ready { border-left-color: var(--cp-success); }
     .rollout-gate strong { display: block; margin-bottom: 4px; }
     .rollout-gate span { color: var(--cp-text-muted); }
+    .tracker-toolbar { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 14px; }
+    .tracker-toolbar h2 { margin: 0; font-size: 20px; }
+    .tracker-toolbar p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 13px; }
+    .tracker-toolbar-actions { display: flex; flex-shrink: 0; gap: 8px; }
     .phase { margin-bottom: 24px; scroll-margin-top: 112px; }
     .phase-header {
       display: grid;
-      grid-template-columns: 44px minmax(0, 1fr) auto;
+      grid-template-columns: 44px minmax(0, 1fr) minmax(170px, 230px) 36px;
       gap: 18px;
       align-items: start;
       padding: 24px 26px;
@@ -250,6 +266,16 @@
       font-size: 12px;
     }
     .phase-count { margin-top: 8px; font-size: 13px; }
+    .phase-status { margin-top: 10px; }
+    .phase-toggle { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text-muted); cursor: pointer; font-size: 20px; line-height: 1; }
+    .phase-toggle:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .phase-toggle:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 2px; }
+    .phase-toggle-icon { transition: transform 180ms ease; }
+    .phase.collapsed { margin-bottom: 12px; }
+    .phase.collapsed .phase-header { padding-top: 16px; padding-bottom: 16px; border-bottom: 0; }
+    .phase.collapsed .phase-description { display: none; }
+    .phase.collapsed .phase-toggle-icon { transform: rotate(-90deg); }
+    .phase-tasks[hidden] { display: none; }
     .task-wrap { border-bottom: 1px solid var(--cp-border); }
     .task-wrap:last-child { border-bottom: 0; }
     .task {
@@ -351,6 +377,8 @@
       .phase-link { border-right: 1px solid var(--cp-border); }
       .metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .overview-grid { grid-template-columns: 1fr; }
+      .program-guide { grid-template-columns: 1fr; }
+      .program-guide-intro { border-right: 0; border-bottom: 1px solid var(--cp-border); }
     }
     @media (max-width: 680px) {
       .topbar { gap: 14px; padding: 16px; }
@@ -368,11 +396,21 @@
       .metric-value { font-size: 27px; }
       .phase-overview-row { grid-template-columns: 28px minmax(0, 1fr) 52px 14px; padding: 14px 16px; }
       .phase-overview-row .status-stack { grid-column: 2 / -1; }
+      .program-steps { grid-template-columns: 1fr; }
+      .program-step { border-right: 0; border-bottom: 1px solid var(--cp-border); }
+      .program-step:last-child { border-bottom: 0; }
       .phase-nav { grid-template-columns: 1fr; }
-      .phase-header { grid-template-columns: 38px 1fr; padding: 20px 16px; }
+      .tracker-toolbar { display: block; }
+      .tracker-toolbar-actions { margin-top: 12px; }
+      .tracker-toolbar-actions .command-btn { flex: 1; }
+      .phase-header { grid-template-columns: 38px minmax(0, 1fr) 36px; padding: 20px 16px; }
       .phase-number { width: 38px; }
-      .phase-summary { grid-column: 2; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+      .phase-summary { grid-column: 2 / -1; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; text-align: left; }
       .phase-count { margin-top: 0; }
+      .phase-status { grid-column: 1 / -1; margin-top: 0; }
+      .phase-toggle { grid-column: 3; grid-row: 1; }
+      .layout.all-phases-collapsed .phase.collapsed .phase-header { grid-template-columns: 38px minmax(0, 1fr) 36px; padding-top: 14px; padding-bottom: 14px; }
+      .layout.all-phases-collapsed .phase.collapsed .phase-summary { grid-column: 2 / -1; }
       .task { grid-template-columns: 24px minmax(0, 1fr); gap: 12px; padding: 16px; }
       .status-label { grid-column: 2; grid-row: 1; justify-self: end; padding-left: 8px; background: var(--cp-surface); }
       .task-title { padding-right: 78px; }
@@ -435,7 +473,13 @@
       <p class="side-note">Durations are planning estimates for a mid-size tenant. Progress and notes are saved in this browser only.</p>
     </aside>
 
-    <main class="main" id="phase-list"></main>
+    <main class="main">
+      <header class="tracker-toolbar">
+        <div><h2>Program phases</h2><p>Open a phase to manage its tasks, owners, dates, and rationale.</p></div>
+        <div class="tracker-toolbar-actions"><button class="command-btn mono" type="button" data-action="collapse-phases">Collapse all</button><button class="command-btn mono" type="button" data-action="expand-phases">Expand all</button></div>
+      </header>
+      <div id="phase-list"></div>
+    </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -645,6 +689,7 @@
     let syncConfig = loadSyncConfig();
     let msalApp = null;
     let syncAccount = null;
+    const collapsedPhases = new Set();
     let syncInProgress = false;
     let activeView = location.hash === "#tracker" || location.hash.startsWith("#phase-") ? "tracker" : "overview";
     let toastTimer;
@@ -981,7 +1026,15 @@
         <span class="attention-title">${task.title}</span>${task.data.targetDate ? `<span class="attention-due ${isOverdue(task) ? "overdue" : ""}">Target ${formatDate(task.data.targetDate)}</span>` : ""}
       </button>`).join("") : `<div class="empty-state">No blocked, overdue, or in-progress items yet.</div>`;
       document.getElementById("overview-view").innerHTML = `
-        <header class="overview-heading"><div><h2>Program overview</h2><p>Readiness, ownership, and delivery risk across all five phases.</p></div><div><span class="overview-updated mono">Saved locally · live summary</span><div class="overview-actions"><button class="command-btn mono" type="button" data-action="export-csv">Export CSV</button><button class="command-btn mono" type="button" data-action="export-json">Backup JSON</button><button class="command-btn mono" type="button" data-action="import-json">Restore JSON</button><button class="command-btn mono" type="button" data-action="print">Print report</button></div></div></header>
+        <header class="overview-heading"><div><h2>Program overview</h2><p>Understand the approach, then track readiness, ownership, and delivery risk.</p></div><div><span class="overview-updated mono">Saved locally · live summary</span><div class="overview-actions"><button class="command-btn mono" type="button" data-action="export-csv">Export CSV</button><button class="command-btn mono" type="button" data-action="export-json">Backup JSON</button><button class="command-btn mono" type="button" data-action="import-json">Restore JSON</button><button class="command-btn mono" type="button" data-action="print">Print report</button></div></div></header>
+        <section class="program-guide" aria-labelledby="program-guide-title">
+          <div class="program-guide-intro"><div class="eyebrow mono">Why this sequence</div><h3 id="program-guide-title">Clean first. Govern next. Expand with evidence.</h3><p>Copilot respects existing access. This program reduces what people can already reach, puts durable controls around it, and only then broadens AI access.</p></div>
+          <div class="program-steps">
+            <div class="program-step"><span class="program-step-number mono">PHASES 01–02</span><h4>Know and contain</h4><p>Find stale, sensitive, and overshared content, then archive or remove it with owner approval.</p></div>
+            <div class="program-step"><span class="program-step-number mono">PHASE 03</span><h4>Prevent the rebound</h4><p>Automate ownership, expiration, exclusion, and monitoring so today’s cleanup lasts.</p></div>
+            <div class="program-step"><span class="program-step-number mono">PHASES 04–05</span><h4>Roll out deliberately</h4><p>Pilot Copilot, learn from real usage, then add users, agents, and connectors in controlled stages.</p></div>
+          </div>
+        </section>
         <section class="metric-grid" aria-label="Program metrics">
           <div class="metric"><div class="eyebrow mono">Complete</div><div class="metric-value">${counts.done}<span class="mono"> / ${totalTasks}</span></div><div class="metric-detail">${Math.round((counts.done / totalTasks) * 100)}% of program tasks</div></div>
           <div class="metric"><div class="eyebrow mono">In progress</div><div class="metric-value">${counts.progress}</div><div class="metric-detail">Active work items</div></div>
@@ -1008,6 +1061,7 @@
     function render() {
       const nav = document.getElementById("phase-nav");
       const list = document.getElementById("phase-list");
+      document.getElementById("tracker-view").classList.toggle("all-phases-collapsed", collapsedPhases.size === phases.length);
       nav.innerHTML = phases.map((phase, phaseIndex) => {
         const done = phase.tasks.filter((_, taskIndex) => taskData(phaseIndex, taskIndex).status === "done").length;
         const percent = (done / phase.tasks.length) * 100;
@@ -1019,7 +1073,10 @@
       }).join("");
 
       list.innerHTML = phases.map((phase, phaseIndex) => {
-        const done = phase.tasks.filter((_, taskIndex) => taskData(phaseIndex, taskIndex).status === "done").length;
+        const stats = phaseStats(phaseIndex);
+        const done = stats.done;
+        const width = status => (stats[status] / phase.tasks.length) * 100;
+        const collapsed = collapsedPhases.has(phase.number);
         const tasks = phase.tasks.map((rawTask, taskIndex) => {
           const task = typeof rawTask === "string" ? { title: rawTask } : rawTask;
           const id = taskId(phaseIndex, taskIndex);
@@ -1043,12 +1100,13 @@
             </div>${details}
           </div>`;
         }).join("");
-        return `<section class="phase" id="phase-${phase.number}">
+        return `<section class="phase${collapsed ? " collapsed" : ""}" id="phase-${phase.number}">
           <header class="phase-header">
             <div class="phase-number mono">${phase.number}</div>
             <div><h2>${phase.title}</h2><p class="phase-description">${phase.description}</p></div>
-            <div class="phase-summary"><span class="duration-badge mono">${phase.duration}</span><div class="phase-count mono">${done}/${phase.tasks.length} done</div></div>
-          </header>${tasks}
+            <div class="phase-summary"><span class="duration-badge mono">${phase.duration}</span><div class="phase-count mono">${done}/${phase.tasks.length} done</div><div class="status-stack phase-status" aria-label="${stats.done} done, ${stats.progress} in progress, ${stats.blocked} blocked"><span class="progress" style="width:${width("progress")}%"></span><span class="blocked" style="width:${width("blocked")}%"></span><span class="done" style="width:${width("done")}%"></span></div></div>
+            <button class="phase-toggle" type="button" data-phase-toggle="${phase.number}" aria-expanded="${!collapsed}" aria-controls="phase-tasks-${phase.number}" aria-label="${collapsed ? "Expand" : "Collapse"} ${escapeHtml(phase.title)}"><span class="phase-toggle-icon" aria-hidden="true">⌄</span></button>
+          </header><div class="phase-tasks" id="phase-tasks-${phase.number}"${collapsed ? " hidden" : ""}>${tasks}</div>
         </section>`;
       }).join("") + `<div class="footer-note">Phase 3 is the reusable engine — configure it once and the environment stays clean without repeating Phases 1–2 later. Stand it up early, before cleanup finishes.</div>`;
       updateOverall();
@@ -1071,6 +1129,8 @@
     }
 
     function navigateToPhase(phaseNumber) {
+      collapsedPhases.delete(phaseNumber);
+      render();
       setView("tracker", false);
       const phaseId = `phase-${phaseNumber}`;
       history.replaceState(null, "", `#${phaseId}`);
@@ -1084,6 +1144,14 @@
         if (action.dataset.action === "export-json") exportJson();
         if (action.dataset.action === "import-json") document.getElementById("import-file").click();
         if (action.dataset.action === "print") window.print();
+        if (action.dataset.action === "collapse-phases") {
+          phases.forEach(phase => collapsedPhases.add(phase.number));
+          render();
+        }
+        if (action.dataset.action === "expand-phases") {
+          collapsedPhases.clear();
+          render();
+        }
         return;
       }
 
@@ -1106,6 +1174,16 @@
       const phaseJump = event.target.closest("[data-jump-phase]");
       if (phaseJump) {
         navigateToPhase(phaseJump.dataset.jumpPhase);
+        return;
+      }
+
+      const phaseToggle = event.target.closest("[data-phase-toggle]");
+      if (phaseToggle) {
+        const phaseNumber = phaseToggle.dataset.phaseToggle;
+        if (collapsedPhases.has(phaseNumber)) collapsedPhases.delete(phaseNumber);
+        else collapsedPhases.add(phaseNumber);
+        render();
+        document.getElementById(`phase-${phaseNumber}`).scrollIntoView({ block: "nearest" });
         return;
       }
 
