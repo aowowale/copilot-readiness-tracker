@@ -293,6 +293,8 @@
     .task-details { padding: 0 26px 20px 68px; background: var(--cp-surface-soft); }
     .task-details[hidden] { display: none; }
     .task-details h3 { margin: 0 0 8px; padding-top: 16px; color: var(--cp-accent); font-size: 11px; text-transform: uppercase; }
+    .task-why { max-width: 78ch; margin: 0; color: var(--cp-text-soft); }
+    .task-details .task-why + h3 { padding-top: 14px; }
     .task-details ul { margin: 0; padding-left: 20px; }
     .task-details li { margin: 7px 0; color: var(--cp-text-muted); }
     .footer-note {
@@ -578,6 +580,61 @@
       }
     ];
 
+    const taskReasons = [
+      [
+        "Creates the baseline needed to make cleanup decisions from evidence rather than assumptions.",
+        "Shows which sites carry the most risk, cost, or ownership gaps so effort can be prioritized.",
+        "Surfaces hidden exposure and governance issues that normal site lists do not reveal.",
+        "Prevents applying the wrong cleanup process to services that store and retain content differently.",
+        "Avoids leaving unmanaged business data in accounts that are no longer actively used.",
+        "Prevents cleanup work from conflicting with records obligations or causing unintended data loss.",
+        "Protects legally preserved content and gives the delivery team a clear do-not-touch list.",
+        "Labels help people and Copilot handle sensitive information consistently before access expands.",
+        "Gives decision-makers a shared mental model of where Microsoft 365 content lives and why sites multiply.",
+        "Provides enough activity history to identify unsanctioned AI usage before the rollout begins."
+      ],
+      [
+        "Provides a controlled destination for content that must be retained but should leave active workspaces.",
+        "Keeps archived content traceable to its source and easier to find, govern, and restore.",
+        "Reduces the chance that archived or sensitive material is rediscovered through broad permissions or Copilot.",
+        "Allows approved cleanup to proceed while keeping the exception narrow, deliberate, and time-bound.",
+        "Removes stale content from its original location so duplicate copies do not remain searchable or governed twice.",
+        "Reduces the attack surface, administrative burden, and irrelevant content available to search and Copilot.",
+        "Restores normal safeguards immediately after cleanup so future deletion still follows policy.",
+        "Data owners understand the business need for external access and can distinguish valid collaboration from stale sharing.",
+        "Closes confirmed access paths that could expose organizational content outside the intended audience.",
+        "Creates accountability and evidence for audits, investigations, and recovery if a deletion is challenged.",
+        "Helps owners prevent new exposure instead of making governance a permanent central IT cleanup job."
+      ],
+      [
+        "Prompts owners to renew active workspaces and removes abandoned groups before they become unmanaged data stores.",
+        "Ensures every group has accountable people who can respond to access, lifecycle, and renewal decisions.",
+        "Turns expiration into a complete process so deleted groups do not leave orphaned SharePoint sites behind.",
+        "Prevents sensitive or archival content from appearing in Copilot even when a user still has technical access.",
+        "Makes unusual access to sensitive information visible early enough for security teams to respond.",
+        "Keeps controls effective as sites, owners, risks, and Microsoft 365 features change over time."
+      ],
+      [
+        "Ensures Copilot is introduced only after the highest-risk content and permission gaps are under control.",
+        "Sets a clear security and user-experience boundary before people begin relying on Copilot answers.",
+        "Sets accurate expectations so intentionally restricted answers are not mistaken for a broken product.",
+        "Records who accepted the external-information risk and under which safeguards.",
+        "Limits early impact while the team learns how Copilot behaves with real users and organizational data.",
+        "Helps users get value without accidentally exposing content through poor prompts or permissions.",
+        "Reveals unsanctioned AI tools and data flows that could otherwise sit outside rollout governance.",
+        "Turns early issues into actionable fixes and distinguishes Copilot problems from existing data-quality problems.",
+        "Allows support, governance, and training capacity to grow with adoption rather than being overwhelmed.",
+        "Shows whether licensed users are finding sustained value and where additional support may be needed.",
+        "A configured alert has no protective value unless someone owns, reviews, and responds to it."
+      ],
+      [
+        "Limits the data and actions exposed if a connector is misconfigured or an agent behaves unexpectedly.",
+        "Prevents a new source from reintroducing the same stale, overshared, or ownerless content already cleaned up elsewhere.",
+        "Makes the agent's authority understandable, reviewable, and accountable before it can change business systems.",
+        "Ensures connected data remains governed after launch as permissions, content, and business needs change."
+      ]
+    ];
+
     const STORAGE_KEY = "copilot-readiness-tracker-v1";
     const SYNC_CONFIG_KEY = "copilot-readiness-sync-config-v1";
     const GRAPH_SCOPES = ["Sites.ReadWrite.All", "Sites.Manage.All"];
@@ -589,7 +646,7 @@
     let msalApp = null;
     let syncAccount = null;
     let syncInProgress = false;
-    let activeView = location.hash.startsWith("#phase-") ? "tracker" : "overview";
+    let activeView = location.hash === "#tracker" || location.hash.startsWith("#phase-") ? "tracker" : "overview";
     let toastTimer;
 
     function loadState() {
@@ -967,7 +1024,9 @@
           const task = typeof rawTask === "string" ? { title: rawTask } : rawTask;
           const id = taskId(phaseIndex, taskIndex);
           const data = taskData(phaseIndex, taskIndex);
-          const details = task.details ? `<div class="task-details" id="details-${id}" hidden><h3 class="mono">Config path</h3><ul>${task.details.map(item => `<li>${item}</li>`).join("")}</ul></div>` : "";
+          const reason = taskReasons[phaseIndex][taskIndex];
+          const steps = task.details ? `<h3 class="mono">Config path</h3><ul>${task.details.map(item => `<li>${item}</li>`).join("")}</ul>` : "";
+          const details = `<div class="task-details" id="details-${id}" hidden><h3 class="mono">Why this matters</h3><p class="task-why">${escapeHtml(reason)}</p>${steps}</div>`;
           return `<div class="task-wrap">
             <div class="task" data-id="${id}" data-status="${data.status}">
               <button class="status-btn" type="button" aria-label="Cycle status for ${escapeHtml(task.title)}" title="Click to cycle status"></button>
@@ -977,7 +1036,7 @@
                   <input data-field="owner" value="${escapeHtml(data.owner)}" placeholder="Owner" aria-label="Owner for ${escapeHtml(task.title)}">
                   <input data-field="targetDate" type="date" value="${escapeHtml(data.targetDate)}" aria-label="Target date for ${escapeHtml(task.title)}" title="Target date">
                   <input data-field="notes" value="${escapeHtml(data.notes)}" placeholder="Notes / date" aria-label="Notes for ${escapeHtml(task.title)}">
-                  ${task.details ? `<button class="details-toggle mono" type="button" aria-expanded="false" aria-controls="details-${id}">Show steps</button>` : ""}
+                  <button class="details-toggle mono" type="button" aria-expanded="false" aria-controls="details-${id}">${task.details ? "Why & steps" : "Why"}</button>
                 </div>
               </div>
               <div class="status-label mono">${statusLabels[data.status]}</div>
@@ -1067,7 +1126,8 @@
         const details = document.getElementById(toggle.getAttribute("aria-controls"));
         const expanded = toggle.getAttribute("aria-expanded") === "true";
         toggle.setAttribute("aria-expanded", String(!expanded));
-        toggle.textContent = expanded ? "Show steps" : "Hide steps";
+        const hasSteps = Boolean(details.querySelector("ul"));
+        toggle.textContent = expanded ? (hasSteps ? "Why & steps" : "Why") : "Hide details";
         details.hidden = expanded;
       }
     });
