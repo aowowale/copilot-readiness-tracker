@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Copilot Readiness Tracker</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .mono {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      letter-spacing: 0;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 360px) auto;
+      gap: 28px;
+      align-items: center;
+      padding: 20px clamp(20px, 3vw, 48px);
+      background: var(--cp-bg-elevated);
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .brand h1 { margin: 0; font-size: 21px; line-height: 1.2; }
+    .brand p, .eyebrow {
+      margin: 5px 0 0;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .overall-row { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; }
+    .progress-track {
+      height: 5px;
+      margin-top: 8px;
+      overflow: hidden;
+      background: var(--cp-border);
+    }
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: var(--cp-accent);
+      transition: width 220ms ease;
+    }
+    .reset-btn, .details-toggle, .view-tab, .sync-btn {
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .reset-btn { min-height: 42px; padding: 0 18px; }
+    .reset-btn:hover, .details-toggle:hover, .view-tab:hover, .sync-btn:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .header-actions { display: flex; gap: 8px; }
+    .sync-btn { min-height: 42px; padding: 0 15px; }
+    .sync-btn.connected { border-color: var(--cp-success); }
+    .sync-dot { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: var(--cp-border-strong); }
+    .sync-btn.connected .sync-dot { background: var(--cp-success); }
+    .sync-btn.syncing .sync-dot { background: var(--cp-warning); }
+    .view-switcher { display: flex; gap: 8px; max-width: 1540px; margin: 0 auto; padding: 18px clamp(20px, 3vw, 48px) 0; }
+    .view-tab { min-height: 38px; padding: 0 16px; font-size: 12px; }
+    .view-tab[aria-selected="true"] { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); }
+    .view-panel[hidden] { display: none; }
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 28px;
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 28px clamp(20px, 3vw, 48px) 64px;
+    }
+    .sidebar { position: sticky; top: 108px; align-self: start; }
+    .side-panel, .phase {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+    }
+    .side-panel { margin-bottom: 20px; }
+    .panel-title { padding: 16px 18px; border-bottom: 1px solid var(--cp-border); }
+    .phase-link {
+      display: block;
+      padding: 16px 18px;
+      color: var(--cp-text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .phase-link:last-child { border-bottom: 0; }
+    .phase-link:hover { background: var(--cp-accent-soft); }
+    .phase-link-title { display: flex; gap: 12px; align-items: baseline; font-weight: 600; }
+    .phase-link-number { color: var(--cp-accent); }
+    .phase-link-stats { display: flex; align-items: center; gap: 12px; margin: 12px 0 8px; }
+    .mini-track { flex: 1; height: 4px; background: var(--cp-border); }
+    .mini-fill { height: 100%; background: var(--cp-accent); transition: width 220ms ease; }
+    .phase-link-duration { color: var(--cp-text-muted); font-size: 12px; }
+    .legend { padding: 16px 18px; }
+    .legend-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; color: var(--cp-text-muted); }
+    .legend-dot { width: 11px; height: 11px; border: 1px solid var(--cp-border-strong); border-radius: 50%; }
+    .legend-dot.progress { background: var(--cp-warning); }
+    .legend-dot.blocked { background: var(--cp-danger); }
+    .legend-dot.done { background: var(--cp-success); }
+    .side-note { margin: 0 4px; color: var(--cp-text-muted); font-size: 13px; }
+    .main { min-width: 0; }
+    .overview { max-width: 1540px; margin: 0 auto; padding: 28px clamp(20px, 3vw, 48px) 64px; }
+    .overview-heading { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 20px; }
+    .overview-heading h2 { margin: 0; font-size: 28px; }
+    .overview-heading p { margin: 6px 0 0; color: var(--cp-text-muted); }
+    .overview-updated { color: var(--cp-text-muted); font-size: 12px; white-space: nowrap; }
+    .overview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .command-btn { min-height: 35px; padding: 0 12px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); cursor: pointer; font-size: 11px; text-transform: uppercase; }
+    .command-btn:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .metric-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .metric, .overview-panel { background: var(--cp-surface); border: 1px solid var(--cp-border); box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
+    .metric { min-height: 132px; padding: 20px; }
+    .metric-value { margin-top: 12px; font-size: 32px; line-height: 1; }
+    .metric-detail { margin-top: 10px; color: var(--cp-text-muted); font-size: 13px; }
+    .metric-value.danger { color: var(--cp-danger); }
+    .overview-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr); gap: 16px; }
+    .overview-panel { min-width: 0; }
+    .overview-panel-header { padding: 18px 20px; border-bottom: 1px solid var(--cp-border); }
+    .overview-panel-header h3 { margin: 0; font-size: 17px; }
+    .overview-panel-header p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 13px; }
+    .phase-overview-row { display: grid; grid-template-columns: 34px minmax(150px, 1fr) minmax(120px, 1.2fr) 68px; gap: 14px; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--cp-border); }
+    .phase-overview-row:last-child { border-bottom: 0; }
+    .phase-overview-number { color: var(--cp-accent); }
+    .phase-overview-title { font-weight: 600; }
+    .phase-overview-title span { display: block; margin-top: 3px; color: var(--cp-text-muted); font-size: 12px; font-weight: 400; }
+    .phase-overview-count { text-align: right; font-size: 12px; }
+    .status-stack { display: flex; height: 12px; overflow: hidden; background: var(--cp-border); }
+    .status-stack span { min-width: 0; }
+    .status-stack .progress { background: var(--cp-warning); }
+    .status-stack .blocked { background: var(--cp-danger); }
+    .status-stack .done { background: var(--cp-success); }
+    .attention-list { max-height: 430px; overflow: auto; }
+    .attention-item { display: block; width: 100%; padding: 15px 20px; border: 0; border-bottom: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text); text-align: left; cursor: pointer; }
+    .attention-item:last-child { border-bottom: 0; }
+    .attention-item:hover { background: var(--cp-accent-soft); }
+    .attention-meta { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 11px; text-transform: uppercase; }
+    .attention-status.blocked { color: var(--cp-danger); }
+    .attention-status.progress { color: var(--cp-warning); }
+    .attention-status.overdue { color: var(--cp-danger); }
+    .attention-owner { color: var(--cp-text-muted); }
+    .attention-title { font-size: 14px; }
+    .attention-due { display: block; margin-top: 7px; color: var(--cp-text-muted); font-size: 12px; }
+    .attention-due.overdue { color: var(--cp-danger); }
+    .empty-state { padding: 32px 20px; color: var(--cp-text-muted); text-align: center; }
+    .rollout-gate { margin-top: 16px; padding: 18px 20px; border-left: 4px solid var(--cp-warning); background: var(--cp-accent-soft); }
+    .rollout-gate.ready { border-left-color: var(--cp-success); }
+    .rollout-gate strong { display: block; margin-bottom: 4px; }
+    .rollout-gate span { color: var(--cp-text-muted); }
+    .phase { margin-bottom: 24px; scroll-margin-top: 112px; }
+    .phase-header {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      padding: 24px 26px;
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .phase-number {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 36px;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+    }
+    .phase-header h2 { margin: 0; font-size: 22px; }
+    .phase-description { margin: 5px 0 0; color: var(--cp-text-muted); }
+    .phase-summary { min-width: 150px; text-align: right; }
+    .duration-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border: 1px solid var(--cp-border);
+      color: var(--cp-text-muted);
+      font-size: 12px;
+    }
+    .phase-count { margin-top: 8px; font-size: 13px; }
+    .task-wrap { border-bottom: 1px solid var(--cp-border); }
+    .task-wrap:last-child { border-bottom: 0; }
+    .task {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) 112px;
+      gap: 16px;
+      align-items: start;
+      padding: 17px 26px;
+    }
+    .status-btn {
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      padding: 0;
+      border: 2px solid var(--cp-border-strong);
+      border-radius: 50%;
+      background: var(--cp-surface);
+      cursor: pointer;
+    }
+    .status-btn:hover { border-color: var(--cp-accent); }
+    .task[data-status="progress"] .status-btn { border-color: var(--cp-warning); background: var(--cp-warning); }
+    .task[data-status="blocked"] .status-btn { border-color: var(--cp-danger); background: var(--cp-danger); }
+    .task[data-status="done"] .status-btn { border-color: var(--cp-success); background: var(--cp-success); }
+    .task-title { font-size: 16px; }
+    .task-fields { display: grid; grid-template-columns: minmax(120px, 180px) minmax(140px, 165px) minmax(180px, 1fr) auto; gap: 12px; margin-top: 10px; }
+    .task-fields input {
+      min-width: 0;
+      height: 35px;
+      padding: 6px 10px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+    }
+    .task-fields input:focus { outline: 2px solid var(--cp-accent); outline-offset: 1px; }
+    .details-toggle { height: 35px; padding: 0 12px; font-size: 11px; }
+    .status-label { padding-top: 4px; color: var(--cp-text-muted); text-align: right; font-size: 11px; text-transform: uppercase; }
+    .task[data-status="progress"] .status-label { color: var(--cp-warning); }
+    .task[data-status="blocked"] .status-label { color: var(--cp-danger); }
+    .task[data-status="done"] .status-label { color: var(--cp-success); }
+    .task-details { padding: 0 26px 20px 68px; background: var(--cp-surface-soft); }
+    .task-details[hidden] { display: none; }
+    .task-details h3 { margin: 0 0 8px; padding-top: 16px; color: var(--cp-accent); font-size: 11px; text-transform: uppercase; }
+    .task-details ul { margin: 0; padding-left: 20px; }
+    .task-details li { margin: 7px 0; color: var(--cp-text-muted); }
+    .footer-note {
+      padding: 18px 22px;
+      border-left: 4px solid var(--cp-accent);
+      background: var(--cp-accent-soft);
+      color: var(--cp-text-muted);
+    }
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 30;
+      padding: 12px 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-panel-strong);
+      box-shadow: var(--cp-shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+    .toast.visible { opacity: 1; transform: translateY(0); }
+    .sync-dialog { width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); color: var(--cp-text); box-shadow: var(--cp-shadow); }
+    .sync-dialog::backdrop { background: var(--cp-overlay); }
+    .dialog-header { display: flex; justify-content: space-between; gap: 20px; padding: 22px 24px; border-bottom: 1px solid var(--cp-border); }
+    .dialog-header h2 { margin: 0; font-size: 21px; }
+    .dialog-header p { margin: 5px 0 0; color: var(--cp-text-muted); }
+    .dialog-close { align-self: start; padding: 3px 8px; border: 0; background: transparent; color: var(--cp-text-muted); cursor: pointer; font-size: 24px; }
+    .dialog-body { padding: 22px 24px; }
+    .setup-notice { margin-bottom: 18px; padding: 14px 16px; border-left: 4px solid var(--cp-warning); background: var(--cp-accent-soft); color: var(--cp-text-muted); }
+    .setup-notice strong { display: block; margin-bottom: 4px; color: var(--cp-text); }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .config-field { display: grid; gap: 6px; }
+    .config-field.wide { grid-column: 1 / -1; }
+    .config-field label { color: var(--cp-text-muted); font-size: 12px; }
+    .config-field input, .config-field select { min-width: 0; height: 40px; padding: 7px 10px; border: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text); }
+    .config-field input:focus, .config-field select:focus { outline: 2px solid var(--cp-accent); outline-offset: 1px; }
+    .redirect-value { padding: 10px 12px; overflow-wrap: anywhere; border: 1px solid var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 12px; }
+    .permissions { margin: 18px 0 0; color: var(--cp-text-muted); font-size: 13px; }
+    .dialog-status { min-height: 44px; margin-top: 18px; padding: 12px 14px; border: 1px solid var(--cp-border); color: var(--cp-text-muted); }
+    .dialog-status.error { border-color: var(--cp-danger); color: var(--cp-danger); }
+    .dialog-status.success { border-color: var(--cp-success); color: var(--cp-success); }
+    .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 18px 24px; border-top: 1px solid var(--cp-border); }
+    .dialog-actions .command-btn.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); }
+
+    @media (max-width: 980px) {
+      .topbar { grid-template-columns: 1fr auto; }
+      .overall { grid-column: 1 / -1; grid-row: 2; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .phase-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .phase-link { border-right: 1px solid var(--cp-border); }
+      .metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .overview-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .topbar { gap: 14px; padding: 16px; }
+      .header-actions { grid-column: 1 / -1; }
+      .sync-btn, .reset-btn { flex: 1; }
+      .brand h1 { font-size: 18px; }
+      .layout { padding: 16px 12px 48px; }
+      .view-switcher { padding: 12px 12px 0; }
+      .overview { padding: 20px 12px 48px; }
+      .overview-heading { display: block; }
+      .overview-updated { display: block; margin-top: 8px; }
+      .overview-actions { justify-content: flex-start; }
+      .metric-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .metric { min-height: 116px; padding: 16px; }
+      .metric-value { font-size: 27px; }
+      .phase-overview-row { grid-template-columns: 28px minmax(0, 1fr) 52px; padding: 14px 16px; }
+      .phase-overview-row .status-stack { grid-column: 2 / -1; }
+      .phase-nav { grid-template-columns: 1fr; }
+      .phase-header { grid-template-columns: 38px 1fr; padding: 20px 16px; }
+      .phase-number { width: 38px; }
+      .phase-summary { grid-column: 2; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+      .phase-count { margin-top: 0; }
+      .task { grid-template-columns: 24px minmax(0, 1fr); gap: 12px; padding: 16px; }
+      .status-label { grid-column: 2; grid-row: 1; justify-self: end; padding-left: 8px; background: var(--cp-surface); }
+      .task-title { padding-right: 78px; }
+      .task-fields { grid-template-columns: 1fr; }
+      .task-details { padding: 0 16px 18px 52px; }
+      .sidebar .side-panel:nth-child(2), .side-note { display: none; }
+      .config-grid { grid-template-columns: 1fr; }
+      .config-field.wide { grid-column: auto; }
+    }
+    @media print {
+      :root, html[data-theme="dark"] { color-scheme: light; --cp-bg: #f7f4ef; --cp-bg-elevated: #fcfbf8; --cp-surface: #ffffff; --cp-surface-soft: #f5f5f5; --cp-border: #dedede; --cp-border-strong: #919191; --cp-text: #242424; --cp-text-muted: #5c5c5c; --cp-text-soft: #6f6f6f; --cp-accent: #b11f4b; --cp-accent-hover: #9a1a41; --cp-accent-soft: rgba(177, 31, 75, 0.08); --cp-accent-fg: #ffffff; --cp-success: #16a34a; --cp-danger: #dc2626; --cp-warning: #f59e0b; --cp-link: #0078d4; --cp-shadow: none; --cp-overlay: rgba(255, 255, 255, 0.8); --cp-panel: rgba(255, 255, 255, 0.86); --cp-panel-strong: rgba(255, 255, 255, 0.96); --cp-sheen: rgba(255, 255, 255, 0.55); --cp-highlight: rgba(177, 31, 75, 0.12); }
+      .topbar { position: static; padding: 12px 0; }
+      .topbar .reset-btn, .view-switcher, .overview-actions, .toast, #tracker-view { display: none !important; }
+      .overview { display: block !important; padding: 20px 0; }
+      .metric-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+      .metric { min-height: 0; padding: 12px; box-shadow: none; }
+      .metric-value { font-size: 22px; }
+      .overview-grid { grid-template-columns: 1.4fr 1fr; }
+      .attention-list { max-height: none; }
+      .overview-panel, .phase-overview-row { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>SharePoint &amp; Teams Cleanup + Copilot Readiness</h1>
+      <p class="mono">Five-phase program tracker — generic template</p>
+    </div>
+    <div class="overall">
+      <div class="overall-row mono"><span>PROGRAM COMPLETE</span><span id="overall-count">0 / 42</span></div>
+      <div class="progress-track" role="progressbar" aria-label="Overall progress" aria-valuemin="0" aria-valuemax="42" aria-valuenow="0"><div class="progress-fill" id="overall-fill"></div></div>
+    </div>
+    <div class="header-actions"><button class="sync-btn mono" id="cloud-sync" type="button"><span class="sync-dot"></span>Cloud sync</button><button class="reset-btn mono" id="reset" type="button">Reset</button></div>
+  </header>
+
+  <nav class="view-switcher" role="tablist" aria-label="Tracker views">
+    <button class="view-tab mono" id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-view" data-view="overview">Overview</button>
+    <button class="view-tab mono" id="tracker-tab" type="button" role="tab" aria-selected="false" aria-controls="tracker-view" data-view="tracker">Detailed tracker</button>
+  </nav>
+
+  <main class="overview view-panel" id="overview-view" role="tabpanel" aria-labelledby="overview-tab"></main>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+
+  <div class="layout view-panel" id="tracker-view" role="tabpanel" aria-labelledby="tracker-tab" hidden>
+    <aside class="sidebar">
+      <section class="side-panel">
+        <div class="panel-title eyebrow mono">Phases</div>
+        <nav class="phase-nav" id="phase-nav" aria-label="Program phases"></nav>
+      </section>
+      <section class="side-panel">
+        <div class="legend">
+          <div class="eyebrow mono">Status — click to cycle</div>
+          <div class="legend-row"><span class="legend-dot"></span>Not started</div>
+          <div class="legend-row"><span class="legend-dot progress"></span>In progress</div>
+          <div class="legend-row"><span class="legend-dot blocked"></span>Blocked</div>
+          <div class="legend-row"><span class="legend-dot done"></span>Done</div>
+        </div>
+      </section>
+      <p class="side-note">Durations are planning estimates for a mid-size tenant. Progress and notes are saved in this browser only.</p>
+    </aside>
+
+    <main class="main" id="phase-list"></main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="sync-dialog" id="sync-dialog">
+    <form id="sync-form" method="dialog">
+      <header class="dialog-header"><div><h2>Microsoft Lists sync</h2><p>Share this tracker across your Microsoft 365 team.</p></div><button class="dialog-close" type="button" aria-label="Close cloud sync setup">×</button></header>
+      <div class="dialog-body">
+        <div class="setup-notice" id="protocol-notice"><strong>Serve this page from HTTPS or localhost</strong>Microsoft Entra SPA sign-in cannot use a file:// redirect. Register and open the tracker at the redirect URI shown below.</div>
+        <div class="config-grid">
+          <div class="config-field"><label for="sync-cloud">Microsoft cloud</label><select id="sync-cloud"><option value="commercial">Commercial Microsoft 365</option><option value="gcch">GCC High</option></select></div>
+          <div class="config-field"><label for="sync-tenant">Tenant ID or domain</label><input id="sync-tenant" placeholder="contoso.onmicrosoft.com"></div>
+          <div class="config-field wide"><label for="sync-client">Entra application (client) ID</label><input id="sync-client" placeholder="00000000-0000-0000-0000-000000000000"></div>
+          <div class="config-field wide"><label for="sync-site">SharePoint site URL</label><input id="sync-site" type="url" placeholder="https://contoso.sharepoint.com/sites/CopilotReadiness"></div>
+          <div class="config-field wide"><label for="sync-list">Microsoft List name</label><input id="sync-list" value="Copilot Readiness Tracker"></div>
+          <div class="config-field wide"><label>SPA redirect URI to register</label><div class="redirect-value mono" id="redirect-uri"></div></div>
+        </div>
+        <p class="permissions">Delegated permissions: <strong>Sites.ReadWrite.All</strong> for task data and <strong>Sites.Manage.All</strong> to provision the List and columns. Your tenant may require administrator consent.</p>
+        <div class="dialog-status" id="sync-status" role="status">Enter the connection details, then save and connect.</div>
+      </div>
+      <footer class="dialog-actions"><button class="command-btn mono" id="disconnect" type="button">Disconnect</button><button class="command-btn mono" id="save-sync" type="button">Save settings</button><button class="command-btn primary mono" id="connect-sync" type="button">Connect &amp; sync</button></footer>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const phases = [
+      {
+        number: "01",
+        title: "Discovery & Inventory",
+        duration: "3–4 weeks",
+        description: "What exists, what is actually used, what is exposed. Nothing gets deleted or connected until this is complete.",
+        tasks: [
+          "Export full SharePoint site inventory (SharePoint Admin Center → Active sites → Export)",
+          "Capture per site: last activity date, storage size, owner(s), sensitivity/external sharing status, retention policy applied",
+          "Run SharePoint Advanced Management (SAM) reports: oversharing, orphaned sites, sites with unique permissions, external sharing",
+          "Classify sites: Teams-backed vs. standalone SharePoint vs. OneDrive-only (each has different cleanup mechanics)",
+          "Inventory inactive/stale mailboxes if in scope",
+          "Identify sites under indefinite/forever retention — flag for records/legal review before any deletion action",
+          "Identify sites under legal hold — build an explicit exception register; these are never touched by bulk actions",
+          "Confirm sensitivity label taxonomy exists and is applied (or flag as a gap — needed before Copilot rollout)",
+          "Deliver M365 architecture briefing to IT/governance stakeholders (Teams = UI, SharePoint = backend; every Team, private channel and M365 Group creates a SharePoint site)",
+          "Confirm Microsoft Defender for Cloud Apps / Cloud App Discovery is deployed and logging — needed for Phase 4 shadow-AI visibility, and it takes time to backfill"
+        ]
+      },
+      {
+        number: "02",
+        title: "Data Containment",
+        duration: "6–10 weeks",
+        description: "Archive or delete the dead weight, lock down what remains, and keep a record of every destructive action.",
+        tasks: [
+          "Create dedicated archive site",
+          "Create document libraries within archive site, named per source site being archived",
+          "Lock archive site permissions to a dedicated admin security group only (no general access)",
+          "Temporarily disable governance/retention block preventing deletion — only for the duration of cleanup",
+          "Move (not copy) content from orphaned/inactive sites into archive — copying leaves stale duplicates behind",
+          "Delete confirmed orphaned/unused sites per the inventory decision",
+          "Re-enable governance/retention block once cleanup pass is complete",
+          "Pull SAM external-sharing report; review site-by-site with the actual data owner before revoking access — cannot be fully automated",
+          "Manually remove external user access where confirmed unnecessary",
+          "Document every bulk deletion action: what, when, by whom, under what approval (audit trail / rollback record)",
+          "Publish self-service documentation for site owners: how to lock down and harden their own sites going forward"
+        ]
+      },
+      {
+        number: "03",
+        title: "Governance Automation",
+        duration: "2–3 weeks, then continuous",
+        description: "Configure once and let it run. This is what prevents the whole cleanup being repeated in eighteen months.",
+        tasks: [
+          { title: "Step 1 — Enable Microsoft 365 Groups expiration policy", details: [
+            "Entra admin center (entra.microsoft.com, or entra.microsoft.us for GCC High) → Groups → Expiration",
+            "Set Group lifetime: choose the expiration period (commonly 180 or 365 days of inactivity) — align to the customer’s records schedule, not an arbitrary default",
+            "Set Group expiration notification recipients: designate group owners as default recipients",
+            "Scope: apply to All Microsoft 365 groups, or a specific subset via a configured group — decide based on how broadly this should be enforced",
+            "Save"
+          ]},
+          { title: "Step 2 — Enforce mandatory group ownership", details: [
+            "Entra admin center → Groups → All groups → identify ownerless groups (Entra reports this, or query via Graph/PowerShell: Get-MgGroup cross-referenced against Get-MgGroupOwner)",
+            "Establish a minimum-two-owners policy as a governance standard — not a hard technical block by default; enforce via process plus the notification workflow, or a Power Automate flow that flags single/zero-owner groups",
+            "Communicate the two-owner requirement to all current group owners as part of rollout"
+          ]},
+          { title: "Step 3 — Configure the inactivity notification / deletion workflow", details: [
+            "With the expiration policy active, Entra automatically emails the group owner near the expiration date asking whether the group is still needed",
+            "Owner can renew (resets the clock) or take no action",
+            "No action by the deadline → Entra deletes the Microsoft 365 Group and its attached Teams channel automatically",
+            "Critical distinction: the underlying SharePoint site is NOT auto-deleted with the group in most configurations — plan for this explicitly",
+            "Set up a Power Automate flow (or Purview retention-based workflow) triggered on group deletion that notifies the SharePoint admin: group deleted, site now orphaned, review and move to archive",
+            "This closes the loop so orphaned sites do not silently reaccumulate after group deletion"
+          ]},
+          { title: "Step 4 — Exclude sensitive content from Copilot indexing", details: [
+            "SharePoint Admin Center → Advanced Management (SAM) → Restricted Content Discovery, or the site-level exclusion setting",
+            "Select the archive site and any other site that should never appear in Copilot results, even for users with technical access",
+            "Enable Exclude from Copilot — this prevents indexing and surfacing regardless of the underlying permission state, closing the gap where ‘locked down’ and ‘excluded from AI’ are not the same thing",
+            "Document the excluded-sites list as part of the Copilot readiness evidence package"
+          ]},
+          { title: "Step 5 — Configure Purview alerting on sensitive queries and content", details: [
+            "Microsoft Purview compliance portal → Data Loss Prevention (content-based rules) or Insider Risk Management (behavioural / query-pattern signals), depending on the signal being built",
+            "Create the policy or rule set targeting the sensitive information types and labels relevant to this environment",
+            "Configure alert routing — where a SIEM exists (Splunk, Sentinel), configure the Purview → SIEM integration via the Microsoft Graph Security API or native connector rather than relying on the Purview portal as the monitoring surface",
+            "Validate: trigger a test alert and confirm it lands in the SIEM as expected"
+          ]},
+          { title: "Step 6 — Establish a recurring governance cadence", details: [
+            "Set a recurring review interval — quarterly is common — to re-pull the SAM oversharing and orphaned-site reports",
+            "Confirm the expiration policy and notification workflow are still firing correctly (spot-check a sample of recently expired groups)",
+            "Re-confirm the excluded-from-Copilot list is current as new sensitive and archive sites are created",
+            "Review alert volumes and tune Purview policies so monitoring remains actionable",
+            "Record decisions, exceptions and owners in the governance register"
+          ]}
+        ]
+      },
+      {
+        number: "04",
+        title: "Copilot Readiness & Rollout",
+        duration: "8–12 weeks, phased",
+        description: "Exclude what should not be indexed, pilot deliberately, teach in parallel, then expand on evidence.",
+        tasks: [
+          "Confirm all Phase 2 and Phase 3 containment and automation steps are complete before licensing any users",
+          "Decide and document web grounding posture (on/off) before rollout, not reactively",
+          "If web grounding is off: prepare user education in advance explaining why responses may seem limited, so it does not read as a product failure",
+          "If web grounding is on: confirm this went through the appropriate risk-acceptance / change process",
+          "Select and license a pilot group — start small, deliberately",
+          "Deliver the user training track in parallel with rollout: writing effective prompts, setting SharePoint/OneDrive permissions correctly, recognising and avoiding oversharing",
+          "Stand up shadow-AI visibility: confirm Purview DSPM for AI Discover is reporting, fed by Cloud App Discovery log collection",
+          "Collect and triage user feedback continuously — expect rollout to surface pre-existing data and permission problems, not just Copilot behaviour problems",
+          "Expand rollout in stages based on pilot feedback and support load",
+          "Track adoption metrics (daily/weekly active users) as a rollout health signal",
+          "Confirm Purview alerting is actively monitored, not just configured"
+        ]
+      },
+      {
+        number: "05",
+        title: "Extension — Agents & Connectors",
+        duration: "Post-Phase 4, ongoing",
+        description: "Copilot Studio agents and third-party sources, only once Phases 1–3 are solid.",
+        tasks: [
+          "For each new connector or agent (ServiceNow, Confluence, other third-party source): scope the connection narrowly — specific spaces, time windows and permission sets rather than a full ingest",
+          "Apply the Phase 1–2 containment discipline to any new data source before connecting it to Copilot",
+          "Document agent permissions explicitly: what it can create or modify (e.g. ticket creation) and under whose authority",
+          "Add new data sources to the recurring governance cadence from Phase 3, Step 6"
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = "copilot-readiness-tracker-v1";
+    const SYNC_CONFIG_KEY = "copilot-readiness-sync-config-v1";
+    const GRAPH_SCOPES = ["Sites.ReadWrite.All", "Sites.Manage.All"];
+    const statusOrder = ["not-started", "progress", "blocked", "done"];
+    const statusLabels = { "not-started": "Not started", progress: "In progress", blocked: "Blocked", done: "Done" };
+    const totalTasks = phases.reduce((sum, phase) => sum + phase.tasks.length, 0);
+    let savedState = loadState();
+    let syncConfig = loadSyncConfig();
+    let msalApp = null;
+    let syncAccount = null;
+    let syncInProgress = false;
+    let activeView = location.hash.startsWith("#phase-") ? "tracker" : "overview";
+    let toastTimer;
+
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch { return {}; }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
+    }
+
+    function loadSyncConfig() {
+      try {
+        return { cloud: "commercial", tenant: "", clientId: "", siteUrl: "", listName: "Copilot Readiness Tracker", ...JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY) || "{}") };
+      } catch {
+        return { cloud: "commercial", tenant: "", clientId: "", siteUrl: "", listName: "Copilot Readiness Tracker" };
+      }
+    }
+
+    function syncEnvironment() {
+      return syncConfig.cloud === "gcch"
+        ? { authority: "https://login.microsoftonline.us", graph: "https://graph.microsoft.us/v1.0" }
+        : { authority: "https://login.microsoftonline.com", graph: "https://graph.microsoft.com/v1.0" };
+    }
+
+    function redirectUri() {
+      return location.protocol === "file:" ? "http://localhost:8080/index.html" : `${location.origin}${location.pathname}`;
+    }
+
+    function setSyncStatus(message, tone = "") {
+      const status = document.getElementById("sync-status");
+      status.textContent = message;
+      status.className = `dialog-status ${tone}`.trim();
+    }
+
+    function updateSyncButton(state = syncAccount ? "connected" : "local") {
+      const button = document.getElementById("cloud-sync");
+      button.classList.toggle("connected", state === "connected");
+      button.classList.toggle("syncing", state === "syncing");
+      button.lastChild.textContent = state === "syncing" ? " Syncing" : state === "connected" ? " Synced" : " Cloud sync";
+    }
+
+    function populateSyncDialog() {
+      document.getElementById("sync-cloud").value = syncConfig.cloud;
+      document.getElementById("sync-tenant").value = syncConfig.tenant;
+      document.getElementById("sync-client").value = syncConfig.clientId;
+      document.getElementById("sync-site").value = syncConfig.siteUrl;
+      document.getElementById("sync-list").value = syncConfig.listName;
+      document.getElementById("redirect-uri").textContent = redirectUri();
+      document.getElementById("protocol-notice").hidden = location.protocol !== "file:";
+      setSyncStatus(syncAccount ? `Connected as ${syncAccount.username}. Select Connect & sync to refresh shared data.` : "Enter the connection details, then save and connect.", syncAccount ? "success" : "");
+    }
+
+    function readSyncForm() {
+      return {
+        cloud: document.getElementById("sync-cloud").value,
+        tenant: document.getElementById("sync-tenant").value.trim(),
+        clientId: document.getElementById("sync-client").value.trim(),
+        siteUrl: document.getElementById("sync-site").value.trim().replace(/\/$/, ""),
+        listName: document.getElementById("sync-list").value.trim() || "Copilot Readiness Tracker"
+      };
+    }
+
+    function saveSyncSettings() {
+      const next = readSyncForm();
+      const connectionChanged = next.cloud !== syncConfig.cloud || next.tenant !== syncConfig.tenant || next.clientId !== syncConfig.clientId || next.siteUrl !== syncConfig.siteUrl || next.listName !== syncConfig.listName;
+      syncConfig = next;
+      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
+      if (connectionChanged) {
+        msalApp = null;
+        syncAccount = null;
+        updateSyncButton();
+      }
+      setSyncStatus("Settings saved in this browser.", "success");
+    }
+
+    async function initializeMsal() {
+      if (!window.msal) throw new Error("The Microsoft authentication library could not load. Check the internet connection or content-security policy.");
+      if (!syncConfig.clientId || !syncConfig.tenant) throw new Error("Enter the Entra client ID and tenant ID or domain.");
+      if (!msalApp) {
+        const environment = syncEnvironment();
+        msalApp = new msal.PublicClientApplication({
+          auth: { clientId: syncConfig.clientId, authority: `${environment.authority}/${syncConfig.tenant}`, knownAuthorities: [new URL(environment.authority).hostname], redirectUri: redirectUri() },
+          cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
+        });
+      }
+      const accounts = msalApp.getAllAccounts();
+      if (accounts.length) syncAccount = accounts[0];
+    }
+
+    async function accessToken() {
+      await initializeMsal();
+      if (!syncAccount) {
+        const login = await msalApp.loginPopup({ scopes: GRAPH_SCOPES, prompt: "select_account" });
+        syncAccount = login.account;
+      }
+      try {
+        return (await msalApp.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: syncAccount })).accessToken;
+      } catch {
+        return (await msalApp.acquireTokenPopup({ scopes: GRAPH_SCOPES, account: syncAccount })).accessToken;
+      }
+    }
+
+    async function graphRequest(path, options = {}) {
+      const token = await accessToken();
+      const url = path.startsWith("https://") ? path : `${syncEnvironment().graph}${path}`;
+      const response = await fetch(url, {
+        ...options,
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers }
+      });
+      if (!response.ok) {
+        let detail = "";
+        try { detail = (await response.json()).error?.message || ""; } catch { detail = await response.text(); }
+        throw new Error(`Microsoft Graph ${response.status}: ${detail || response.statusText}`);
+      }
+      return response.status === 204 ? null : response.json();
+    }
+
+    async function resolveSharePointSite() {
+      if (!syncConfig.siteUrl) throw new Error("Enter the SharePoint site URL.");
+      const site = new URL(syncConfig.siteUrl);
+      const path = site.pathname === "/" ? `/sites/${site.hostname}` : `/sites/${site.hostname}:${site.pathname}`;
+      return graphRequest(path);
+    }
+
+    async function ensureTrackerList(siteId) {
+      const escapedName = syncConfig.listName.replace(/'/g, "''");
+      const found = await graphRequest(`/sites/${siteId}/lists?$filter=${encodeURIComponent(`displayName eq '${escapedName}'`)}`);
+      let list = found.value?.[0];
+      if (!list) {
+        setSyncStatus(`Creating Microsoft List “${syncConfig.listName}”…`);
+        list = await graphRequest(`/sites/${siteId}/lists`, { method: "POST", body: JSON.stringify({ displayName: syncConfig.listName, list: { template: "genericList" } }) });
+      }
+      const existing = await graphRequest(`/sites/${siteId}/lists/${list.id}/columns`);
+      const existingNames = new Set(existing.value.map(column => column.name));
+      const columns = [
+        { name: "TaskKey", displayName: "Task key", required: true, indexed: true, text: { maxLength: 64 } },
+        { name: "TaskStatus", displayName: "Task status", choice: { choices: statusOrder, displayAs: "dropDownMenu" } },
+        { name: "TaskOwner", displayName: "Task owner", text: { maxLength: 255 } },
+        { name: "TargetDate", displayName: "Target date", dateTime: { displayAs: "default", format: "dateOnly" } },
+        { name: "TaskNotes", displayName: "Task notes", text: { allowMultipleLines: true, textType: "plain" } },
+        { name: "ClientUpdated", displayName: "Client updated", dateTime: { displayAs: "default", format: "dateTime" } }
+      ];
+      for (const column of columns) {
+        if (!existingNames.has(column.name)) {
+          setSyncStatus(`Provisioning column “${column.displayName}”…`);
+          await graphRequest(`/sites/${siteId}/lists/${list.id}/columns`, { method: "POST", body: JSON.stringify(column) });
+        }
+      }
+      return list;
+    }
+
+    async function getRemoteItems(siteId, listId) {
+      const items = [];
+      let next = `/sites/${siteId}/lists/${listId}/items?expand=fields`;
+      while (next) {
+        const page = await graphRequest(next);
+        items.push(...(page.value || []));
+        next = page["@odata.nextLink"] || "";
+      }
+      return items;
+    }
+
+    function fieldsForTask(task) {
+      return {
+        Title: task.title,
+        TaskKey: task.id,
+        TaskStatus: task.data.status,
+        TaskOwner: task.data.owner,
+        TargetDate: task.data.targetDate || null,
+        TaskNotes: task.data.notes,
+        ClientUpdated: task.data.updatedAt || new Date().toISOString()
+      };
+    }
+
+    async function synchronizeList() {
+      if (syncInProgress) return;
+      if (location.protocol === "file:") throw new Error(`Cloud sync requires HTTPS or localhost. Serve this file and register ${redirectUri()} as the Entra SPA redirect URI.`);
+      syncInProgress = true;
+      updateSyncButton("syncing");
+      try {
+        saveSyncSettings();
+        setSyncStatus("Signing in to Microsoft 365…");
+        await accessToken();
+        setSyncStatus("Resolving the SharePoint site…");
+        const site = await resolveSharePointSite();
+        const list = await ensureTrackerList(site.id);
+        setSyncStatus("Reading shared task data…");
+        const remoteItems = await getRemoteItems(site.id, list.id);
+        const remoteByKey = new Map(remoteItems.filter(item => item.fields?.TaskKey).map(item => [item.fields.TaskKey, item]));
+        let uploaded = 0;
+        let downloaded = 0;
+        for (const task of allTaskRecords()) {
+          const remote = remoteByKey.get(task.id);
+          if (!remote) {
+            if (!task.data.updatedAt) task.data.updatedAt = new Date().toISOString();
+            await graphRequest(`/sites/${site.id}/lists/${list.id}/items`, { method: "POST", body: JSON.stringify({ fields: fieldsForTask(task) }) });
+            uploaded++;
+            continue;
+          }
+          const remoteTime = Date.parse(remote.fields.ClientUpdated || "") || 0;
+          const localTime = Date.parse(task.data.updatedAt || "") || 0;
+          if (remoteTime > localTime) {
+            task.data.status = statusOrder.includes(remote.fields.TaskStatus) ? remote.fields.TaskStatus : "not-started";
+            task.data.owner = String(remote.fields.TaskOwner || "");
+            task.data.targetDate = String(remote.fields.TargetDate || "").slice(0, 10);
+            task.data.notes = String(remote.fields.TaskNotes || "");
+            task.data.updatedAt = remote.fields.ClientUpdated || "";
+            downloaded++;
+          } else if (localTime > remoteTime) {
+            await graphRequest(`/sites/${site.id}/lists/${list.id}/items/${remote.id}/fields`, { method: "PATCH", body: JSON.stringify(fieldsForTask(task)) });
+            uploaded++;
+          }
+        }
+        saveState();
+        render();
+        updateSyncButton("connected");
+        setSyncStatus(`Sync complete. ${uploaded} uploaded, ${downloaded} downloaded. Connected as ${syncAccount.username}.`, "success");
+        showToast("Microsoft Lists sync complete");
+      } finally {
+        syncInProgress = false;
+        if (!syncAccount) updateSyncButton();
+      }
+    }
+
+    async function disconnectSync() {
+      if (msalApp && syncAccount) {
+        try { await msalApp.logoutPopup({ account: syncAccount, postLogoutRedirectUri: redirectUri(), mainWindowRedirectUri: redirectUri() }); } catch { /* Local cache is cleared below. */ }
+      }
+      syncAccount = null;
+      msalApp = null;
+      updateSyncButton();
+      setSyncStatus("Disconnected. Saved connection settings were retained.");
+    }
+
+    function taskId(phaseIndex, taskIndex) {
+      return `p${phaseIndex + 1}-t${taskIndex + 1}`;
+    }
+
+    function taskData(phaseIndex, taskIndex) {
+      const id = taskId(phaseIndex, taskIndex);
+      if (!savedState[id]) savedState[id] = { status: "not-started", owner: "", targetDate: "", notes: "", updatedAt: "" };
+      savedState[id] = { status: "not-started", owner: "", targetDate: "", notes: "", updatedAt: "", ...savedState[id] };
+      return savedState[id];
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      })[character]);
+    }
+
+    function phaseStats(phaseIndex) {
+      const counts = { "not-started": 0, progress: 0, blocked: 0, done: 0 };
+      phases[phaseIndex].tasks.forEach((_, taskIndex) => counts[taskData(phaseIndex, taskIndex).status]++);
+      return counts;
+    }
+
+    function todayKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+
+    function isOverdue(task) {
+      return Boolean(task.data.targetDate && task.data.targetDate < todayKey() && task.data.status !== "done");
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+    }
+
+    function allTaskRecords() {
+      return phases.flatMap((phase, phaseIndex) => phase.tasks.map((rawTask, taskIndex) => ({
+        id: taskId(phaseIndex, taskIndex), phaseIndex, phase,
+        title: typeof rawTask === "string" ? rawTask : rawTask.title,
+        data: taskData(phaseIndex, taskIndex)
+      })));
+    }
+
+    function downloadFile(filename, content, type) {
+      const url = URL.createObjectURL(new Blob([content], { type }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    function exportJson() {
+      const payload = { format: "copilot-readiness-tracker", version: 1, exportedAt: new Date().toISOString(), state: savedState };
+      downloadFile(`copilot-readiness-backup-${todayKey()}.json`, JSON.stringify(payload, null, 2), "application/json");
+      showToast("JSON backup exported");
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function exportCsv() {
+      const header = ["Phase", "Task", "Status", "Owner", "Target date", "Overdue", "Notes"];
+      const rows = allTaskRecords().map(task => [task.phase.title, task.title, statusLabels[task.data.status], task.data.owner, task.data.targetDate, isOverdue(task) ? "Yes" : "No", task.data.notes]);
+      const csv = [header, ...rows].map(row => row.map(csvCell).join(",")).join("\r\n");
+      downloadFile(`copilot-readiness-summary-${todayKey()}.csv`, `\uFEFF${csv}`, "text/csv;charset=utf-8");
+      showToast("CSV summary exported");
+    }
+
+    function renderOverview() {
+      const allTasks = allTaskRecords();
+      const counts = statusOrder.reduce((result, status) => ({ ...result, [status]: allTasks.filter(task => task.data.status === status).length }), {});
+      const owned = allTasks.filter(task => task.data.owner.trim()).length;
+      const overdue = allTasks.filter(isOverdue);
+      const activeUnassigned = allTasks.filter(task => (task.data.status === "blocked" || task.data.status === "progress") && !task.data.owner.trim()).length;
+      const active = allTasks.filter(task => task.data.status === "blocked" || task.data.status === "progress" || isOverdue(task)).sort((first, second) => {
+        const priority = task => task.data.status === "blocked" ? 0 : isOverdue(task) ? 1 : 2;
+        return priority(first) - priority(second) || first.phaseIndex - second.phaseIndex;
+      });
+      const containmentReady = [1, 2].every(phaseIndex => phaseStats(phaseIndex).done === phases[phaseIndex].tasks.length);
+      const phaseRows = phases.map((phase, phaseIndex) => {
+        const stats = phaseStats(phaseIndex);
+        const width = status => (stats[status] / phase.tasks.length) * 100;
+        return `<div class="phase-overview-row">
+          <div class="phase-overview-number mono">${phase.number}</div>
+          <div class="phase-overview-title">${phase.title}<span>${phase.duration}</span></div>
+          <div class="status-stack" aria-label="${stats.done} done, ${stats.progress} in progress, ${stats.blocked} blocked"><span class="progress" style="width:${width("progress")}%"></span><span class="blocked" style="width:${width("blocked")}%"></span><span class="done" style="width:${width("done")}%"></span></div>
+          <div class="phase-overview-count mono">${stats.done}/${phase.tasks.length}</div>
+        </div>`;
+      }).join("");
+      const attention = active.length ? active.map(task => `<button class="attention-item" type="button" data-jump-task="${task.id}" data-phase="${task.phase.number}">
+        <span class="attention-meta"><span class="attention-status ${isOverdue(task) ? "overdue" : task.data.status} mono">${isOverdue(task) ? "Overdue" : statusLabels[task.data.status]} · Phase ${task.phase.number}</span><span class="attention-owner">${escapeHtml(task.data.owner || "Unassigned")}</span></span>
+        <span class="attention-title">${task.title}</span>${task.data.targetDate ? `<span class="attention-due ${isOverdue(task) ? "overdue" : ""}">Target ${formatDate(task.data.targetDate)}</span>` : ""}
+      </button>`).join("") : `<div class="empty-state">No blocked, overdue, or in-progress items yet.</div>`;
+      document.getElementById("overview-view").innerHTML = `
+        <header class="overview-heading"><div><h2>Program overview</h2><p>Readiness, ownership, and delivery risk across all five phases.</p></div><div><span class="overview-updated mono">Saved locally · live summary</span><div class="overview-actions"><button class="command-btn mono" type="button" data-action="export-csv">Export CSV</button><button class="command-btn mono" type="button" data-action="export-json">Backup JSON</button><button class="command-btn mono" type="button" data-action="import-json">Restore JSON</button><button class="command-btn mono" type="button" data-action="print">Print report</button></div></div></header>
+        <section class="metric-grid" aria-label="Program metrics">
+          <div class="metric"><div class="eyebrow mono">Complete</div><div class="metric-value">${counts.done}<span class="mono"> / ${totalTasks}</span></div><div class="metric-detail">${Math.round((counts.done / totalTasks) * 100)}% of program tasks</div></div>
+          <div class="metric"><div class="eyebrow mono">In progress</div><div class="metric-value">${counts.progress}</div><div class="metric-detail">Active work items</div></div>
+          <div class="metric"><div class="eyebrow mono">Blocked</div><div class="metric-value ${counts.blocked ? "danger" : ""}">${counts.blocked}</div><div class="metric-detail">Items needing intervention</div></div>
+          <div class="metric"><div class="eyebrow mono">Overdue</div><div class="metric-value ${overdue.length ? "danger" : ""}">${overdue.length}</div><div class="metric-detail">Open tasks past target</div></div>
+          <div class="metric"><div class="eyebrow mono">Ownership</div><div class="metric-value">${owned}<span class="mono"> / ${totalTasks}</span></div><div class="metric-detail">${activeUnassigned} active task${activeUnassigned === 1 ? "" : "s"} unassigned</div></div>
+        </section>
+        <div class="overview-grid">
+          <section class="overview-panel"><header class="overview-panel-header"><h3>Phase health</h3><p>Colored bars show in progress, blocked, and done.</p></header>${phaseRows}</section>
+          <section class="overview-panel"><header class="overview-panel-header"><h3>Needs attention</h3><p>Blocked, overdue, and active work in priority order.</p></header><div class="attention-list">${attention}</div></section>
+        </div>
+        <div class="rollout-gate ${containmentReady ? "ready" : ""}"><strong>${containmentReady ? "Copilot rollout gate cleared" : "Copilot rollout gate not yet cleared"}</strong><span>${containmentReady ? "Data Containment and Governance Automation are complete." : "Complete Phases 02 and 03 before licensing pilot users."}</span></div>`;
+    }
+
+    function setView(view, updateHash = true) {
+      activeView = view;
+      document.querySelectorAll(".view-tab").forEach(tab => tab.setAttribute("aria-selected", String(tab.dataset.view === view)));
+      document.getElementById("overview-view").hidden = view !== "overview";
+      document.getElementById("tracker-view").hidden = view !== "tracker";
+      if (updateHash) history.replaceState(null, "", view === "overview" ? "#overview" : "#tracker");
+      if (view === "overview") renderOverview();
+    }
+
+    function render() {
+      const nav = document.getElementById("phase-nav");
+      const list = document.getElementById("phase-list");
+      nav.innerHTML = phases.map((phase, phaseIndex) => {
+        const done = phase.tasks.filter((_, taskIndex) => taskData(phaseIndex, taskIndex).status === "done").length;
+        const percent = (done / phase.tasks.length) * 100;
+        return `<a class="phase-link" href="#phase-${phase.number}">
+          <div class="phase-link-title"><span class="phase-link-number mono">${phase.number}</span><span>${phase.title}</span></div>
+          <div class="phase-link-stats"><div class="mini-track"><div class="mini-fill" style="width:${percent}%"></div></div><span class="mono">${done}/${phase.tasks.length}</span></div>
+          <div class="phase-link-duration mono">${phase.duration}</div>
+        </a>`;
+      }).join("");
+
+      list.innerHTML = phases.map((phase, phaseIndex) => {
+        const done = phase.tasks.filter((_, taskIndex) => taskData(phaseIndex, taskIndex).status === "done").length;
+        const tasks = phase.tasks.map((rawTask, taskIndex) => {
+          const task = typeof rawTask === "string" ? { title: rawTask } : rawTask;
+          const id = taskId(phaseIndex, taskIndex);
+          const data = taskData(phaseIndex, taskIndex);
+          const details = task.details ? `<div class="task-details" id="details-${id}" hidden><h3 class="mono">Config path</h3><ul>${task.details.map(item => `<li>${item}</li>`).join("")}</ul></div>` : "";
+          return `<div class="task-wrap">
+            <div class="task" data-id="${id}" data-status="${data.status}">
+              <button class="status-btn" type="button" aria-label="Cycle status for ${escapeHtml(task.title)}" title="Click to cycle status"></button>
+              <div class="task-content">
+                <div class="task-title">${task.title}</div>
+                <div class="task-fields">
+                  <input data-field="owner" value="${escapeHtml(data.owner)}" placeholder="Owner" aria-label="Owner for ${escapeHtml(task.title)}">
+                  <input data-field="targetDate" type="date" value="${escapeHtml(data.targetDate)}" aria-label="Target date for ${escapeHtml(task.title)}" title="Target date">
+                  <input data-field="notes" value="${escapeHtml(data.notes)}" placeholder="Notes / date" aria-label="Notes for ${escapeHtml(task.title)}">
+                  ${task.details ? `<button class="details-toggle mono" type="button" aria-expanded="false" aria-controls="details-${id}">Show steps</button>` : ""}
+                </div>
+              </div>
+              <div class="status-label mono">${statusLabels[data.status]}</div>
+            </div>${details}
+          </div>`;
+        }).join("");
+        return `<section class="phase" id="phase-${phase.number}">
+          <header class="phase-header">
+            <div class="phase-number mono">${phase.number}</div>
+            <div><h2>${phase.title}</h2><p class="phase-description">${phase.description}</p></div>
+            <div class="phase-summary"><span class="duration-badge mono">${phase.duration}</span><div class="phase-count mono">${done}/${phase.tasks.length} done</div></div>
+          </header>${tasks}
+        </section>`;
+      }).join("") + `<div class="footer-note">Phase 3 is the reusable engine — configure it once and the environment stays clean without repeating Phases 1–2 later. Stand it up early, before cleanup finishes.</div>`;
+      updateOverall();
+      renderOverview();
+    }
+
+    function updateOverall() {
+      const completed = phases.reduce((sum, phase, phaseIndex) => sum + phase.tasks.filter((_, taskIndex) => taskData(phaseIndex, taskIndex).status === "done").length, 0);
+      document.getElementById("overall-count").textContent = `${completed} / ${totalTasks}`;
+      document.getElementById("overall-fill").style.width = `${(completed / totalTasks) * 100}%`;
+      document.querySelector(".progress-track").setAttribute("aria-valuenow", completed);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("visible"), 1800);
+    }
+
+    document.addEventListener("click", event => {
+      const action = event.target.closest("[data-action]");
+      if (action) {
+        if (action.dataset.action === "export-csv") exportCsv();
+        if (action.dataset.action === "export-json") exportJson();
+        if (action.dataset.action === "import-json") document.getElementById("import-file").click();
+        if (action.dataset.action === "print") window.print();
+        return;
+      }
+
+      const viewTab = event.target.closest(".view-tab");
+      if (viewTab) {
+        setView(viewTab.dataset.view);
+        return;
+      }
+
+      const jump = event.target.closest("[data-jump-task]");
+      if (jump) {
+        setView("tracker", false);
+        history.replaceState(null, "", `#phase-${jump.dataset.phase}`);
+        const task = document.querySelector(`.task[data-id="${jump.dataset.jumpTask}"]`);
+        task.scrollIntoView({ behavior: "smooth", block: "center" });
+        task.querySelector(".task-content").animate([{ background: "var(--cp-highlight)" }, { background: "transparent" }], { duration: 1400 });
+        return;
+      }
+
+      const statusButton = event.target.closest(".status-btn");
+      if (statusButton) {
+        const task = statusButton.closest(".task");
+        const data = savedState[task.dataset.id];
+        data.status = statusOrder[(statusOrder.indexOf(data.status) + 1) % statusOrder.length];
+        data.updatedAt = new Date().toISOString();
+        saveState();
+        render();
+        showToast(`Status changed to ${statusLabels[data.status]}`);
+        return;
+      }
+
+      const toggle = event.target.closest(".details-toggle");
+      if (toggle) {
+        const details = document.getElementById(toggle.getAttribute("aria-controls"));
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        toggle.textContent = expanded ? "Show steps" : "Hide steps";
+        details.hidden = expanded;
+      }
+    });
+
+    document.addEventListener("input", event => {
+      const field = event.target.closest("input[data-field]");
+      if (!field) return;
+      const id = field.closest(".task").dataset.id;
+      savedState[id][field.dataset.field] = field.value;
+      savedState[id].updatedAt = new Date().toISOString();
+      saveState();
+      if (field.dataset.field === "targetDate") renderOverview();
+    });
+
+    document.getElementById("import-file").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const payload = JSON.parse(await file.text());
+        if (payload.format !== "copilot-readiness-tracker" || payload.version !== 1 || !payload.state || typeof payload.state !== "object") throw new Error("Unsupported backup format");
+        const validIds = new Set(allTaskRecords().map(task => task.id));
+        const restored = {};
+        for (const [id, data] of Object.entries(payload.state)) {
+          if (!validIds.has(id) || !data || !statusOrder.includes(data.status)) continue;
+          restored[id] = { status: data.status, owner: String(data.owner || ""), targetDate: /^\d{4}-\d{2}-\d{2}$/.test(data.targetDate || "") ? data.targetDate : "", notes: String(data.notes || ""), updatedAt: String(data.updatedAt || "") };
+        }
+        savedState = restored;
+        saveState();
+        render();
+        setView("overview");
+        showToast("JSON backup restored");
+      } catch (error) {
+        window.alert(`Could not restore backup: ${error.message}`);
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    document.getElementById("cloud-sync").addEventListener("click", () => {
+      populateSyncDialog();
+      document.getElementById("sync-dialog").showModal();
+    });
+
+    document.querySelector(".dialog-close").addEventListener("click", () => document.getElementById("sync-dialog").close());
+
+    document.getElementById("save-sync").addEventListener("click", saveSyncSettings);
+
+    document.getElementById("connect-sync").addEventListener("click", async () => {
+      try {
+        await synchronizeList();
+      } catch (error) {
+        updateSyncButton(syncAccount ? "connected" : "local");
+        setSyncStatus(error.message, "error");
+      }
+    });
+
+    document.getElementById("disconnect").addEventListener("click", disconnectSync);
+
+    document.getElementById("reset").addEventListener("click", () => {
+      if (!window.confirm("Reset all statuses, owners, target dates, and notes? This cannot be undone.")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      savedState = {};
+      render();
+      showToast("Tracker reset");
+    });
+
+    render();
+    setView(activeView, false);
+    populateSyncDialog();
+    if (location.protocol !== "file:" && syncConfig.clientId && syncConfig.tenant) {
+      initializeMsal().then(() => updateSyncButton(syncAccount ? "connected" : "local")).catch(() => updateSyncButton());
+    }
+  </script>
+</body>
+</html>
