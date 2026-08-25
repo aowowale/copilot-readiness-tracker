@@ -1,0 +1,50 @@
+{
+  "format": "sam-governance-workspaces",
+  "version": 1,
+  "collectedAt": "2026-01-15T09:00:00.000Z",
+  "status": "manual-export",
+  "warnings": [
+    "Activity and exposure require additional read-only reports; fields left Unknown were not validated."
+  ],
+  "workspaces": [
+    {
+      "id": "team-001",
+      "name": "Finance Operations",
+      "type": "Private team",
+      "activityDays": 12,
+      "activeChannels": 5,
+      "channelCount": 7,
+      "owners": ["Alex Wilber", "Megan Bowen"],
+      "members": 46,
+      "guests": 2,
+      "exposure": "High",
+      "exposureCount": 3,
+      "rcd": true,
+      "lifecycle": "Review",
+      "site": "/sites/FinanceOperations",
+      "findings": [
+        "Organization-wide access group detected",
+        "Two external guests have site access"
+      ]
+    },
+    {
+      "id": "team-002",
+      "name": "Records Modernization",
+      "type": "Private team",
+      "activityDays": null,
+      "activeChannels": null,
+      "channelCount": 5,
+      "owners": ["Johanna Lorenz"],
+      "members": 23,
+      "guests": 1,
+      "exposure": "Unknown",
+      "exposureCount": 0,
+      "rcd": true,
+      "lifecycle": "Data unavailable",
+      "site": "/sites/RecordsModernization",
+      "findings": [
+        "Activity source has not been validated for this workspace"
+      ]
+    }
+  ]
+}

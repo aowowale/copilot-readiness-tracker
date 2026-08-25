@@ -1,0 +1,20 @@
+{
+  "name": "sam-governance-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Read-only GCC High collector and API for the Microsoft 365 Copilot Readiness dashboard.",
+  "main": "src/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "func start",
+    "check": "node --check src/index.js"
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.0",
+    "@azure/functions": "^4.5.0",
+    "@azure/identity": "^4.4.1"
+  }
+}

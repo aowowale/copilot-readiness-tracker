@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Copilot Readiness Tracker</title>
+  <title>Microsoft 365 Copilot Readiness</title>
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -179,6 +179,30 @@
     .overview-heading p { margin: 6px 0 0; color: var(--cp-text-muted); }
     .overview-updated { color: var(--cp-text-muted); font-size: 12px; white-space: nowrap; }
     .overview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .arch-briefing { margin-bottom: 16px; border: 1px solid var(--cp-border); background: var(--cp-surface); }
+    .arch-briefing[open] { border-color: var(--cp-border-strong); }
+    .arch-briefing-summary { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; list-style: none; color: var(--cp-text); }
+    .arch-briefing-summary::-webkit-details-marker { display: none; }
+    .arch-briefing-summary:hover { color: var(--cp-accent); }
+    .arch-briefing-summary:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: -2px; }
+    .arch-briefing-icon { color: var(--cp-accent); transition: transform 0.15s ease; }
+    .arch-briefing[open] .arch-briefing-icon { transform: rotate(90deg); }
+    .arch-briefing-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .arch-briefing-hint { color: var(--cp-text-muted); font-size: 11px; }
+    .arch-briefing-body { padding: 4px 18px 20px; border-top: 1px solid var(--cp-border); }
+    .arch-briefing-lede { margin: 14px 0 16px; color: var(--cp-text); font-size: 13px; }
+    .arch-flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-bottom: 18px; }
+    .arch-flow-step { flex: 1 1 160px; padding: 12px 14px; border: 1px solid var(--cp-border); background: var(--cp-surface-soft); }
+    .arch-flow-step h5 { margin: 8px 0 4px; font-size: 13px; }
+    .arch-flow-step p { margin: 0; color: var(--cp-text-muted); font-size: 12px; }
+    .arch-flow-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid var(--cp-accent); border-radius: 50%; color: var(--cp-accent); font-size: 11px; }
+    .arch-flow-arrow { display: flex; align-items: center; color: var(--cp-text-muted); font-size: 18px; }
+    .arch-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .arch-col h5 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cp-text-muted); }
+    .arch-col ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; }
+    .arch-col li { color: var(--cp-text); font-size: 12px; }
+    .arch-briefing-note { margin-top: 16px; }
+    @media (max-width: 720px) { .arch-columns { grid-template-columns: 1fr; } .arch-flow-arrow { display: none; } .arch-briefing-hint { display: none; } }
     .command-btn { min-height: 35px; padding: 0 12px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); cursor: pointer; font-size: 11px; text-transform: uppercase; }
     .command-btn:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
     .program-guide { display: grid; grid-template-columns: minmax(230px, 0.8fr) minmax(0, 2.2fr); margin-bottom: 16px; border: 1px solid var(--cp-border); background: var(--cp-surface); }
@@ -367,6 +391,94 @@
     .dialog-status.success { border-color: var(--cp-success); color: var(--cp-success); }
     .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 18px 24px; border-top: 1px solid var(--cp-border); }
     .dialog-actions .command-btn.primary { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); }
+    .governance { max-width: 1540px; margin: 0 auto; padding: 28px clamp(20px, 3vw, 48px) 64px; }
+    .governance-heading { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 16px; }
+    .governance-heading h2 { margin: 0; font-size: 28px; }
+    .governance-heading p { max-width: 780px; margin: 6px 0 0; color: var(--cp-text-muted); }
+    .data-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid var(--cp-warning); border-radius: 0.625rem; color: var(--cp-text); font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+    .data-badge::before { width: 8px; height: 8px; border-radius: 50%; background: var(--cp-warning); content: ""; }
+    .data-badge.live { border-color: var(--cp-success); }
+    .data-badge.live::before { background: var(--cp-success); }
+    .data-badge.manual { border-color: var(--cp-accent); }
+    .data-badge.manual::before { background: var(--cp-accent); }
+    .governance-data-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .source-banner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; margin-bottom: 16px; padding: 15px 18px; border: 1px solid var(--cp-border); border-left: 4px solid var(--cp-warning); background: var(--cp-surface); }
+    .source-banner strong { font-size: 14px; }
+    .source-banner span { color: var(--cp-text-muted); font-size: 13px; }
+    .source-banner .mono { color: var(--cp-text); font-size: 11px; white-space: nowrap; }
+    .governance-metrics { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .metric-value.warning { color: var(--cp-warning); }
+    .metric-filter { display: block; width: 100%; text-align: left; font: inherit; cursor: pointer; background: var(--cp-surface); border: 1px solid var(--cp-border); }
+    .metric-filter:hover { border-color: var(--cp-accent); }
+    .metric-filter.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); box-shadow: inset 0 0 0 1px var(--cp-accent); }
+    .governance-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; margin-bottom: 16px; padding: 14px; border: 1px solid var(--cp-border); background: var(--cp-surface); }
+    .governance-toolbar label { display: grid; gap: 5px; color: var(--cp-text-muted); font-size: 11px; text-transform: uppercase; }
+    .governance-toolbar .toolbar-search { flex: 1 1 220px; }
+    .governance-toolbar input, .governance-toolbar select { min-width: 0; height: 38px; padding: 7px 10px; border: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text); }
+    .governance-toolbar input:focus, .governance-toolbar select:focus { outline: 2px solid var(--cp-accent); outline-offset: 1px; }
+    .governance-toolbar .command-btn { align-self: end; height: 38px; }
+    .command-btn.ghost { border-style: dashed; color: var(--cp-text-muted); }
+    .filter-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .filter-label { color: var(--cp-text-muted); font-size: 10px; text-transform: uppercase; margin-right: 2px; }
+    .filter-chip { padding: 6px 10px; border: 1px solid var(--cp-border); border-radius: 999px; background: var(--cp-surface); color: var(--cp-text-muted); cursor: pointer; font: inherit; font-size: 11px; }
+    .filter-chip:hover { border-color: var(--cp-accent); color: var(--cp-text); }
+    .filter-chip.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); color: var(--cp-text); }
+    .sort-th { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: inherit; cursor: pointer; }
+    .sort-th:hover { color: var(--cp-accent); }
+    .sort-th.active { color: var(--cp-text); }
+    .sort-arrow { font-size: 9px; color: var(--cp-accent); }
+    .governance-tips { margin-bottom: 16px; padding: 15px 18px; border: 1px solid var(--cp-border); border-left: 4px solid var(--cp-accent); background: var(--cp-surface); }
+    .tips-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .tips-head strong { font-size: 14px; }
+    .tips-dismiss { padding: 4px 9px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: none; color: var(--cp-text-muted); cursor: pointer; font-size: 10px; text-transform: uppercase; }
+    .tips-dismiss:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .tips-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .tip-btn { padding: 6px 11px; border: 1px solid var(--cp-border-strong); border-radius: 999px; background: var(--cp-surface); color: var(--cp-text); cursor: pointer; font: inherit; font-size: 12px; }
+    .tip-btn:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .decision-strip { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 14px; margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--cp-border); background: var(--cp-surface); }
+    .decision-strip-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .decision-strip-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .decision-chip { padding: 6px 10px; border: 1px solid var(--cp-border); border-radius: 999px; background: var(--cp-surface); color: var(--cp-text-muted); cursor: pointer; font: inherit; font-size: 11px; }
+    .decision-chip:hover { border-color: var(--cp-accent); color: var(--cp-text); }
+    .decision-chip.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); color: var(--cp-text); }
+    .decision-editor { display: grid; gap: 10px; }
+    .decision-field { display: grid; gap: 5px; color: var(--cp-text-muted); font-size: 11px; text-transform: uppercase; }
+    .decision-field select, .decision-field input, .decision-field textarea { height: auto; min-height: 34px; padding: 7px 10px; border: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text); font: inherit; text-transform: none; }
+    .decision-field textarea { resize: vertical; }
+    .decision-field select:focus, .decision-field input:focus, .decision-field textarea:focus { outline: 2px solid var(--cp-accent); outline-offset: 1px; }
+    .governance-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(310px, 380px); gap: 16px; align-items: start; }
+    .inventory-panel, .workspace-detail { min-width: 0; border: 1px solid var(--cp-border); background: var(--cp-surface); box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border); }
+    .inventory-header { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 17px 20px; border-bottom: 1px solid var(--cp-border); }
+    .inventory-header h3, .workspace-detail h3 { margin: 0; font-size: 17px; }
+    .inventory-header p, .workspace-detail-header p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 12px; }
+    .inventory-count { color: var(--cp-text-muted); font-size: 11px; white-space: nowrap; }
+    .table-scroll { overflow-x: auto; }
+    .inventory-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .inventory-table th { padding: 11px 14px; border-bottom: 1px solid var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 10px; font-weight: 600; text-align: left; text-transform: uppercase; white-space: nowrap; }
+    .inventory-table td { padding: 13px 14px; border-bottom: 1px solid var(--cp-border); vertical-align: middle; }
+    .inventory-table tbody tr { cursor: pointer; }
+    .inventory-table tbody tr:last-child td { border-bottom: 0; }
+    .inventory-table tbody tr:hover, .inventory-table tbody tr.selected { background: var(--cp-accent-soft); }
+    .workspace-name { min-width: 180px; font-weight: 600; }
+    .workspace-name span { display: block; margin-top: 3px; color: var(--cp-text-muted); font-size: 11px; font-weight: 400; }
+    .status-pill { display: inline-block; padding: 3px 7px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; font-size: 10px; text-transform: uppercase; white-space: nowrap; }
+    .status-pill.danger { border-color: var(--cp-danger); color: var(--cp-danger); }
+    .status-pill.warning { border-color: var(--cp-warning); color: var(--cp-text); }
+    .status-pill.success { border-color: var(--cp-success); color: var(--cp-success); }
+    .status-pill.muted { border-color: var(--cp-border); color: var(--cp-text-muted); }
+    .status-pill.info { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .workspace-detail { position: sticky; top: 112px; }
+    .workspace-detail-header { padding: 18px 20px; border-bottom: 1px solid var(--cp-border); }
+    .detail-section { padding: 16px 20px; border-bottom: 1px solid var(--cp-border); }
+    .detail-section:last-child { border-bottom: 0; }
+    .detail-section h4 { margin: 0 0 10px; color: var(--cp-text-muted); font-size: 10px; text-transform: uppercase; }
+    .detail-list { display: grid; gap: 9px; margin: 0; }
+    .detail-row { display: grid; grid-template-columns: 115px minmax(0, 1fr); gap: 12px; font-size: 13px; }
+    .detail-row dt { color: var(--cp-text-muted); }
+    .detail-row dd { margin: 0; overflow-wrap: anywhere; }
+    .finding-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .finding-list li { padding-left: 12px; border-left: 3px solid var(--cp-warning); color: var(--cp-text-muted); font-size: 13px; }
+    .detail-note { margin: 0; color: var(--cp-text-muted); font-size: 12px; }
 
     @media (max-width: 980px) {
       .topbar { grid-template-columns: 1fr auto; }
@@ -379,6 +491,11 @@
       .overview-grid { grid-template-columns: 1fr; }
       .program-guide { grid-template-columns: 1fr; }
       .program-guide-intro { border-right: 0; border-bottom: 1px solid var(--cp-border); }
+      .governance-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .governance-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .governance-toolbar label:first-child { grid-column: 1 / -1; }
+      .governance-grid { grid-template-columns: 1fr; }
+      .workspace-detail { position: static; }
     }
     @media (max-width: 680px) {
       .topbar { gap: 14px; padding: 16px; }
@@ -388,7 +505,14 @@
       .layout { padding: 16px 12px 48px; }
       .view-switcher { padding: 12px 12px 0; }
       .overview { padding: 20px 12px 48px; }
+      .governance { padding: 20px 12px 48px; }
       .overview-heading { display: block; }
+      .governance-heading { display: block; }
+      .governance-heading .data-badge { margin-top: 10px; }
+      .source-banner { grid-template-columns: 1fr; gap: 5px; }
+      .governance-metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .governance-toolbar { grid-template-columns: 1fr; }
+      .governance-toolbar label:first-child { grid-column: auto; }
       .overview-updated { display: block; margin-top: 8px; }
       .overview-actions { justify-content: flex-start; }
       .metric-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -423,7 +547,7 @@
     @media print {
       :root, html[data-theme="dark"] { color-scheme: light; --cp-bg: #f7f4ef; --cp-bg-elevated: #fcfbf8; --cp-surface: #ffffff; --cp-surface-soft: #f5f5f5; --cp-border: #dedede; --cp-border-strong: #919191; --cp-text: #242424; --cp-text-muted: #5c5c5c; --cp-text-soft: #6f6f6f; --cp-accent: #b11f4b; --cp-accent-hover: #9a1a41; --cp-accent-soft: rgba(177, 31, 75, 0.08); --cp-accent-fg: #ffffff; --cp-success: #16a34a; --cp-danger: #dc2626; --cp-warning: #f59e0b; --cp-link: #0078d4; --cp-shadow: none; --cp-overlay: rgba(255, 255, 255, 0.8); --cp-panel: rgba(255, 255, 255, 0.86); --cp-panel-strong: rgba(255, 255, 255, 0.96); --cp-sheen: rgba(255, 255, 255, 0.55); --cp-highlight: rgba(177, 31, 75, 0.12); }
       .topbar { position: static; padding: 12px 0; }
-      .topbar .reset-btn, .view-switcher, .overview-actions, .toast, #tracker-view { display: none !important; }
+      .topbar .reset-btn, .view-switcher, .overview-actions, .toast, #tracker-view, #governance-view { display: none !important; }
       .overview { display: block !important; padding: 20px 0; }
       .metric-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
       .metric { min-height: 0; padding: 12px; box-shadow: none; }
@@ -437,23 +561,27 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <h1>SharePoint &amp; Teams Cleanup + Copilot Readiness</h1>
-      <p class="mono">Five-phase program tracker — generic template</p>
+      <h1>Microsoft 365 Copilot Readiness</h1>
+      <p class="mono">Tenant governance dashboard + program plan</p>
     </div>
-    <div class="overall">
+    <div class="overall" id="overall-tracker" hidden>
       <div class="overall-row mono"><span>PROGRAM COMPLETE</span><span id="overall-count">0 / 42</span></div>
       <div class="progress-track" role="progressbar" aria-label="Overall progress" aria-valuemin="0" aria-valuemax="42" aria-valuenow="0"><div class="progress-fill" id="overall-fill"></div></div>
     </div>
-    <div class="header-actions"><button class="sync-btn mono" id="cloud-sync" type="button"><span class="sync-dot"></span>Cloud sync</button><button class="reset-btn mono" id="reset" type="button">Reset</button></div>
+    <div class="header-actions"><button class="sync-btn mono" id="cloud-sync" type="button"><span class="sync-dot"></span>Task sync</button><button class="reset-btn mono" id="reset" type="button">Reset tasks</button></div>
   </header>
 
-  <nav class="view-switcher" role="tablist" aria-label="Tracker views">
-    <button class="view-tab mono" id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-view" data-view="overview">Overview</button>
-    <button class="view-tab mono" id="tracker-tab" type="button" role="tab" aria-selected="false" aria-controls="tracker-view" data-view="tracker">Detailed tracker</button>
+  <nav class="view-switcher" role="tablist" aria-label="Copilot readiness views">
+    <button class="view-tab mono" id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-view" data-view="overview">Program plan</button>
+    <button class="view-tab mono" id="governance-tab" type="button" role="tab" aria-selected="false" aria-controls="governance-view" data-view="governance">Tenant governance</button>
+    <button class="view-tab mono" id="tracker-tab" type="button" role="tab" aria-selected="false" aria-controls="tracker-view" data-view="tracker">Program tasks</button>
   </nav>
 
-  <main class="overview view-panel" id="overview-view" role="tabpanel" aria-labelledby="overview-tab"></main>
+  <main class="governance view-panel" id="governance-view" role="tabpanel" aria-labelledby="governance-tab"></main>
+  <main class="overview view-panel" id="overview-view" role="tabpanel" aria-labelledby="overview-tab" hidden></main>
   <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <input id="governance-import-file" type="file" accept="application/json,.json" hidden>
+  <input id="governance-decisions-file" type="file" accept="application/json,.json" hidden>
 
   <div class="layout view-panel" id="tracker-view" role="tabpanel" aria-labelledby="tracker-tab" hidden>
     <aside class="sidebar">
@@ -485,7 +613,7 @@
 
   <dialog class="sync-dialog" id="sync-dialog">
     <form id="sync-form" method="dialog">
-      <header class="dialog-header"><div><h2>Microsoft Lists sync</h2><p>Share this tracker across your Microsoft 365 team.</p></div><button class="dialog-close" type="button" aria-label="Close cloud sync setup">×</button></header>
+      <header class="dialog-header"><div><h2>Program tracker Lists sync</h2><p>Share the 42 program tasks. This does not connect tenant inventory.</p></div><button class="dialog-close" type="button" aria-label="Close cloud sync setup">×</button></header>
       <div class="dialog-body">
         <div class="setup-notice" id="protocol-notice"><strong>Serve this page from HTTPS or localhost</strong>Microsoft Entra SPA sign-in cannot use a file:// redirect. Register and open the tracker at the redirect URI shown below.</div>
         <div class="config-grid">
@@ -684,6 +812,16 @@
     const GRAPH_SCOPES = ["Sites.ReadWrite.All", "Sites.Manage.All"];
     const statusOrder = ["not-started", "progress", "blocked", "done"];
     const statusLabels = { "not-started": "Not started", progress: "In progress", blocked: "Blocked", done: "Done" };
+    const governanceWorkspaces = [
+      { id: "team-001", name: "Finance Operations", type: "Public team", activityDays: 12, activeChannels: 5, channelCount: 7, owners: ["Alex Wilber", "Megan Bowen"], members: 46, guests: 2, exposure: "High", exposureCount: 3, rcd: true, lifecycle: "Review", site: "/sites/FinanceOperations", findings: ["Organization-wide access group detected", "Two external guests have site access", "One anonymous sharing link requires review"] },
+      { id: "team-002", name: "Facilities Projects", type: "Private team", activityDays: 37, activeChannels: 2, channelCount: 6, owners: ["Patti Fernandez"], members: 28, guests: 0, exposure: "Medium", exposureCount: 1, rcd: false, lifecycle: "Attestation due", site: "/sites/FacilitiesProjects", findings: ["Owner attestation is overdue by 4 days"] },
+      { id: "team-003", name: "FY24 Acquisition", type: "Private team", activityDays: 68, activeChannels: 1, channelCount: 4, owners: ["Lee Gu"], members: 19, guests: 4, exposure: "High", exposureCount: 2, rcd: true, lifecycle: "Review", site: "/sites/FY24Acquisition", findings: ["Four guest members remain active", "Private channel site has a broader sharing setting than its parent site"] },
+      { id: "team-004", name: "Legacy Intranet Working Group", type: "Private team", activityDays: 104, activeChannels: 0, channelCount: 3, owners: [], members: 11, guests: 0, exposure: "Medium", exposureCount: 2, rcd: false, lifecycle: "Owner required", site: "/sites/LegacyIntranetWG", findings: ["No active owner is assigned", "Team has exceeded the 90-day inactivity threshold"] },
+      { id: "team-005", name: "Human Resources Leadership", type: "Private team", activityDays: 7, activeChannels: 4, channelCount: 5, owners: ["Adele Vance", "Nestor Wilke"], members: 14, guests: 0, exposure: "Low", exposureCount: 0, rcd: false, lifecycle: "Retain", site: "/sites/HRLeadership", findings: [] },
+      { id: "team-006", name: "Vendor Collaboration", type: "Shared channels", activityDays: 92, activeChannels: 0, channelCount: 8, owners: ["Pradeep Gupta"], members: 32, guests: 13, exposure: "High", exposureCount: 4, rcd: true, lifecycle: "Archive proposed", site: "/sites/VendorCollaboration", findings: ["Thirteen guest members require recertification", "Two shared-channel sites cross organizational boundaries", "External sharing is enabled", "Team has exceeded the 90-day inactivity threshold"] },
+      { id: "team-007", name: "Copilot Pilot Community", type: "Public team", activityDays: 2, activeChannels: 9, channelCount: 11, owners: ["MOD Administrator"], members: 184, guests: 0, exposure: "Medium", exposureCount: 1, rcd: false, lifecycle: "Retain", site: "/sites/CopilotPilot", findings: ["Large public membership requires scheduled recertification"] },
+      { id: "team-008", name: "Records Modernization", type: "Private team", activityDays: null, activeChannels: null, channelCount: 5, owners: ["Johanna Lorenz"], members: 23, guests: 1, exposure: "Unknown", exposureCount: 0, rcd: true, lifecycle: "Data unavailable", site: "/sites/RecordsModernization", findings: ["Activity source has not been validated for this workspace"] }
+    ];
     const totalTasks = phases.reduce((sum, phase) => sum + phase.tasks.length, 0);
     let savedState = loadState();
     let syncConfig = loadSyncConfig();
@@ -691,8 +829,201 @@
     let syncAccount = null;
     const collapsedPhases = new Set();
     let syncInProgress = false;
-    let activeView = location.hash === "#tracker" || location.hash.startsWith("#phase-") ? "tracker" : "overview";
+    let activeView = location.hash === "#tracker" || location.hash.startsWith("#phase-") ? "tracker" : location.hash === "#governance" ? "governance" : "overview";
+    let governanceFilters = { query: "", age: [], exposure: [], ownership: "all", decision: "all", cards: new Set() };
+    let governanceSort = { column: "name", direction: 1 };
+    let architectureBriefingOpen = false;
+    let selectedWorkspaceId = governanceWorkspaces[0].id;
     let toastTimer;
+
+    // ---- Decision / disposition tracking ----------------------------------
+    // Decisions are stored under a SEPARATE key so refreshing or re-importing
+    // the workspace inventory never wipes recorded decisions. The dashboard only
+    // RECORDS decisions; it never performs any change in the tenant.
+    const GOVERNANCE_DECISIONS_KEY = "governance-decisions-v1";
+    const GOVERNANCE_TIPS_KEY = "governance-tips-dismissed-v1";
+    const DECISION_OPTIONS = ["No decision", "Keep", "Attest", "Archive", "Investigate"];
+    const DECISION_TONE = { "No decision": "muted", Keep: "success", Attest: "info", Investigate: "warning", Archive: "danger" };
+
+    function loadDecisions() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(GOVERNANCE_DECISIONS_KEY) || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch { return {}; }
+    }
+    let governanceDecisions = loadDecisions();
+    function saveDecisions() { localStorage.setItem(GOVERNANCE_DECISIONS_KEY, JSON.stringify(governanceDecisions)); }
+    function decisionOf(id) {
+      const d = governanceDecisions[id] || {};
+      return {
+        decision: DECISION_OPTIONS.includes(d.decision) ? d.decision : "No decision",
+        assignee: typeof d.assignee === "string" ? d.assignee : "",
+        dueDate: /^\d{4}-\d{2}-\d{2}$/.test(d.dueDate || "") ? d.dueDate : "",
+        note: typeof d.note === "string" ? d.note : "",
+        updatedAt: typeof d.updatedAt === "string" ? d.updatedAt : ""
+      };
+    }
+    function setDecision(id, patch) {
+      const next = { ...decisionOf(id), ...patch, updatedAt: new Date().toISOString() };
+      if (next.decision === "No decision" && !next.assignee && !next.dueDate && !next.note) delete governanceDecisions[id];
+      else governanceDecisions[id] = next;
+      saveDecisions();
+    }
+
+    // ---- Governance data source layer -------------------------------------
+    // Priority: live tenant API -> manual import (localStorage) -> sample data.
+    // Sample data is always clearly labeled and never presented as tenant findings.
+    const GOVERNANCE_API_PATH = "api/workspaces";
+    const GOVERNANCE_MANUAL_KEY = "governance-manual-data-v1";
+    const EXPOSURE_VALUES = new Set(["High", "Medium", "Low", "Unknown"]);
+    let governanceState = { source: "sample", collectedAt: null, importedAt: null, status: null, warnings: [], workspaces: governanceWorkspaces };
+
+    function currentWorkspaces() {
+      return governanceState.workspaces && governanceState.workspaces.length ? governanceState.workspaces : governanceWorkspaces;
+    }
+
+    function toNullableNumber(value) {
+      if (value === null || value === undefined || value === "") return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function toNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function toStringArray(value) {
+      if (Array.isArray(value)) return value.map(item => String(item)).filter(Boolean);
+      if (typeof value === "string" && value.trim()) return value.split(/[;|]/).map(item => item.trim()).filter(Boolean);
+      return [];
+    }
+
+    // Validate and coerce an untrusted record into the exact workspace schema.
+    // Missing activity is preserved as null (rendered "Unknown"), never "Inactive".
+    function normalizeWorkspaceRecord(raw, index) {
+      if (!raw || typeof raw !== "object") throw new Error(`Record ${index + 1} is not an object`);
+      const name = String(raw.name || "").trim();
+      if (!name) throw new Error(`Record ${index + 1} is missing a name`);
+      const exposure = EXPOSURE_VALUES.has(raw.exposure) ? raw.exposure : "Unknown";
+      return {
+        id: String(raw.id || `workspace-${index + 1}`),
+        name,
+        type: String(raw.type || "Workspace"),
+        activityDays: toNullableNumber(raw.activityDays),
+        activeChannels: toNullableNumber(raw.activeChannels),
+        channelCount: toNumber(raw.channelCount, 0),
+        owners: toStringArray(raw.owners),
+        members: toNumber(raw.members, 0),
+        guests: toNumber(raw.guests, 0),
+        exposure,
+        exposureCount: toNumber(raw.exposureCount, 0),
+        rcd: raw.rcd === true || raw.rcd === "true",
+        lifecycle: String(raw.lifecycle || "Unknown"),
+        site: String(raw.site || ""),
+        findings: toStringArray(raw.findings)
+      };
+    }
+
+    // Accept a bare array, { workspaces: [...] }, or the API envelope.
+    function parseGovernancePayload(payload) {
+      const list = Array.isArray(payload) ? payload : Array.isArray(payload?.workspaces) ? payload.workspaces : null;
+      if (!list) throw new Error("Expected a JSON array of workspace records or an object with a \"workspaces\" array.");
+      if (!list.length) throw new Error("The import contains no workspace records.");
+      const workspaces = list.map((record, index) => normalizeWorkspaceRecord(record, index));
+      return { workspaces, status: payload?.status || null, warnings: Array.isArray(payload?.warnings) ? payload.warnings.map(String) : [], collectedAt: payload?.collectedAt || null };
+    }
+
+    function ensureSelectedWorkspace() {
+      const list = currentWorkspaces();
+      if (!list.some(workspace => workspace.id === selectedWorkspaceId)) selectedWorkspaceId = list[0].id;
+    }
+
+    function saveManualImport(parsed) {
+      const importedAt = new Date().toISOString();
+      localStorage.setItem(GOVERNANCE_MANUAL_KEY, JSON.stringify({ importedAt, workspaces: parsed.workspaces }));
+      governanceState = { source: "manual", collectedAt: parsed.collectedAt, importedAt, status: parsed.status, warnings: parsed.warnings, workspaces: parsed.workspaces };
+      ensureSelectedWorkspace();
+    }
+
+    function loadManualImport() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(GOVERNANCE_MANUAL_KEY));
+        if (!stored || !Array.isArray(stored.workspaces) || !stored.workspaces.length) return false;
+        const parsed = parseGovernancePayload(stored.workspaces);
+        governanceState = { source: "manual", collectedAt: null, importedAt: stored.importedAt || null, status: null, warnings: [], workspaces: parsed.workspaces };
+        ensureSelectedWorkspace();
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function useSampleData() {
+      localStorage.removeItem(GOVERNANCE_MANUAL_KEY);
+      governanceState = { source: "sample", collectedAt: null, importedAt: null, status: null, warnings: [], workspaces: governanceWorkspaces };
+      selectedWorkspaceId = governanceWorkspaces[0].id;
+    }
+
+    // Try the live tenant collector API. Falls back silently to manual/sample.
+    async function loadGovernanceData() {
+      try {
+        const response = await fetch(GOVERNANCE_API_PATH, { headers: { Accept: "application/json" }, credentials: "same-origin" });
+        if (response.ok) {
+          const payload = await response.json();
+          const parsed = parseGovernancePayload(payload);
+          governanceState = { source: "backend", collectedAt: payload.collectedAt || null, importedAt: null, status: payload.status || null, warnings: parsed.warnings, workspaces: parsed.workspaces };
+          ensureSelectedWorkspace();
+          return;
+        }
+      } catch {
+        // No backend configured (static hosting) — expected in demo mode.
+      }
+      if (!loadManualImport()) useSampleData();
+    }
+
+    const GOVERNANCE_TEMPLATE = [
+      { id: "team-001", name: "Example Team", type: "Private team", activityDays: 14, activeChannels: 3, channelCount: 6, owners: ["Owner Name"], members: 25, guests: 1, exposure: "Medium", exposureCount: 1, rcd: false, lifecycle: "Review", site: "/sites/ExampleTeam", findings: ["Describe an exposure indicator here"] },
+      { id: "team-002", name: "Activity Unavailable Example", type: "Private team", activityDays: null, activeChannels: null, channelCount: 4, owners: [], members: 12, guests: 0, exposure: "Unknown", exposureCount: 0, rcd: true, lifecycle: "Owner required", site: "/sites/Example2", findings: ["Activity source has not been validated for this workspace"] }
+    ];
+
+    function downloadGovernanceTemplate() {
+      const blob = new Blob([JSON.stringify({ format: "sam-governance-workspaces", version: 1, workspaces: GOVERNANCE_TEMPLATE }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "governance-import-template.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function governanceSourceMeta() {
+      if (governanceState.source === "backend") {
+        return {
+          badge: "Live tenant data",
+          badgeClass: "data-badge live",
+          title: "Connected to tenant collector",
+          detail: governanceState.collectedAt ? `Read-only snapshot collected ${new Date(governanceState.collectedAt).toLocaleString()}.` : "Read-only snapshot from the tenant collector.",
+          note: `SOURCE · COLLECTOR API${governanceState.status ? ` · ${String(governanceState.status).toUpperCase()}` : ""}`
+        };
+      }
+      if (governanceState.source === "manual") {
+        return {
+          badge: "Manual import",
+          badgeClass: "data-badge manual",
+          title: "Manual import loaded",
+          detail: `Imported from an admin-provided export${governanceState.importedAt ? ` on ${new Date(governanceState.importedAt).toLocaleString()}` : ""}. Values reflect the exported data, not a live connection.`,
+          note: "SOURCE · MANUAL IMPORT"
+        };
+      }
+      return {
+        badge: "Sample data",
+        badgeClass: "data-badge",
+        title: "GCC High connector not configured",
+        detail: "These records demonstrate the target experience. They are not tenant findings and cannot trigger remediation.",
+        note: "ACTIVITY SOURCE · VALIDATION REQUIRED"
+      };
+    }
 
     function loadState() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
@@ -1035,6 +1366,42 @@
             <div class="program-step"><span class="program-step-number mono">PHASES 04–05</span><h4>Roll out deliberately</h4><p>Pilot Copilot, learn from real usage, then add users, agents, and connectors in controlled stages.</p></div>
           </div>
         </section>
+        <details class="arch-briefing" id="arch-briefing"${architectureBriefingOpen ? " open" : ""}>
+          <summary class="arch-briefing-summary"><span class="arch-briefing-icon" aria-hidden="true">▸</span><span class="arch-briefing-label">M365 architecture briefing</span><span class="arch-briefing-hint mono">Teams = UI · SharePoint = backend · click to open</span></summary>
+          <div class="arch-briefing-body">
+            <p class="arch-briefing-lede">Brief for IT and governance stakeholders. Teams is the interface people work in, but the content lives in SharePoint. Every Team, private/shared channel, and Microsoft 365 Group provisions its own SharePoint site — so governing Copilot access is really about governing SharePoint permissions.</p>
+            <div class="arch-flow" aria-label="Teams to SharePoint relationship">
+              <div class="arch-flow-step"><span class="arch-flow-num mono">UI</span><h5>Teams</h5><p>The collaboration surface staff use daily — chat, channels, meetings, and files.</p></div>
+              <div class="arch-flow-arrow" aria-hidden="true">→</div>
+              <div class="arch-flow-step"><span class="arch-flow-num mono">ID</span><h5>Microsoft 365 Group</h5><p>The membership and identity behind each Team; every group carries a SharePoint site.</p></div>
+              <div class="arch-flow-arrow" aria-hidden="true">→</div>
+              <div class="arch-flow-step"><span class="arch-flow-num mono">DB</span><h5>SharePoint</h5><p>Where the files, pages, and lists actually live. Permissions here are the real access boundary.</p></div>
+              <div class="arch-flow-arrow" aria-hidden="true">→</div>
+              <div class="arch-flow-step"><span class="arch-flow-num mono">AI</span><h5>Copilot &amp; search</h5><p>Reads that SharePoint content using each user's existing permissions — nothing more, nothing less.</p></div>
+            </div>
+            <div class="arch-columns">
+              <div class="arch-col"><h5>Each gets its own SharePoint site</h5><ul>
+                <li>Every Microsoft 365 Group</li>
+                <li>Every Team (team-connected site)</li>
+                <li>Every private channel (separate site)</li>
+                <li>Every shared channel (separate site)</li>
+              </ul></div>
+              <div class="arch-col"><h5>Stored inside the team's site</h5><ul>
+                <li>Standard channel files (as folders)</li>
+                <li>Team pages, wiki, and notebook</li>
+                <li>Lists, forms, and app data</li>
+                <li>Anything shared into a chat lands in OneDrive</li>
+              </ul></div>
+              <div class="arch-col"><h5>Why governance cares</h5><ul>
+                <li>Oversharing in SharePoint = oversharing in Copilot</li>
+                <li>Site- and item-level permissions drive what AI can surface</li>
+                <li>Sprawl means more sites, owners, and guests to review</li>
+                <li>RCD limits discovery in search/Copilot — it does not change permissions</li>
+              </ul></div>
+            </div>
+            <p class="arch-briefing-note detail-note">Takeaway for stakeholders: the fastest way to make Copilot safe is to clean up and govern the SharePoint sites behind Teams, channels, and Groups — which is exactly what Phases 01–03 of this program do.</p>
+          </div>
+        </details>
         <section class="metric-grid" aria-label="Program metrics">
           <div class="metric"><div class="eyebrow mono">Complete</div><div class="metric-value">${counts.done}<span class="mono"> / ${totalTasks}</span></div><div class="metric-detail">${Math.round((counts.done / totalTasks) * 100)}% of program tasks</div></div>
           <div class="metric"><div class="eyebrow mono">In progress</div><div class="metric-value">${counts.progress}</div><div class="metric-detail">Active work items</div></div>
@@ -1047,14 +1414,257 @@
           <section class="overview-panel"><header class="overview-panel-header"><h3>Needs attention</h3><p>Blocked, overdue, and active work in priority order.</p></header><div class="attention-list">${attention}</div></section>
         </div>
         <div class="rollout-gate ${containmentReady ? "ready" : ""}"><strong>${containmentReady ? "Copilot rollout gate cleared" : "Copilot rollout gate not yet cleared"}</strong><span>${containmentReady ? "Data Containment and Governance Automation are complete." : "Complete Phases 02 and 03 before licensing pilot users."}</span></div>`;
+      const briefing = document.getElementById("arch-briefing");
+      if (briefing) briefing.addEventListener("toggle", () => { architectureBriefingOpen = briefing.open; });
+    }
+
+    function activityBucket(workspace) {
+      if (workspace.activityDays === null) return "Unknown";
+      if (workspace.activityDays > 90) return "90+ days";
+      if (workspace.activityDays > 60) return "61–90 days";
+      if (workspace.activityDays > 30) return "31–60 days";
+      return "Active <30 days";
+    }
+
+    function governanceStatusPill(label, tone = "muted") {
+      return `<span class="status-pill ${tone}">${escapeHtml(label)}</span>`;
+    }
+
+    function matchesCardFilters(workspace) {
+      const cards = governanceFilters.cards;
+      if (!cards.size) return true;
+      if (cards.has("inactive30") && !(workspace.activityDays !== null && workspace.activityDays > 30)) return false;
+      if (cards.has("inactive60") && !(workspace.activityDays !== null && workspace.activityDays > 60)) return false;
+      if (cards.has("inactive90") && !(workspace.activityDays !== null && workspace.activityDays > 90)) return false;
+      if (cards.has("ownerless") && workspace.owners.length) return false;
+      if (cards.has("rcd") && !workspace.rcd) return false;
+      if (cards.has("highExposure") && workspace.exposure !== "High") return false;
+      return true;
+    }
+
+    function exposureRank(value) {
+      return value === "High" ? 3 : value === "Medium" ? 2 : value === "Low" ? 1 : null;
+    }
+
+    function decisionRank(id) {
+      const decision = decisionOf(id).decision;
+      const order = ["Investigate", "Attest", "Keep", "Archive", "No decision"];
+      const index = order.indexOf(decision);
+      return decision === "No decision" ? null : index;
+    }
+
+    function sortValue(workspace, column) {
+      switch (column) {
+        case "activity": return workspace.activityDays;
+        case "channels": return workspace.activeChannels;
+        case "owners": return workspace.owners.length ? workspace.owners.length : null;
+        case "members": return workspace.members;
+        case "exposure": return exposureRank(workspace.exposure);
+        case "rcd": return workspace.rcd ? 1 : 0;
+        case "lifecycle": return workspace.lifecycle ? workspace.lifecycle.toLowerCase() : null;
+        case "decision": return decisionRank(workspace.id);
+        case "name":
+        default: return workspace.name ? workspace.name.toLowerCase() : null;
+      }
+    }
+
+    function sortWorkspaces(list) {
+      const { column, direction } = governanceSort;
+      return list.slice().sort((a, b) => {
+        const va = sortValue(a, column);
+        const vb = sortValue(b, column);
+        const na = va === null || va === undefined || (typeof va === "number" && Number.isNaN(va));
+        const nb = vb === null || vb === undefined || (typeof vb === "number" && Number.isNaN(vb));
+        if (na && nb) return 0;
+        if (na) return 1;   // Unknown / missing values always sort last.
+        if (nb) return -1;
+        if (va < vb) return -1 * direction;
+        if (va > vb) return 1 * direction;
+        return 0;
+      });
+    }
+
+    function filteredGovernanceWorkspaces() {
+      const query = governanceFilters.query.trim().toLowerCase();
+      const filtered = currentWorkspaces().filter(workspace => {
+        const matchesQuery = !query || `${workspace.name} ${workspace.site} ${workspace.owners.join(" ")}`.toLowerCase().includes(query);
+        const bucket = activityBucket(workspace);
+        const matchesAge = !governanceFilters.age.length || governanceFilters.age.includes(bucket);
+        const matchesExposure = !governanceFilters.exposure.length || governanceFilters.exposure.includes(workspace.exposure);
+        const matchesOwnership = governanceFilters.ownership === "all" || (governanceFilters.ownership === "missing" ? !workspace.owners.length : workspace.owners.length > 0);
+        const matchesDecision = governanceFilters.decision === "all" || decisionOf(workspace.id).decision === governanceFilters.decision;
+        return matchesQuery && matchesAge && matchesExposure && matchesOwnership && matchesDecision && matchesCardFilters(workspace);
+      });
+      return sortWorkspaces(filtered);
+    }
+
+    function governanceFiltersActive() {
+      return Boolean(governanceFilters.query.trim()) || governanceFilters.age.length || governanceFilters.exposure.length ||
+        governanceFilters.ownership !== "all" || governanceFilters.decision !== "all" || governanceFilters.cards.size;
+    }
+
+    function clearGovernanceFilters() {
+      governanceFilters = { query: "", age: [], exposure: [], ownership: "all", decision: "all", cards: new Set() };
+    }
+
+    function toggleArrayFilter(key, value) {
+      const arr = governanceFilters[key];
+      const index = arr.indexOf(value);
+      if (index === -1) arr.push(value); else arr.splice(index, 1);
+    }
+
+    function syncSearchFromInput() {
+      const el = document.getElementById("governance-search");
+      if (el) governanceFilters.query = el.value;
+    }
+
+    function exportDecisionsJson() {
+      const payload = { format: "sam-governance-decisions", version: 1, exportedAt: new Date().toISOString(), decisions: governanceDecisions };
+      downloadFile(`governance-decisions-${todayKey()}.json`, JSON.stringify(payload, null, 2), "application/json");
+      showToast("Decisions exported");
+    }
+
+    function exportDecisionsCsv() {
+      const header = ["id", "name", "decision", "assignee", "dueDate", "note", "updatedAt"];
+      const lines = [header.join(",")];
+      currentWorkspaces().forEach(workspace => {
+        const decision = decisionOf(workspace.id);
+        if (decision.decision === "No decision" && !decision.assignee && !decision.dueDate && !decision.note) return;
+        lines.push([workspace.id, workspace.name, decision.decision, decision.assignee, decision.dueDate, decision.note, decision.updatedAt].map(csvCell).join(","));
+      });
+      if (lines.length === 1) { showToast("No decisions to export yet"); return; }
+      downloadFile(`governance-decisions-${todayKey()}.csv`, `\uFEFF${lines.join("\r\n")}`, "text/csv;charset=utf-8");
+      showToast("Decisions exported (CSV)");
+    }
+
+    function renderGovernance() {
+      const filtered = filteredGovernanceWorkspaces();
+      const workspaces = currentWorkspaces();
+      const selected = filtered.find(workspace => workspace.id === selectedWorkspaceId) || filtered[0] || workspaces.find(workspace => workspace.id === selectedWorkspaceId) || workspaces[0];
+      selectedWorkspaceId = selected.id;
+      const inactive30 = workspaces.filter(workspace => workspace.activityDays > 30).length;
+      const inactive60 = workspaces.filter(workspace => workspace.activityDays > 60).length;
+      const inactive90 = workspaces.filter(workspace => workspace.activityDays > 90).length;
+      const ownerless = workspaces.filter(workspace => !workspace.owners.length).length;
+      const highExposure = workspaces.filter(workspace => workspace.exposure === "High").length;
+      const rcdSites = workspaces.filter(workspace => workspace.rcd).length;
+      const rcdGaps = workspaces.length - rcdSites;
+      const cards = governanceFilters.cards;
+
+      const sortHeader = (label, column, extraClass = "") => {
+        const active = governanceSort.column === column;
+        const arrow = active ? (governanceSort.direction === 1 ? "▲" : "▼") : "";
+        return `<th class="${extraClass}"><button type="button" class="sort-th${active ? " active" : ""}" data-sort="${column}" aria-label="Sort by ${escapeHtml(label)}">${escapeHtml(label)}<span class="sort-arrow" aria-hidden="true">${arrow}</span></button></th>`;
+      };
+      const metricCard = (key, eyebrow, value, valueClass, detail) =>
+        `<button type="button" class="metric metric-filter${cards.has(key) ? " active" : ""}" data-card="${key}" aria-pressed="${cards.has(key)}"><div class="eyebrow mono">${eyebrow}</div><div class="metric-value ${valueClass}">${value}</div><div class="metric-detail">${detail}</div></button>`;
+      const chip = (group, value, active) =>
+        `<button type="button" class="filter-chip${active ? " active" : ""}" data-${group}-toggle="${escapeHtml(value)}" aria-pressed="${active}">${escapeHtml(value)}</button>`;
+
+      const decisionCounts = DECISION_OPTIONS.reduce((acc, opt) => (acc[opt] = 0, acc), {});
+      workspaces.forEach(workspace => { decisionCounts[decisionOf(workspace.id).decision]++; });
+
+      const rows = filtered.length ? filtered.map(workspace => {
+        const bucket = activityBucket(workspace);
+        const ageTone = workspace.activityDays === null ? "muted" : workspace.activityDays > 90 ? "danger" : workspace.activityDays > 30 ? "warning" : "success";
+        const exposureTone = workspace.exposure === "High" ? "danger" : workspace.exposure === "Medium" ? "warning" : workspace.exposure === "Low" ? "success" : "muted";
+        const dec = decisionOf(workspace.id);
+        return `<tr data-workspace-id="${workspace.id}" class="${workspace.id === selected.id ? "selected" : ""}" tabindex="0" aria-label="View ${escapeHtml(workspace.name)} details">
+          <td class="workspace-name">${escapeHtml(workspace.name)}<span>${escapeHtml(workspace.type)}</span></td>
+          <td>${governanceStatusPill(bucket, ageTone)}</td>
+          <td>${workspace.activeChannels === null ? "Unknown" : `${workspace.activeChannels} / ${workspace.channelCount}`}</td>
+          <td>${workspace.owners.length ? escapeHtml(workspace.owners.join(", ")) : governanceStatusPill("No owner", "danger")}</td>
+          <td>${workspace.members} <span class="mono">+${workspace.guests} guests</span></td>
+          <td>${governanceStatusPill(`${workspace.exposure}${workspace.exposureCount ? ` · ${workspace.exposureCount}` : ""}`, exposureTone)}</td>
+          <td>${governanceStatusPill(workspace.rcd ? "Applied" : "Not applied", workspace.rcd ? "success" : "muted")}</td>
+          <td>${escapeHtml(workspace.lifecycle)}</td>
+          <td>${governanceStatusPill(dec.decision, DECISION_TONE[dec.decision])}</td>
+        </tr>`;
+      }).join("") : `<tr><td colspan="9"><div class="empty-state">No workspaces match these filters.</div></td></tr>`;
+
+      const findings = selected.findings.length ? `<ul class="finding-list">${selected.findings.map(finding => `<li>${escapeHtml(finding)}</li>`).join("")}</ul>` : `<p class="detail-note">No exposure indicators in this record.</p>`;
+      const meta = governanceSourceMeta();
+      const isSample = governanceState.source === "sample";
+      const recordLabel = governanceState.source === "backend" ? "Tenant workspace record" : governanceState.source === "manual" ? "Imported workspace record" : "Sample workspace record";
+      const warningsHtml = governanceState.warnings && governanceState.warnings.length ? `<section class="source-banner" aria-label="Collector warnings"><strong>Collector warnings</strong><span>${escapeHtml(governanceState.warnings.join(" · "))}</span><span class="mono">PARTIAL DATA</span></section>` : "";
+
+      const tipsDismissed = localStorage.getItem(GOVERNANCE_TIPS_KEY) === "1";
+      const tipButtons = [
+        ownerless ? `<button type="button" class="tip-btn" data-card="ownerless">${ownerless} without an owner</button>` : "",
+        inactive90 ? `<button type="button" class="tip-btn" data-card="inactive90">${inactive90} inactive 90+ days</button>` : "",
+        highExposure ? `<button type="button" class="tip-btn" data-card="highExposure">${highExposure} high exposure</button>` : "",
+        rcdGaps ? `<button type="button" class="tip-btn" data-card="rcd">${rcdGaps} without RCD coverage</button>` : ""
+      ].filter(Boolean).join("");
+      const tipsHtml = tipsDismissed || !tipButtons ? "" : `<section class="governance-tips" aria-label="Where to start">
+        <div class="tips-head"><strong>Where to start</strong><button type="button" class="tips-dismiss mono" data-action="governance-dismiss-tips" aria-label="Dismiss guidance">Dismiss</button></div>
+        <p class="detail-note">Advisory guidance, not a compliance guarantee. Review ownerless workspaces first, then long-inactive ones, then high-exposure and RCD gaps — record a decision as you go.</p>
+        <div class="tips-actions">${tipButtons}</div>
+      </section>`;
+
+      const dec = decisionOf(selected.id);
+      const decisionEditor = `<section class="detail-section decision-editor"><h4>Disposition</h4>
+        <label class="decision-field">Decision<select data-decision-select>${DECISION_OPTIONS.map(opt => `<option value="${opt}"${dec.decision === opt ? " selected" : ""}>${opt}</option>`).join("")}</select></label>
+        <label class="decision-field">Decision owner<input type="text" data-decision-field="assignee" value="${escapeHtml(dec.assignee)}" placeholder="Who is accountable"></label>
+        <label class="decision-field">Target date<input type="date" data-decision-field="dueDate" value="${escapeHtml(dec.dueDate)}"></label>
+        <label class="decision-field">Note<textarea data-decision-field="note" rows="2" placeholder="Context or rationale">${escapeHtml(dec.note)}</textarea></label>
+        ${dec.updatedAt ? `<p class="detail-note mono">Recorded ${escapeHtml(new Date(dec.updatedAt).toLocaleString())}</p>` : ""}
+        <p class="detail-note">Records your decision only. No change is made in the tenant.</p></section>`;
+
+      document.getElementById("governance-view").innerHTML = `
+        <header class="governance-heading"><div><h2>Tenant governance</h2><p>Prioritize inactive workspaces, ownership gaps, membership review, SharePoint exposure indicators, and Restricted Content Discovery coverage.</p></div><span class="${meta.badgeClass} mono">${escapeHtml(meta.badge)}</span></header>
+        <section class="source-banner" aria-label="Data source status"><strong>${escapeHtml(meta.title)}</strong><span>${escapeHtml(meta.detail)}</span><span class="mono">${escapeHtml(meta.note)}</span></section>
+        ${warningsHtml}
+        ${tipsHtml}
+        <section class="governance-data-actions" aria-label="Data source controls">
+          <button class="command-btn mono" type="button" data-action="governance-import">Import data</button>
+          <button class="command-btn mono" type="button" data-action="governance-template">Download template</button>
+          <button class="command-btn mono" type="button" data-action="governance-refresh">Retry live connector</button>
+          ${isSample ? "" : `<button class="command-btn mono" type="button" data-action="governance-use-sample">Use sample data</button>`}
+        </section>
+        <section class="metric-grid governance-metrics" aria-label="Tenant governance metrics">
+          <div class="metric"><div class="eyebrow mono">Workspaces</div><div class="metric-value">${workspaces.length}</div><div class="metric-detail">Teams in inventory</div></div>
+          ${metricCard("inactive30", "Inactive 30+", inactive30, "warning", "Includes 60- and 90-day aging")}
+          ${metricCard("inactive60", "Inactive 60+", inactive60, "warning", "Owner attestation priority")}
+          ${metricCard("inactive90", "Inactive 90+", inactive90, inactive90 ? "danger" : "", "Archive review candidates")}
+          ${metricCard("ownerless", "Accountability", ownerless, ownerless ? "danger" : "", "Workspace without an owner")}
+          ${metricCard("rcd", "RCD coverage", `${rcdSites}<span class="mono"> / ${workspaces.length}</span>`, "", `Separate from ${highExposure} high exposure records`)}
+        </section>
+        <section class="governance-toolbar" aria-label="Inventory filters">
+          <label class="toolbar-search">Search<input id="governance-search" value="${escapeHtml(governanceFilters.query)}" placeholder="Team, owner, or site"></label>
+          <button class="command-btn mono" type="button" data-action="apply-governance-filters">Apply</button>
+          <div class="filter-group"><span class="filter-label mono">Activity</span>${["Active <30 days", "31–60 days", "61–90 days", "90+ days", "Unknown"].map(value => chip("age", value, governanceFilters.age.includes(value))).join("")}</div>
+          <div class="filter-group"><span class="filter-label mono">Exposure</span>${["High", "Medium", "Low", "Unknown"].map(value => chip("exposure", value, governanceFilters.exposure.includes(value))).join("")}</div>
+          <label class="filter-select">Ownership<select id="governance-ownership"><option value="all">All ownership</option><option value="assigned"${governanceFilters.ownership === "assigned" ? " selected" : ""}>Owner assigned</option><option value="missing"${governanceFilters.ownership === "missing" ? " selected" : ""}>No owner</option></select></label>
+          ${governanceFiltersActive() ? `<button class="command-btn mono ghost" type="button" data-action="governance-clear-filters">Clear filters</button>` : ""}
+        </section>
+        <section class="decision-strip" aria-label="Decisions">
+          <div class="decision-strip-filters"><span class="filter-label mono">Decisions</span>${DECISION_OPTIONS.map(opt => `<button type="button" class="decision-chip tone-${DECISION_TONE[opt]}${governanceFilters.decision === opt ? " active" : ""}" data-decision-filter="${escapeHtml(opt)}" aria-pressed="${governanceFilters.decision === opt}">${escapeHtml(opt)} · ${decisionCounts[opt]}</button>`).join("")}</div>
+          <div class="decision-strip-actions"><button class="command-btn mono" type="button" data-action="governance-export-decisions">Export decisions</button><button class="command-btn mono" type="button" data-action="governance-export-decisions-csv">CSV</button><button class="command-btn mono" type="button" data-action="governance-import-decisions">Import</button></div>
+        </section>
+        <div class="governance-grid">
+          <section class="inventory-panel"><header class="inventory-header"><div><h3>Teams and connected sites</h3><p>Team activity and membership correlated with SharePoint-backed content.</p></div><span class="inventory-count mono">${filtered.length} OF ${workspaces.length}</span></header>
+            <div class="table-scroll"><table class="inventory-table"><thead><tr>${sortHeader("Workspace", "name")}${sortHeader("Activity", "activity")}${sortHeader("Active channels", "channels")}${sortHeader("Owners", "owners")}${sortHeader("Members", "members")}${sortHeader("Exposure", "exposure")}${sortHeader("RCD", "rcd")}${sortHeader("Lifecycle", "lifecycle")}${sortHeader("Decision", "decision")}</tr></thead><tbody>${rows}</tbody></table></div>
+          </section>
+          <aside class="workspace-detail" aria-label="Selected workspace details">
+            <header class="workspace-detail-header"><h3>${escapeHtml(selected.name)}</h3><p>${escapeHtml(selected.type)} · ${escapeHtml(recordLabel)}</p></header>
+            ${decisionEditor}
+            <section class="detail-section"><h4>Accountability</h4><dl class="detail-list"><div class="detail-row"><dt>Owners</dt><dd>${selected.owners.length ? escapeHtml(selected.owners.join(", ")) : governanceStatusPill("Owner required", "danger")}</dd></div><div class="detail-row"><dt>Membership</dt><dd>${selected.members} members · ${selected.guests} guests</dd></div><div class="detail-row"><dt>Lifecycle</dt><dd>${escapeHtml(selected.lifecycle)}</dd></div></dl></section>
+            <section class="detail-section"><h4>Activity and content</h4><dl class="detail-list"><div class="detail-row"><dt>Last activity</dt><dd>${selected.activityDays === null ? "Unknown" : `${selected.activityDays} days ago`}</dd></div><div class="detail-row"><dt>Channels</dt><dd>${selected.activeChannels === null ? "Unknown activity" : `${selected.activeChannels} active of ${selected.channelCount}`}</dd></div><div class="detail-row"><dt>SharePoint site</dt><dd class="mono">${escapeHtml(selected.site)}</dd></div><div class="detail-row"><dt>RCD</dt><dd>${selected.rcd ? "Applied" : "Not applied"}</dd></div></dl></section>
+            <section class="detail-section"><h4>Exposure indicators</h4>${findings}</section>
+            <section class="detail-section"><p class="detail-note">RCD limits discovery in organization-wide search and Copilot. It does not change permissions or prove that a site is secure.</p></section>
+          </aside>
+        </div>`;
     }
 
     function setView(view, updateHash = true) {
       activeView = view;
       document.querySelectorAll(".view-tab").forEach(tab => tab.setAttribute("aria-selected", String(tab.dataset.view === view)));
+      document.getElementById("governance-view").hidden = view !== "governance";
       document.getElementById("overview-view").hidden = view !== "overview";
       document.getElementById("tracker-view").hidden = view !== "tracker";
-      if (updateHash) history.replaceState(null, "", view === "overview" ? "#overview" : "#tracker");
+      document.getElementById("overall-tracker").hidden = view !== "tracker";
+      if (updateHash) history.replaceState(null, "", `#${view}`);
+      if (view === "governance") renderGovernance();
       if (view === "overview") renderOverview();
     }
 
@@ -1152,6 +1762,79 @@
           collapsedPhases.clear();
           render();
         }
+        if (action.dataset.action === "apply-governance-filters") {
+          syncSearchFromInput();
+          renderGovernance();
+        }
+        if (action.dataset.action === "governance-clear-filters") {
+          clearGovernanceFilters();
+          renderGovernance();
+        }
+        if (action.dataset.action === "governance-dismiss-tips") {
+          localStorage.setItem(GOVERNANCE_TIPS_KEY, "1");
+          renderGovernance();
+        }
+        if (action.dataset.action === "governance-export-decisions") exportDecisionsJson();
+        if (action.dataset.action === "governance-export-decisions-csv") exportDecisionsCsv();
+        if (action.dataset.action === "governance-import-decisions") document.getElementById("governance-decisions-file").click();
+        if (action.dataset.action === "governance-import") document.getElementById("governance-import-file").click();
+        if (action.dataset.action === "governance-template") downloadGovernanceTemplate();
+        if (action.dataset.action === "governance-use-sample") {
+          useSampleData();
+          renderGovernance();
+          showToast("Showing sample data");
+        }
+        if (action.dataset.action === "governance-refresh") {
+          loadGovernanceData().then(() => {
+            renderGovernance();
+            showToast(governanceState.source === "backend" ? "Connected to tenant collector" : governanceState.source === "manual" ? "Manual import in use" : "No live connector; showing sample data");
+          });
+        }
+        return;
+      }
+
+      const metricCardBtn = event.target.closest("[data-card]");
+      if (metricCardBtn) {
+        syncSearchFromInput();
+        const key = metricCardBtn.dataset.card;
+        if (governanceFilters.cards.has(key)) governanceFilters.cards.delete(key);
+        else governanceFilters.cards.add(key);
+        renderGovernance();
+        return;
+      }
+
+      const ageChip = event.target.closest("[data-age-toggle]");
+      if (ageChip) {
+        syncSearchFromInput();
+        toggleArrayFilter("age", ageChip.dataset.ageToggle);
+        renderGovernance();
+        return;
+      }
+
+      const exposureChip = event.target.closest("[data-exposure-toggle]");
+      if (exposureChip) {
+        syncSearchFromInput();
+        toggleArrayFilter("exposure", exposureChip.dataset.exposureToggle);
+        renderGovernance();
+        return;
+      }
+
+      const sortTh = event.target.closest("[data-sort]");
+      if (sortTh) {
+        syncSearchFromInput();
+        const column = sortTh.dataset.sort;
+        if (governanceSort.column === column) governanceSort.direction *= -1;
+        else governanceSort = { column, direction: 1 };
+        renderGovernance();
+        return;
+      }
+
+      const decisionFilter = event.target.closest("[data-decision-filter]");
+      if (decisionFilter) {
+        syncSearchFromInput();
+        const value = decisionFilter.dataset.decisionFilter;
+        governanceFilters.decision = governanceFilters.decision === value ? "all" : value;
+        renderGovernance();
         return;
       }
 
@@ -1187,6 +1870,13 @@
         return;
       }
 
+      const workspaceRow = event.target.closest("[data-workspace-id]");
+      if (workspaceRow) {
+        selectedWorkspaceId = workspaceRow.dataset.workspaceId;
+        renderGovernance();
+        return;
+      }
+
       const statusButton = event.target.closest(".status-btn");
       if (statusButton) {
         const task = statusButton.closest(".task");
@@ -1211,6 +1901,13 @@
     });
 
     document.addEventListener("keydown", event => {
+      const workspaceRow = event.target.closest("[data-workspace-id]");
+      if (workspaceRow && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        selectedWorkspaceId = workspaceRow.dataset.workspaceId;
+        renderGovernance();
+        return;
+      }
       const phaseJump = event.target.closest("[data-jump-phase]");
       if (!phaseJump || (event.key !== "Enter" && event.key !== " ")) return;
       event.preventDefault();
@@ -1218,6 +1915,11 @@
     });
 
     document.addEventListener("input", event => {
+      const decisionField = event.target.closest("[data-decision-field]");
+      if (decisionField) {
+        setDecision(selectedWorkspaceId, { [decisionField.dataset.decisionField]: decisionField.value });
+        return;
+      }
       const field = event.target.closest("input[data-field]");
       if (!field) return;
       const id = field.closest(".task").dataset.id;
@@ -1225,6 +1927,48 @@
       savedState[id].updatedAt = new Date().toISOString();
       saveState();
       if (field.dataset.field === "targetDate") renderOverview();
+    });
+
+    document.addEventListener("change", event => {
+      if (event.target.id === "governance-ownership") {
+        syncSearchFromInput();
+        governanceFilters.ownership = event.target.value;
+        renderGovernance();
+        return;
+      }
+      const decisionSelect = event.target.closest("[data-decision-select]");
+      if (decisionSelect) {
+        setDecision(selectedWorkspaceId, { decision: decisionSelect.value });
+        renderGovernance();
+        showToast(`Decision set to ${decisionSelect.value}`);
+      }
+    });
+
+    document.getElementById("governance-decisions-file").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const parsed = JSON.parse(await file.text());
+        const incoming = parsed && parsed.decisions && typeof parsed.decisions === "object" ? parsed.decisions : (parsed && typeof parsed === "object" ? parsed : null);
+        if (!incoming) throw new Error("Unrecognized decisions file");
+        let count = 0;
+        for (const [id, data] of Object.entries(incoming)) {
+          if (!data || typeof data !== "object") continue;
+          setDecision(id, {
+            decision: DECISION_OPTIONS.includes(data.decision) ? data.decision : "No decision",
+            assignee: String(data.assignee || ""),
+            dueDate: /^\d{4}-\d{2}-\d{2}$/.test(data.dueDate || "") ? data.dueDate : "",
+            note: String(data.note || "")
+          });
+          count++;
+        }
+        renderGovernance();
+        showToast(`Imported ${count} decision${count === 1 ? "" : "s"}`);
+      } catch (error) {
+        window.alert(`Could not import decisions: ${error.message}`);
+      } finally {
+        event.target.value = "";
+      }
     });
 
     document.getElementById("import-file").addEventListener("change", async event => {
@@ -1246,6 +1990,21 @@
         showToast("JSON backup restored");
       } catch (error) {
         window.alert(`Could not restore backup: ${error.message}`);
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    document.getElementById("governance-import-file").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const parsed = parseGovernancePayload(JSON.parse(await file.text()));
+        saveManualImport(parsed);
+        renderGovernance();
+        showToast(`Imported ${parsed.workspaces.length} workspace record${parsed.workspaces.length === 1 ? "" : "s"}`);
+      } catch (error) {
+        window.alert(`Could not import data: ${error.message}`);
       } finally {
         event.target.value = "";
       }
@@ -1282,6 +2041,7 @@
     render();
     setView(activeView, false);
     populateSyncDialog();
+    loadGovernanceData().then(() => { if (activeView === "governance") renderGovernance(); });
     if (location.protocol !== "file:" && syncConfig.clientId && syncConfig.tenant) {
       initializeMsal().then(() => updateSyncButton(syncAccount ? "connected" : "local")).catch(() => updateSyncButton());
     }

@@ -1,0 +1,31 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+
+    "// national cloud": "Set for GCC High. For commercial, use graph.microsoft.com and login.microsoftonline.com.",
+    "GRAPH_BASE_URL": "https://graph.microsoft.us/v1.0",
+    "GRAPH_SCOPE": "https://graph.microsoft.us/.default",
+    "AZURE_AUTHORITY_HOST": "https://login.microsoftonline.us",
+
+    "// tenant": "Customer directory (tenant) ID. Identifier only, not a secret.",
+    "GRAPH_TENANT_ID": "00000000-0000-0000-0000-000000000000",
+
+    "// collector identity": "Client ID of the user-assigned managed identity used by the collector.",
+    "COLLECTOR_CLIENT_ID": "",
+
+    "// scope": "Optional comma-separated Team (group) IDs. Leave EMPTY to enumerate the entire tenant (all Teams-enabled groups).",
+    "PILOT_TEAM_IDS": "",
+
+    "// safety cap": "Max workspaces to collect in one run. 0 = no cap (whole tenant).",
+    "MAX_WORKSPACES": "0",
+
+    "// storage": "Table endpoint for snapshots. For Azure Government use table.core.usgovcloudapi.net.",
+    "STORAGE_TABLE_ENDPOINT": "https://examplegovacct.table.core.usgovcloudapi.net",
+    "STORAGE_TABLE_NAME": "workspaces",
+
+    "// schedule": "NCRONTAB. Default 03:00 daily.",
+    "COLLECTOR_SCHEDULE": "0 0 3 * * *"
+  }
+}

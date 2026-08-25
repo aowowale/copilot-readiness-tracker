@@ -2,6 +2,8 @@
 
 The tracker can remain local, or synchronize all 42 tasks through a Microsoft List. No client secret is used or stored.
 
+> This connection is only for program-task collaboration. It does not retrieve Teams or channel activity, owners, members, SharePoint permissions, exposure findings, or Restricted Content Discovery status. The Tenant governance view remains sample data until a separate read-only backend connector is deployed.
+
 ## 1. Serve the tracker
 
 Cloud sign-in cannot redirect to a `file://` URL. Serve this folder locally:
@@ -32,7 +34,7 @@ For GCC High, create the registration in the government Entra portal and select 
 
 ## 3. Connect the tracker
 
-1. Select **Cloud sync** in the tracker header.
+1. Select **Task sync** in the header.
 2. Choose the Microsoft cloud.
 3. Enter the tenant ID or verified tenant domain.
 4. Enter the application client ID.
@@ -46,5 +48,6 @@ The first sync creates the List, provisions its columns, and uploads missing tas
 - Users need access to the target SharePoint site and permission to use the approved Entra application.
 - Sync is manual so users control when shared changes are exchanged.
 - Local browser storage remains available as an offline working copy.
+- Task sync is not the system of record for tenant inventory, governance cases, approvals, or remediation audit events.
 - Use **Backup JSON** before changing tenants, sites, or List names.
 - The client ID, tenant, site URL, and List name are stored locally. Access tokens are managed by MSAL; no passwords, client secrets, or tokens are written into tracker data or exports.
