@@ -118,6 +118,8 @@ The installer needs both an Azure subscription and a tenant administrator. If di
 
 The dashboard page and the API are served from the same function app, so one sign-in protects both. `AzureWebJobsDisableHomepage=true` lets the dashboard own `/`, while its explicit root-only route cannot intercept `/api/*`. The sign-in client secret is stored as an app setting; rotate it before its one-year expiry (rerun the installer).
 
+If Entra sign-in reaches `/.auth/login/aad/callback` but returns `401`, run `Test-Deployment.ps1 -TenantId <tenant> -SkipCollector`. A failed **Easy Auth client secret is configured** check means the app setting was removed or is empty; rerun the installer to rotate and restore it. If the check passes, sign out through `https://<app-host>/.auth/logout`, then sign in with an account assigned a governance app role in the deployment tenant.
+
 Notifications are recorded but not sent by default (`-NotificationMode dry-run`). To send reminders and escalations by email, add `-EnableExecution -NotificationMode live -NotificationSender <mailbox> [-NotificationOperatorEmail <team mailbox>]`. That grants the executor identity `Mail.Send`, which allows sending as any mailbox until you restrict it: create an Exchange Online application access policy limiting the executor to the sender mailbox. The installer prints this reminder, and sets `APP_URL` so messages link back to the dashboard.
 
 ### 1. Validate the tenant before building

@@ -286,7 +286,11 @@ $apiSp = (Invoke-GraphRest -Method GET -Path "/v1.0/servicePrincipals?`$filter=a
 if (-not $apiSp) { $apiSp = Invoke-WithRetry { Invoke-GraphRest -Method POST -Path '/v1.0/servicePrincipals' -Body @{ appId = $apiClientId } } }
 Invoke-GraphRest -Method PATCH -Path "/v1.0/servicePrincipals/$($apiSp.id)" -Body @{ appRoleAssignmentRequired = $true } | Out-Null
 
-# A fresh sign-in secret each run; the previous one stays valid until it expires or is removed.
+# Keep prior managed credentials until the replacement is deployed, then prune them.
+$previousAuthCredentials = @()
+try {
+    $previousAuthCredentials = @(az ad app credential list --id $apiClientId --output json 2>$null | ConvertFrom-Json | Where-Object { $_.displayName -like 'install-*' -or $_.displayName -like 'samgov-easyauth-*' })
+} catch { }
 $authSecret = Invoke-Az { az ad app credential reset --id $apiClientId --append --display-name "install-$(Get-Date -Format yyyyMMdd-HHmm)" --years 1 --query password --output tsv } 'Create sign-in secret'
 $authSecret = ($authSecret | Out-String).Trim()
 
@@ -327,6 +331,14 @@ $appUrl = $outputs.appUrl.value
 $functionApp = $outputs.functionAppName.value
 $identityPrincipalId = $outputs.collectorIdentityPrincipalId.value
 Write-Host "Deployed $functionApp at $appUrl"
+
+$deployedSettings = Invoke-AzJson { az functionapp config appsettings list --resource-group $ResourceGroup --subscription $SubscriptionId --name $functionApp --output json } 'Verify app settings'
+if (-not ($deployedSettings | Where-Object { $_.name -eq 'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET' -and $_.value })) {
+    throw 'The Easy Auth client secret was not stored in the Function App. Prior credentials were retained.'
+}
+foreach ($credential in $previousAuthCredentials) {
+    Invoke-Az { az ad app credential delete --id $apiClientId --key-id $credential.keyId } "Remove superseded sign-in secret $($credential.keyId)" | Out-Null
+}
 
 # ------------------------------------------------------------------ sign-in redirect, Graph permissions, roles
 Step 'Sign-in redirect and permissions'

@@ -63,11 +63,16 @@ function Call-WithoutRedirect([string]$Path) {
 
 Write-Host "Testing $appUrl`n"
 
-# 1. The platform must refuse anonymous requests.
+# 1. Easy Auth must have its confidential-client credential.
+$appSettings = az functionapp config appsettings list --resource-group $state.resourceGroup --name $state.functionApp --subscription $state.subscriptionId --output json 2>$null | ConvertFrom-Json
+$authSecretConfigured = [bool]($appSettings | Where-Object { $_.name -eq 'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET' -and $_.value })
+Record 'Easy Auth client secret is configured' $authSecretConfigured $(if (-not $authSecretConfigured) { 'browser sign-in callbacks will return 401; rerun Install-Governance.ps1 to rotate and restore the credential' })
+
+# 2. The platform must refuse anonymous requests.
 $anonymous = Call-WithoutRedirect '/api/policies'
 Record 'Anonymous requests are refused' ($anonymous.Status -in 301, 302, 401, 403) "status $($anonymous.Status)"
 
-# 2. Token for the signed-in user.
+# 3. Token for the signed-in user.
 $token = $null
 try {
     $token = (az account get-access-token --tenant $TenantId --scope "api://$($state.apiClientId)/user_impersonation" --query accessToken --output tsv 2>&1 | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] }) -join ''
@@ -80,7 +85,7 @@ $claims = Read-JwtPayload $token
 Record 'Token carries a governance app role' ([bool]($claims.roles | Where-Object { $_ -like 'Governance.*' -or $_ -in 'Approver', 'Executor', 'Auditor' })) "roles: $($claims.roles -join ', ')"
 $auth = @{ Authorization = "Bearer $token" }
 
-# 3. Every read route.
+# 4. Every read route.
 $routes = '/api/policies', '/api/workspaces', '/api/findings', '/api/cases', '/api/exceptions', '/api/decisions', '/api/posture', '/api/sources', '/api/owner/tasks?scope=all'
 foreach ($route in $routes) {
     $response = Call $route $auth
@@ -93,7 +98,7 @@ Record 'Dashboard page is served' ($page.Status -eq 200 -and $page.Body -match '
 $missing = Call '/api/does-not-exist' $auth
 Record 'Unknown API route returns 404, not the page' ($missing.Status -eq 404) "status $($missing.Status)"
 
-# 4. A real collector run.
+# 5. A real collector run.
 if (-not $SkipCollector) {
     Write-Host "`nTriggering one collector run (reads the tenant, read-only)..."
     $startedAt = (Get-Date).ToUniversalTime()
