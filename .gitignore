@@ -1,1 +1,5 @@
 artifacts/
+backend/node_modules/
+backend/local.settings.json
+backend/public/
+.install/

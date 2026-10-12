@@ -128,10 +128,114 @@
     .sync-dot { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: var(--cp-border-strong); }
     .sync-btn.connected .sync-dot { background: var(--cp-success); }
     .sync-btn.syncing .sync-dot { background: var(--cp-warning); }
-    .view-switcher { display: flex; gap: 8px; max-width: 1540px; margin: 0 auto; padding: 18px clamp(20px, 3vw, 48px) 0; }
+    .view-switcher { display: flex; flex-wrap: wrap; gap: 8px; max-width: 1540px; margin: 0 auto; padding: 18px clamp(20px, 3vw, 48px) 0; }
     .view-tab { min-height: 38px; padding: 0 16px; font-size: 12px; }
     .view-tab[aria-selected="true"] { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); }
     .view-panel[hidden] { display: none; }
+    .governance-cases { max-width: 1440px; margin: 0 auto; padding: 24px 28px 64px; }
+    .governance-cases-header { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin-bottom: 18px; }
+    .governance-cases-header h2 { margin: 0; }
+    .governance-cases-header p { margin: 5px 0 0; color: var(--cp-text-muted); }
+    .case-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr); gap: 16px; }
+    .case-panel { background: var(--cp-surface); border: 1px solid var(--cp-border); box-shadow: 0 1px 2px var(--cp-border); min-width: 0; }
+    .case-panel-header { padding: 16px 18px; border-bottom: 1px solid var(--cp-border); }
+    .case-panel-header h3 { margin: 0; font-size: 16px; }
+    .case-panel-header p { margin: 4px 0 0; color: var(--cp-text-muted); font-size: 12px; }
+    .case-table { width: 100%; border-collapse: collapse; }
+    .case-table th, .case-table td { padding: 11px 14px; border-bottom: 1px solid var(--cp-border); text-align: left; font-size: 12px; }
+    .case-table th { color: var(--cp-text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+    .case-table tbody tr { cursor: pointer; }
+    .case-table tbody tr:hover, .case-table tbody tr[aria-selected="true"] { background: var(--cp-accent-soft); }
+    .case-status { display: inline-block; padding: 3px 7px; border: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 10px; text-transform: uppercase; }
+    .case-status.approved { color: var(--cp-success); border-color: var(--cp-success); }
+    .case-status.failed, .case-status.expired { color: var(--cp-danger); border-color: var(--cp-danger); }
+    .case-status.proposed, .case-status.pending { color: var(--cp-warning); border-color: var(--cp-warning); }
+    .case-detail { padding: 18px; }
+    .case-detail h3 { margin: 0 0 5px; }
+    .case-detail p { color: var(--cp-text-muted); font-size: 12px; }
+    .case-detail dl { margin: 18px 0; }
+    .case-detail dt { color: var(--cp-text-muted); font-size: 10px; text-transform: uppercase; margin-top: 12px; }
+    .case-detail dd { margin: 3px 0 0; }
+    .case-empty { padding: 22px 18px; color: var(--cp-text-muted); font-size: 13px; }
+    .hub-banner { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text-muted); font-size: 12px; }
+    .hub-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .hub-kpi { padding: 14px 16px; background: var(--cp-surface); border: 1px solid var(--cp-border); }
+    .hub-kpi strong { display: block; font-size: 26px; line-height: 1.1; }
+    .hub-kpi span { color: var(--cp-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+    .hub-section { margin-top: 16px; }
+    .hub-table tbody tr { cursor: default; }
+    .hub-table tbody tr:hover { background: transparent; }
+    .hub-note { margin: 0; padding: 12px 18px; color: var(--cp-text-muted); font-size: 12px; border-top: 1px solid var(--cp-border); }
+    .hub-inputs { margin: 6px 0 0; padding: 0; list-style: none; color: var(--cp-text-muted); font-size: 11px; }
+    .hub-inputs .missing { color: var(--cp-warning); }
+    .hub-steps { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 16px; padding: 0; list-style: none; }
+    .hub-steps li { padding: 4px 9px; border: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 11px; }
+    .hub-steps li[aria-current="step"] { border-color: var(--cp-accent); color: var(--cp-accent); font-weight: 700; }
+    .hub-steps li.done { border-color: var(--cp-success); color: var(--cp-success); }
+    .hub-form { display: grid; gap: 12px; }
+    .hub-form label { display: grid; gap: 5px; color: var(--cp-text-muted); font-size: 12px; }
+    .hub-form label.check { display: flex; gap: 8px; align-items: flex-start; color: var(--cp-text); }
+    .hub-form input[type="text"], .hub-form textarea { padding: 8px 10px; border: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text); font: inherit; }
+    .hub-form .choice { padding: 10px 12px; border: 1px solid var(--cp-border); }
+    .hub-form .choice small { display: block; color: var(--cp-text-muted); }
+    .hub-error { color: var(--cp-danger); font-size: 12px; min-height: 16px; }
+    .triage-toolbar { display: grid; grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(145px, 190px)) auto; gap: 10px; align-items: end; padding: 14px 16px; border-bottom: 1px solid var(--cp-border); }
+    .triage-toolbar label { display: grid; gap: 5px; color: var(--cp-text-muted); font-size: 11px; }
+    .triage-toolbar input, .triage-toolbar select, .triage-reason { min-height: 40px; padding: 8px 10px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); }
+    .triage-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
+    .triage-kpi { padding: 16px 18px; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; }
+    .triage-kpi strong { display: block; font-size: 28px; line-height: 1.15; }
+    .triage-kpi span { color: var(--cp-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+    .triage-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(340px, .8fr); gap: 16px; align-items: start; }
+    .triage-list-panel, .triage-detail-panel { min-width: 0; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; overflow: hidden; }
+    .triage-list-scroll { max-height: min(68vh, 760px); overflow: auto; }
+    .triage-table { min-width: 740px; }
+    .triage-table tr[aria-selected="true"] td:first-child { box-shadow: inset 3px 0 var(--cp-accent); }
+    .triage-table button[data-triage-select] { padding: 0; border: 0; background: none; color: var(--cp-link); text-align: left; font-weight: 650; cursor: pointer; }
+    .triage-table button[data-triage-select]:hover { text-decoration: underline; }
+    .triage-detail { padding: 18px; }
+    .triage-detail h3 { margin: 0; font-size: 20px; }
+    .triage-detail-heading { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .triage-detail-section { padding: 14px 0; border-top: 1px solid var(--cp-border); }
+    .triage-detail-section h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--cp-text-muted); }
+    .triage-detail-section p { margin: 0; font-size: 13px; }
+    .triage-evidence { max-height: 220px; overflow: auto; padding: 12px; border-radius: 0.625rem; background: var(--cp-surface-soft); font: 11px/1.5 Consolas, "Courier New", Courier, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .triage-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .triage-reason { display: block; width: 100%; min-height: 74px; resize: vertical; }
+    .triage-timeline { display: grid; gap: 10px; padding-left: 14px; border-left: 2px solid var(--cp-border); }
+    .triage-timeline-item { position: relative; font-size: 12px; }
+    .triage-timeline-item::before { position: absolute; left: -20px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--cp-accent); content: ""; }
+    .triage-timeline-item small { display: block; color: var(--cp-text-muted); }
+    .triage-filter-count { align-self: center; color: var(--cp-text-muted); font-size: 12px; }
+    .triage-empty { padding: 32px 22px; text-align: center; color: var(--cp-text-muted); }
+    .onedrive-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(340px, .75fr); gap: 16px; align-items: start; }
+    .onedrive-panel { min-width: 0; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; overflow: hidden; }
+    .onedrive-toolbar { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(160px, 200px) auto; gap: 10px; align-items: end; padding: 14px 16px; border-bottom: 1px solid var(--cp-border); }
+    .onedrive-toolbar label { display: grid; gap: 5px; color: var(--cp-text-muted); font-size: 11px; }
+    .onedrive-toolbar input, .onedrive-toolbar select { min-height: 40px; padding: 8px 10px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); }
+    .onedrive-table { min-width: 700px; }
+    .onedrive-list-scroll { max-height: min(68vh, 760px); overflow: auto; }
+    .onedrive-table tr[aria-selected="true"] td:first-child { box-shadow: inset 3px 0 var(--cp-accent); }
+    .onedrive-table button[data-onedrive-select] { padding: 0; border: 0; background: none; color: var(--cp-link); text-align: left; font-weight: 650; cursor: pointer; }
+    .onedrive-detail { padding: 18px; }
+    .onedrive-detail h3 { margin: 0; font-size: 19px; overflow-wrap: anywhere; }
+    .onedrive-facts { display: grid; grid-template-columns: minmax(100px, .7fr) 1.3fr; gap: 9px 14px; margin: 16px 0; font-size: 12px; }
+    .onedrive-facts dt { color: var(--cp-text-muted); }
+    .onedrive-facts dd { margin: 0; overflow-wrap: anywhere; }
+    .onedrive-checks { display: grid; gap: 8px; margin: 12px 0; padding: 0; list-style: none; }
+    .onedrive-checks li { padding: 8px 10px; border-left: 3px solid var(--cp-warning); background: var(--cp-surface-soft); font-size: 12px; }
+    .onedrive-form { display: grid; gap: 12px; }
+    .onedrive-form label { display: grid; gap: 5px; color: var(--cp-text-muted); font-size: 12px; }
+    .onedrive-form select, .onedrive-form textarea { min-height: 40px; padding: 8px 10px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); font: inherit; }
+    .onedrive-form textarea { min-height: 90px; resize: vertical; }
+    .hub-form select, .hub-form input:not([type="checkbox"]):not([type="radio"]) { min-height: 40px; padding: 8px 10px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--cp-link); outline-offset: 2px; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    @media (max-width: 980px) { .onedrive-layout { grid-template-columns: 1fr; } .onedrive-list-scroll { max-height: 52vh; } }
+    @media (max-width: 680px) { .onedrive-toolbar { grid-template-columns: 1fr 1fr; } .onedrive-toolbar label:first-child { grid-column: 1 / -1; } }
+    @media (max-width: 980px) { .triage-layout { grid-template-columns: 1fr; } .triage-list-scroll { max-height: 52vh; } }
+    @media (max-width: 680px) { .triage-toolbar { grid-template-columns: 1fr 1fr; } .triage-toolbar label:first-child { grid-column: 1 / -1; } .triage-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 820px) { .governance-cases { padding: 18px 16px 48px; } .governance-cases-header, .case-layout { display: block; } .case-detail { margin-top: 16px; } }
     .layout {
       display: grid;
       grid-template-columns: 320px minmax(0, 1fr);
@@ -574,11 +678,23 @@
   <nav class="view-switcher" role="tablist" aria-label="Copilot readiness views">
     <button class="view-tab mono" id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-view" data-view="overview">Program plan</button>
     <button class="view-tab mono" id="governance-tab" type="button" role="tab" aria-selected="false" aria-controls="governance-view" data-view="governance">Tenant governance</button>
+    <button class="view-tab mono" id="owner-tab" type="button" role="tab" aria-selected="false" aria-controls="owner-view" data-view="owner">My workspaces</button>
+    <button class="view-tab mono" id="findings-tab" type="button" role="tab" aria-selected="false" aria-controls="findings-view" data-view="findings">Findings</button>
+    <button class="view-tab mono" id="onedrive-tab" type="button" role="tab" aria-selected="false" aria-controls="onedrive-view" data-view="onedrive">OneDrive</button>
+    <button class="view-tab mono" id="posture-tab" type="button" role="tab" aria-selected="false" aria-controls="posture-view" data-view="posture">Posture</button>
+    <button class="view-tab mono" id="requests-tab" type="button" role="tab" aria-selected="false" aria-controls="requests-view" data-view="requests">Requests</button>
+    <button class="view-tab mono" id="ai-tab" type="button" role="tab" aria-selected="false" aria-controls="ai-view" data-view="ai">AI and agents</button>
     <button class="view-tab mono" id="tracker-tab" type="button" role="tab" aria-selected="false" aria-controls="tracker-view" data-view="tracker">Program tasks</button>
   </nav>
 
   <main class="governance view-panel" id="governance-view" role="tabpanel" aria-labelledby="governance-tab"></main>
   <main class="overview view-panel" id="overview-view" role="tabpanel" aria-labelledby="overview-tab" hidden></main>
+  <main class="governance-cases view-panel" id="owner-view" role="tabpanel" aria-labelledby="owner-tab" hidden></main>
+  <main class="governance-cases view-panel" id="findings-view" role="tabpanel" aria-labelledby="findings-tab" hidden></main>
+  <main class="governance-cases view-panel" id="onedrive-view" role="tabpanel" aria-labelledby="onedrive-tab" hidden></main>
+  <main class="governance-cases view-panel" id="posture-view" role="tabpanel" aria-labelledby="posture-tab" hidden></main>
+  <main class="governance-cases view-panel" id="requests-view" role="tabpanel" aria-labelledby="requests-tab" hidden></main>
+  <main class="governance-cases view-panel" id="ai-view" role="tabpanel" aria-labelledby="ai-tab" hidden></main>
   <input id="import-file" type="file" accept="application/json,.json" hidden>
   <input id="governance-import-file" type="file" accept="application/json,.json" hidden>
   <input id="governance-decisions-file" type="file" accept="application/json,.json" hidden>
@@ -610,6 +726,8 @@
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="sync-dialog" id="wizard-dialog" aria-labelledby="wizard-title"></dialog>
 
   <dialog class="sync-dialog" id="sync-dialog">
     <form id="sync-form" method="dialog">
@@ -829,7 +947,7 @@
     let syncAccount = null;
     const collapsedPhases = new Set();
     let syncInProgress = false;
-    let activeView = location.hash === "#tracker" || location.hash.startsWith("#phase-") ? "tracker" : location.hash === "#governance" ? "governance" : "overview";
+    let activeView = location.hash === "#tracker" || location.hash.startsWith("#phase-") ? "tracker" : location.hash === "#governance" ? "governance" : location.hash === "#owner" ? "owner" : location.hash === "#findings" ? "findings" : location.hash === "#onedrive" ? "onedrive" : location.hash === "#posture" ? "posture" : location.hash === "#requests" ? "requests" : location.hash === "#ai" ? "ai" : "overview";
     let governanceFilters = { query: "", age: [], exposure: [], ownership: "all", decision: "all", cards: new Set() };
     let governanceSort = { column: "name", direction: 1 };
     let architectureBriefingOpen = false;
@@ -1656,15 +1774,1559 @@
         </div>`;
     }
 
+
+    function formatCaseDate(value) {
+      if (!value) return "Unknown";
+      const date = new Date(value);
+      return Number.isNaN(date.valueOf()) ? String(value) : date.toLocaleDateString();
+    }
+
+    const sampleTriage = {
+      findings: [
+        { findingId: "team-002-workspace-owner-minimum-two", resourceId: "team-002", resourceName: "Facilities Projects", resourceType: "Private team", policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", category: "ownership", severity: "high", complianceStatus: "attention", observed: "1 owner", expected: "Two or more active owners", rationale: "A second owner prevents abandoned workspaces and keeps business decisions with the people closest to the work.", recommendedAction: "Assign and validate at least two active business owners.", evidence: { ownerCount: 1, owners: ["Pradeep Gupta"] }, firstDetectedAt: "2026-10-01T03:00:00Z", lastDetectedAt: "2026-10-09T03:00:00Z", dueAt: "2026-10-15T03:00:00Z", status: "active" },
+        { findingId: "team-004-workspace-owner-minimum-two", resourceId: "team-004", resourceName: "Legacy Intranet Working Group", resourceType: "Private team", policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", category: "ownership", severity: "high", complianceStatus: "attention", observed: "0 owners", expected: "Two or more active owners", rationale: "An ownerless workspace has no accountable decision maker.", recommendedAction: "Assign and validate at least two active business owners.", evidence: { ownerCount: 0, owners: [] }, firstDetectedAt: "2026-10-02T03:00:00Z", lastDetectedAt: "2026-10-09T03:00:00Z", dueAt: "2026-10-16T03:00:00Z", status: "active" },
+        { findingId: "team-004-workspace-activity-source-available", resourceId: "team-004", resourceName: "Legacy Intranet Working Group", resourceType: "Private team", policyId: "workspace-activity-source-available", title: "Activity evidence is available", category: "activity", severity: "informational", complianceStatus: "unknown", observed: "Activity source unavailable", expected: "A sourced activity age and active-channel count", rationale: "Missing activity data must not be interpreted as inactivity.", recommendedAction: "Connect or refresh the tenant-approved activity source.", evidence: { activityDays: null, activeChannels: null }, firstDetectedAt: "2026-10-02T03:00:00Z", lastDetectedAt: "2026-10-09T03:00:00Z", dueAt: null, status: "active" }
+      ],
+      cases: [
+        { caseId: "finding-team-002-workspace-owner-minimum-two", findingId: "team-002-workspace-owner-minimum-two", resourceId: "team-002", resourceName: "Facilities Projects", policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", severity: "high", recommendedAction: "Assign and validate at least two active business owners.", rationale: "A second owner prevents abandoned workspaces and keeps business decisions with the people closest to the work.", dueAt: "2026-10-15T03:00:00Z", detectedAt: "2026-10-01T03:00:00Z", status: "awaiting-owner", version: 3, availableTransitions: ["request-approval", "grant-exception", "cancel"] },
+        { caseId: "finding-team-004-workspace-owner-minimum-two", findingId: "team-004-workspace-owner-minimum-two", resourceId: "team-004", resourceName: "Legacy Intranet Working Group", policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", severity: "high", recommendedAction: "Assign and validate at least two active business owners.", rationale: "An ownerless workspace has no accountable decision maker.", dueAt: "2026-10-16T03:00:00Z", detectedAt: "2026-10-02T03:00:00Z", status: "detected", version: 0, availableTransitions: ["triage", "cancel"] }
+      ]
+    };
+
+    function triageItems() {
+      const casesByFinding = new Map(triageData.cases.filter(item => item.findingId).map(item => [item.findingId, item]));
+      const seen = new Set();
+      const items = triageData.findings.map(finding => {
+        const caseRecord = casesByFinding.get(finding.findingId) || null;
+        if (caseRecord) seen.add(caseRecord.caseId);
+        return { key: `finding:${finding.findingId}`, finding, caseRecord, status: caseRecord?.status || finding.complianceStatus || finding.status };
+      });
+      for (const caseRecord of triageData.cases) {
+        if (!seen.has(caseRecord.caseId)) items.push({ key: `case:${caseRecord.caseId}`, finding: null, caseRecord, status: caseRecord.status });
+      }
+      return items;
+    }
+
+    function filteredTriageItems() {
+      const query = triageFilters.query.trim().toLocaleLowerCase();
+      return triageItems().filter(item => {
+        const f = item.finding || item.caseRecord;
+        const haystack = [f.resourceName, f.title, f.policyId, f.category, item.caseRecord?.caseId, item.status].join(" ").toLocaleLowerCase();
+        const isClosed = ["closed", "cancelled"].includes(item.status);
+        const isOpen = !isClosed;
+        return (!query || haystack.includes(query))
+          && (triageFilters.status === "all" || (triageFilters.status === "open" ? isOpen : triageFilters.status === "unknown" ? item.finding?.complianceStatus === "unknown" : triageFilters.status === "active" ? item.finding?.status === "active" : triageFilters.status === "attention" ? item.finding?.complianceStatus === "attention" : item.status === triageFilters.status))
+          && (triageFilters.severity === "all" || (f.severity || "informational") === triageFilters.severity);
+      }).sort((a, b) => {
+        const rank = { high: 0, medium: 1, low: 2, informational: 3 };
+        const af = a.finding || a.caseRecord, bf = b.finding || b.caseRecord;
+        return (rank[af.severity] ?? 4) - (rank[bf.severity] ?? 4) || String(af.dueAt || "9999").localeCompare(String(bf.dueAt || "9999")) || String(af.resourceName).localeCompare(String(bf.resourceName));
+      });
+    }
+
+    async function loadTriage() {
+      const root = document.getElementById("findings-view");
+      if (!root) return;
+      root.innerHTML = `<div class="triage-empty" role="status">Loading findings and cases…</div>`;
+      try {
+        const [findingPayload, casePayload] = await Promise.all([fetchJson("api/findings?limit=1000"), fetchJson("api/cases?limit=1000")]);
+        triageData = { source: "backend", findings: findingPayload.findings || [], cases: casePayload.cases || [], selectedKey: triageData.selectedKey, detail: null, error: null };
+      } catch {
+        triageData = { source: "sample", ...structuredClone(sampleTriage), selectedKey: triageData.selectedKey, detail: null, error: "Tenant API unavailable" };
+      }
+      renderTriage();
+      const selected = filteredTriageItems().find(item => item.key === triageData.selectedKey) || filteredTriageItems()[0];
+      if (selected) await selectTriageItem(selected.key);
+    }
+
+    async function selectTriageItem(key) {
+      triageData.selectedKey = key;
+      const item = triageItems().find(row => row.key === key);
+      triageData.detail = null;
+      if (item?.caseRecord && triageData.source === "backend") {
+        try { triageData.detail = await fetchJson(`api/cases/${encodeURIComponent(item.caseRecord.caseId)}`); }
+        catch (error) { triageData.error = error.message; }
+      }
+      renderTriage();
+    }
+
+    function triageDetailHtml(item) {
+      if (!item) return `<div class="triage-empty"><strong>Select a finding</strong><p>Review the evidence, linked case and next actions here.</p></div>`;
+      const finding = item.finding || {};
+      const caseRecord = item.caseRecord;
+      const detail = triageData.detail;
+      const transitions = caseRecord?.availableTransitions || [];
+      const actions = caseRecord && triageData.source !== "backend" ? `<section class="triage-detail-section"><h4>Next action</h4><p>Sample mode is read-only. Connect the tenant service to enable audited case actions.</p></section>` : transitions.length ? `<section class="triage-detail-section"><h4>Next action</h4><p>Each change is role-gated, version-checked and written to the audit trail.</p><label class="hub-form" style="margin-top:10px">Reason (optional)<textarea class="triage-reason" id="triage-reason" maxlength="500" placeholder="Add context for the audit record"></textarea></label><div class="triage-actions">${transitions.map(name => `<button class="command-btn ${["approve", "execute", "close"].includes(name) ? "primary" : ""} mono" type="button" data-case-transition="${escapeHtml(name)}">${escapeHtml(name.replaceAll("-", " "))}</button>`).join("")}</div></section>` : caseRecord ? `<section class="triage-detail-section"><h4>Next action</h4><p>No action is available to your current role for this case state.</p></section>` : "";
+      const audit = detail?.auditTrail || [];
+      const timeline = audit.length ? `<div class="triage-timeline">${[...audit].reverse().slice(0, 12).map(event => `<div class="triage-timeline-item"><strong>${escapeHtml((event.transition || event.eventType || "Update").replaceAll("-", " "))}</strong><small>${escapeHtml(event.actorName || event.actorId || "System")} · ${formatCaseDate(event.occurredAt)}${event.reason ? ` · ${escapeHtml(event.reason)}` : ""}</small></div>`).join("")}</div>` : `<p>No case activity has been recorded yet.</p>`;
+      const evidence = finding.evidence || detail?.case?.evidence || null;
+      return `<div class="triage-detail"><div class="triage-detail-heading"><h3>${escapeHtml(finding.resourceName || caseRecord.resourceName || "Governance item")}</h3>${governanceStatusPill(finding.severity || caseRecord.severity || "informational", (finding.severity || caseRecord.severity) === "high" ? "danger" : "muted")}${governanceStatusPill(item.status, ["closed", "approved"].includes(item.status) ? "success" : "warning")}</div>
+        <p style="margin:0 0 14px;color:var(--cp-text-muted)">${escapeHtml(finding.resourceType || "Workspace")} · ${escapeHtml(finding.policyId || caseRecord.policyId || "Policy unavailable")}</p>
+        <section class="triage-detail-section"><h4>Finding</h4><p><strong>${escapeHtml(finding.title || caseRecord.title || "Finding details unavailable")}</strong></p><p style="margin-top:6px">${escapeHtml(finding.observed || "Observed value unavailable")} <span aria-hidden="true">·</span> Expected: ${escapeHtml(finding.expected || "Not specified")}</p></section>
+        <section class="triage-detail-section"><h4>Why this matters</h4><p>${escapeHtml(finding.rationale || caseRecord.rationale || "No rationale was supplied by the policy.")}</p></section>
+        <section class="triage-detail-section"><h4>Recommended next step</h4><p>${escapeHtml(finding.recommendedAction || caseRecord.recommendedAction || "Review the policy and source data.")}</p></section>
+        <section class="triage-detail-section"><h4>Evidence</h4>${evidence ? `<pre class="triage-evidence">${escapeHtml(JSON.stringify(evidence, null, 2))}</pre>` : `<p>Evidence was not attached. Do not interpret missing evidence as compliant.</p>`}</section>
+        <section class="triage-detail-section"><h4>Dates and identifiers</h4><p>First detected ${formatCaseDate(finding.firstDetectedAt || caseRecord.detectedAt)} · Last evaluated ${formatCaseDate(finding.lastDetectedAt || finding.evaluatedAt)} · Due ${formatCaseDate(finding.dueAt || caseRecord.dueAt)}</p><p class="mono" style="margin-top:6px">Finding ${escapeHtml(finding.findingId || caseRecord.findingId || "—")}<br>Case ${escapeHtml(caseRecord?.caseId || "Not eligible for a case")}</p></section>
+        ${caseRecord ? `<section class="triage-detail-section"><h4>Case activity</h4>${timeline}</section>${actions}` : `<section class="triage-detail-section"><h4>Case workflow</h4><p>This finding does not currently qualify for a case. Findings can remain visible without being actionable cases.</p></section>`}
+        ${triageData.error ? `<p class="hub-error" role="status">${escapeHtml(triageData.error)}</p>` : ""}</div>`;
+    }
+
+    function renderTriage() {
+      const root = document.getElementById("findings-view");
+      if (!root) return;
+      const allItems = triageItems();
+      const items = filteredTriageItems();
+      const selected = items.find(item => item.key === triageData.selectedKey) || null;
+      const openCases = triageData.cases.filter(item => !["closed", "cancelled"].includes(item.status)).length;
+      const high = triageData.findings.filter(item => item.severity === "high" && item.status === "active").length;
+      const unknown = triageData.findings.filter(item => item.complianceStatus === "unknown").length;
+      const kpis = [[openCases, "Open cases"], [high, "High severity findings"], [unknown, "Unknown evidence"], [allItems.length, "Total triage items"]].map(([value, label]) => `<div class="triage-kpi"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`).join("");
+      const rows = items.map(item => {
+        const record = item.finding || item.caseRecord;
+        const title = record.title || record.policyId || "Governance case";
+        const severity = record.severity || "informational";
+        return `<tr data-triage-row="${escapeHtml(item.key)}" aria-selected="${String(item.key === triageData.selectedKey)}"><td><button type="button" data-triage-select="${escapeHtml(item.key)}" aria-label="Open ${escapeHtml(record.resourceName || "workspace")}: ${escapeHtml(title)}">${escapeHtml(record.resourceName || "Unknown workspace")}</button><br><span class="mono">${escapeHtml(title)}</span></td><td>${governanceStatusPill(severity, severity === "high" ? "danger" : severity === "medium" ? "warning" : "muted")}</td><td>${governanceStatusPill(item.status, ["closed", "cancelled"].includes(item.status) ? "success" : "warning")}</td><td>${formatCaseDate(record.dueAt)}</td><td>${item.caseRecord ? "Case linked" : "Finding only"}</td></tr>`;
+      }).join("");
+      const source = triageData.source === "backend" ? `${triageData.findings.length} findings · ${triageData.cases.length} cases from the tenant collector` : SAMPLE_LABEL;
+      root.innerHTML = `<header class="governance-cases-header"><div><h2>Findings and cases</h2><p>Prioritize policy issues, inspect source evidence, and move eligible cases through role-gated review.</p></div><button class="command-btn mono" type="button" data-triage-refresh aria-label="Refresh findings and cases">Refresh</button></header>
+        <div class="hub-banner" role="status">${escapeHtml(source)}${triageData.error ? ` · ${escapeHtml(triageData.error)}` : ""}</div><div class="triage-kpis" aria-label="Finding queue summary">${kpis}</div>
+        <section class="case-panel" style="border-radius:16px;overflow:hidden;margin-bottom:16px"><div class="triage-toolbar"><label>Search<input id="triage-search" type="search" aria-label="Search findings and cases" value="${escapeHtml(triageFilters.query)}" placeholder="Workspace, policy, case"></label><label>Case status<select id="triage-status" aria-label="Filter by case state">${[["open", "Open items"], ["all", "All statuses"], ["detected", "Detected"], ["triaged", "Triaged"], ["assigned", "Assigned"], ["awaiting-owner", "Awaiting owner"], ["awaiting-approval", "Awaiting approval"], ["approved", "Approved"], ["executing", "Executing"], ["verifying", "Verifying"], ["failed", "Failed"], ["closed", "Closed"], ["cancelled", "Cancelled"], ["active", "Active findings"], ["attention", "Attention findings"], ["unknown", "Unknown evidence"]].map(([v, label]) => `<option value="${v}"${triageFilters.status === v ? " selected" : ""}>${label}</option>`).join("")}</select></label><label>Severity<select id="triage-severity" aria-label="Filter by severity">${[["all", "All severity"], ["high", "High"], ["medium", "Medium"], ["low", "Low"], ["informational", "Informational"]].map(([v, label]) => `<option value="${v}"${triageFilters.severity === v ? " selected" : ""}>${label}</option>`).join("")}</select></label><span class="triage-filter-count" aria-live="polite">${items.length} of ${allItems.length} items</span></div>
+        <div class="triage-layout"><section class="triage-list-panel" aria-label="Findings and cases"><header class="case-panel-header"><h3>Queue</h3><p>High severity and earliest due dates are shown first.</p></header>${items.length ? `<div class="triage-list-scroll"><table class="case-table triage-table"><thead><tr><th>Workspace and policy</th><th>Severity</th><th>State</th><th>Due</th><th>Workflow</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="triage-empty">No items match these filters. Try another status or search term.</div>`}</section><aside class="triage-detail-panel" aria-label="Selected finding detail">${triageDetailHtml(selected)}</aside></div></section>
+        <p class="hub-note">A finding is evidence from a policy evaluation; a case is a separately audited workflow. Unknown means the source could not establish a fact. This screen never executes tenant changes.</p>`;
+    }
+
+    async function transitionTriageCase(transition) {
+      const item = triageItems().find(row => row.key === triageData.selectedKey);
+      if (!item?.caseRecord || triageData.source !== "backend") return showToast("Case actions are disabled in sample mode.");
+      try {
+        const result = await postJson(`api/cases/${encodeURIComponent(item.caseRecord.caseId)}/transition`, "POST", {
+          transition,
+          expectedVersion: item.caseRecord.version || 0,
+          reason: document.getElementById("triage-reason")?.value.trim() || undefined
+        });
+        showToast(`Case moved to ${result.case.status}`);
+        await loadTriage();
+        await selectTriageItem(`finding:${result.case.findingId}`);
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    document.addEventListener("input", event => {
+      if (event.target.id !== "triage-search") return;
+      const input = event.target;
+      const caret = input.selectionStart;
+      triageFilters.query = input.value;
+      renderTriage();
+      const replacement = document.getElementById("triage-search");
+      replacement?.focus();
+      replacement?.setSelectionRange(caret, caret);
+    });
+
+    document.addEventListener("change", event => {
+      if (event.target.id === "triage-status") { triageFilters.status = event.target.value; renderTriage(); }
+      if (event.target.id === "triage-severity") { triageFilters.severity = event.target.value; renderTriage(); }
+    });
+
+    document.addEventListener("click", event => {
+      const select = event.target.closest("[data-triage-select]");
+      if (select) return selectTriageItem(select.dataset.triageSelect);
+      if (event.target.closest("[data-triage-refresh]")) return loadTriage();
+      const action = event.target.closest("[data-case-transition]");
+      if (action) return transitionTriageCase(action.dataset.caseTransition);
+    });
+
+    function oneDriveMatches(site) {
+      const q = oneDriveFilters.query.trim().toLowerCase();
+      const search = [site.title, site.ownerUpn, site.url, site.sharingCapability, ...(site.flags || [])].join(" ").toLowerCase();
+      const external = ["Anyone", "ExternalUserAndGuestSharing", "ExternalUserSharingOnly", "ExistingExternalUserSharingOnly"].includes(site.sharingCapability);
+      const checks = {
+        all: true,
+        unreviewed: !site.review,
+        reviewed: Boolean(site.review),
+        external,
+        stale: site.ageDays !== null && site.ageDays >= 180,
+        ownerUnknown: !site.ownerUpn
+      };
+      return (!q || search.includes(q)) && checks[oneDriveFilters.status];
+    }
+
+    async function loadOneDrive() {
+      const root = document.getElementById("onedrive-view");
+      if (!root) return;
+      root.innerHTML = `<div class="triage-empty" role="status">Loading OneDrive site inventory…</div>`;
+      try {
+        const payload = await fetchJson("api/onedrive");
+        oneDriveData = { ...payload, source: "backend", selectedKey: oneDriveData.selectedKey, error: null };
+      } catch {
+        oneDriveData = { ...structuredClone(sampleOneDrive), selectedKey: oneDriveData.selectedKey, error: "Tenant API unavailable" };
+      }
+      renderOneDrive();
+    }
+
+    async function loadOneDriveSharing(siteKey) {
+      if (oneDriveData.source !== "backend") { showToast("Sample mode. No OneDrive permissions are queried."); return; }
+      const site = oneDriveData.sites.find(item => item.siteKey === siteKey);
+      if (!site) return;
+      oneDriveSharing = { siteKey, loading: true, findings: [], actions: [] };
+      oneDrivePermissionSelection = new Set();
+      renderOneDrive();
+      try {
+        const result = await fetchJson(`api/onedrive/sharing?siteKey=${encodeURIComponent(siteKey)}`);
+        oneDriveSharing = { ...result, siteKey, loading: false };
+      } catch (error) {
+        oneDriveSharing = { siteKey, loading: false, error: error.message, findings: [], actions: [] };
+      }
+      renderOneDrive();
+    }
+
+    async function proposeOneDriveSelected() {
+      const siteKey = oneDriveSharing?.siteKey;
+      if (!siteKey || !oneDrivePermissionSelection.size) return showToast("Select one or more sharing permissions first.");
+      const targets = [...oneDrivePermissionSelection].slice(0, 10).map(key => { const [itemId, permissionId] = key.split("|"); return { itemId, permissionId }; });
+      try {
+        const result = await postJson("api/onedrive/sharing/proposals", "POST", { siteKey, targets, reason: "Owner OneDrive sharing review" });
+        const existing = oneDriveSharing.actions || [];
+        oneDriveSharing = { ...oneDriveSharing, actions: [...existing, ...result.actions], rejected: result.rejected || [], truncated: result.truncated, scannedItems: result.scannedItems };
+        oneDrivePermissionSelection = new Set();
+        showToast(`${result.actions.length} revocation proposal${result.actions.length === 1 ? "" : "s"} created${result.rejected?.length ? ` · ${result.rejected.length} skipped` : ""}`);
+      } catch (error) { showToast(error.message); }
+      renderOneDrive();
+    }
+
+    async function confirmOneDriveRevocation(actionId) {
+      const action = oneDriveSharing?.actions?.find(item => item.actionId === actionId);
+      if (!action) return;
+      const confirmed = window.confirm(oneDriveSharing.executionMode === "live"
+        ? `Revoke ${action.targetDisplayName}? This changes OneDrive sharing.`
+        : `Record a dry-run for ${action.targetDisplayName}? No OneDrive permission will change.`);
+      if (!confirmed) return;
+      try {
+        const result = await postJson(`api/onedrive/sharing/${encodeURIComponent(action.caseId)}/actions/${encodeURIComponent(action.actionId)}/confirm`, "POST", {});
+        Object.assign(action, result.action);
+        showToast(result.action.status === "verified" && result.action.executionStatus === "executed" ? "Permission revoked and verified" : `Action ${result.action.status}`);
+      } catch (error) { showToast(error.message); }
+      await loadOneDriveSharing(action.workspaceId);
+    }
+
+    function oneDriveDetailHtml(site) {
+      if (!site) return `<div class="triage-empty"><strong>Select a personal site</strong><p>Review only verified site-level facts; this tool does not inspect documents.</p></div>`;
+      const flags = site.flags || [];
+      const lastReview = site.review ? `<section class="triage-detail-section"><h4>Last review</h4><p><strong>${escapeHtml(site.review.outcome.replaceAll("-", " "))}</strong> · ${formatCaseDate(site.review.reviewedAt)}</p><p style="margin-top:6px">${escapeHtml(site.review.reason || "No rationale recorded")}</p><p style="margin-top:6px">By ${escapeHtml(site.review.reviewedByName || site.review.reviewedById || "Unknown")}</p></section>` : `<section class="triage-detail-section"><h4>Review state</h4><p>No review has been recorded for this inventory snapshot.</p></section>`;
+      const staleWarning = oneDriveData.stale ? `<div class="hub-banner">This inventory is stale or its timestamp is unavailable. Refresh the admin export before recording a review.</div>` : "";
+      const form = oneDriveData.source === "backend" && !oneDriveData.stale ? `<section class="triage-detail-section"><h4>Record review</h4><p>Available to this OneDrive owner or a governance operator. This records a decision only; it never deletes or changes files.</p><form class="onedrive-form" id="onedrive-review-form"><label>Outcome<select name="outcome"><option value="retain">Retain — no action now</option><option value="owner-follow-up">Owner follow-up needed</option><option value="escalate">Escalate to governance</option></select></label><label>Review rationale<textarea name="reason" minlength="10" maxlength="500" required placeholder="Summarize what was reviewed and why (at least 10 characters)"></textarea></label><button class="command-btn primary mono" type="submit">Save review</button><div class="hub-error" id="onedrive-error" role="alert"></div></form></section>` : `<section class="triage-detail-section"><h4>Record review</h4><p>${oneDriveData.source === "sample" ? "Sample mode is read-only; no review will be saved." : "A fresh inventory is required before recording a review."}</p></section>`;
+      const facts = [["Owner", site.ownerUpn || "Unknown"], ["Last content activity", site.lastActivityAt ? `${formatCaseDate(site.lastActivityAt)}${site.ageDays === null ? "" : ` · ${site.ageDays} days ago`}` : "Unknown"], ["Sharing setting", site.sharingCapability || "Unknown"], ["Storage", site.storageMb === null || site.storageMb === undefined ? "Unknown" : `${Number(site.storageMb).toLocaleString()} MB`], ["Site state", site.lockState || site.status || "Unknown"], ["Exported", formatCaseDate(site.generatedAt || oneDriveData.generatedAt)]];
+      const scan = oneDriveSharing?.siteKey === site.siteKey ? oneDriveSharing : null;
+      const permissionRows = scan?.findings?.map(permission => {
+        const key = `${permission.itemId}|${permission.permissionId}`;
+        const target = permission.kind === "link" ? `${permission.scope || "Sharing"} link · ${permission.type || "access"}` : `Direct access · ${permission.grantedTo || "Unknown person"}`;
+        const status = scan.actions?.find(action => action.itemId === permission.itemId && action.permissionId === permission.permissionId);
+        return `<tr><td><label class="check"><input type="checkbox" data-onedrive-permission="${escapeHtml(key)}"${oneDrivePermissionSelection.has(key) ? " checked" : ""}${status ? " disabled" : ""}> <span>${escapeHtml(target)}</span></label></td><td>${escapeHtml(permission.itemName || "Unknown item")}</td><td>${escapeHtml((permission.roles || []).join(", ") || "Unknown")}</td><td>${status ? `<span class="case-status ${status.status === "verified" ? "approved" : status.status === "failed" ? "failed" : "pending"}">${escapeHtml(status.status)}</span>${["proposed", "failed", "simulated"].includes(status.status) ? ` <button class="command-btn mono" type="button" data-onedrive-confirm="${escapeHtml(status.actionId)}">${scan.executionMode === "live" ? "Confirm" : "Confirm dry run"}</button>` : ""}` : "Select"}</td></tr>`;
+      }).join("") || "";
+      const sharingSection = !scan
+        ? `<section class="triage-detail-section"><h4>Sharing and direct access</h4><p>On-demand file-level scan, limited to 100 items and three folder levels. The scan reads item names and permissions, not file contents.</p><button class="command-btn mono" type="button" data-onedrive-scan="${escapeHtml(site.siteKey)}"${oneDriveData.source !== "backend" || oneDriveData.stale ? " disabled" : ""}>Scan sharing (up to 100 items)</button></section>`
+        : scan.loading ? `<section class="triage-detail-section"><h4>Sharing and direct access</h4><p role="status">Scanning up to 100 items and three folder levels…</p></section>`
+        : scan.error ? `<section class="triage-detail-section"><h4>Sharing and direct access</h4><p class="hub-error" role="alert">${escapeHtml(scan.error)}</p><button class="command-btn mono" type="button" data-onedrive-rescan="${escapeHtml(site.siteKey)}">Retry scan</button></section>`
+        : `<section class="triage-detail-section"><h4>Bounded sharing scan</h4><p>${scan.scannedItems} items scanned · ${scan.findings.length} eligible permissions${scan.truncated ? " · scan truncated; additional items may exist" : " · scan complete"}. Each proposal re-reads the permission before action.</p>${scan.executionMode === "live" ? `<div class="hub-banner">Live mode: confirming a proposal revokes the selected link or direct permission.</div>` : `<div class="hub-banner">Dry run: confirmation records what would be revoked and changes nothing in OneDrive.</div>`}${scan.findings.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Permission</th><th>Item</th><th>Access</th><th>Action</th></tr></thead><tbody>${permissionRows}</tbody></table></div><div class="triage-actions"><button class="command-btn mono" type="button" data-onedrive-propose${oneDrivePermissionSelection.size ? "" : " disabled"}>Preview selected (max 10)</button><button class="command-btn mono" type="button" data-onedrive-rescan="${escapeHtml(site.siteKey)}">Rescan</button></div>` : `<p>No external sharing links or direct grants were found in the scanned items.</p><button class="command-btn mono" type="button" data-onedrive-rescan="${escapeHtml(site.siteKey)}">Rescan</button>`}</section>`;
+      return `<div class="onedrive-detail"><div class="triage-detail-heading"><h3>${escapeHtml(site.title || site.ownerUpn || "OneDrive personal site")}</h3>${governanceStatusPill(site.review ? site.review.outcome.replaceAll("-", " ") : "Not reviewed", site.review ? "success" : "warning")}</div>
+        ${staleWarning}<p style="margin:0 0 10px;color:var(--cp-text-muted);font-size:12px">Personal SharePoint site · metadata only</p><dl class="onedrive-facts">${facts.map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`).join("")}</dl>
+        <section class="triage-detail-section"><h4>Review flags</h4>${flags.length ? `<ul class="onedrive-checks">${flags.map(flag => `<li>${escapeHtml(flag)}</li>`).join("")}</ul>` : `<p>No flags from the available metadata. Unknown source values are not treated as healthy.</p>`}</section>
+        <section class="triage-detail-section"><h4>Personal site</h4><a href="${escapeHtml(site.url)}" target="_blank" rel="noopener">Open in SharePoint</a><p class="mono" style="margin-top:6px;overflow-wrap:anywhere">${escapeHtml(site.url)}</p></section>
+        ${lastReview}${form}${sharingSection}<p class="hub-note" style="padding:12px 0 0">The inventory itself is metadata-only. The optional bounded scan reads item names and sharing permissions to support review; it does not read file contents. Owner access and the reviewer's own access are never targeted.</p></div>`;
+    }
+
+    function renderOneDrive() {
+      const root = document.getElementById("onedrive-view");
+      if (!root) return;
+      const sites = oneDriveData.sites || [];
+      const externalCount = sites.filter(site => ["Anyone", "ExternalUserAndGuestSharing", "ExternalUserSharingOnly", "ExistingExternalUserSharingOnly"].includes(site.sharingCapability)).length;
+      const staleCount = sites.filter(site => site.ageDays !== null && site.ageDays >= 180).length;
+      const unreviewed = sites.filter(site => !site.review).length;
+      const unknown = sites.filter(site => !site.ownerUpn || !site.lastActivityAt || !site.sharingCapability).length;
+      const kpis = [[sites.length, "Personal sites in scope"], [unreviewed, "Not reviewed"], [externalCount, "External sharing enabled"], [unknown, "Missing key facts"]].map(([value, label]) => `<div class="triage-kpi"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`).join("");
+      const filtered = sites.filter(oneDriveMatches).sort((a, b) => (b.flags?.length || 0) - (a.flags?.length || 0) || String(a.title || a.ownerUpn || "").localeCompare(String(b.title || b.ownerUpn || "")));
+      const selected = filtered.find(site => site.siteKey === oneDriveData.selectedKey) || filtered[0] || null;
+      oneDriveData.selectedKey = selected?.siteKey || null;
+      const rows = filtered.map(site => `<tr aria-selected="${String(site.siteKey === oneDriveData.selectedKey)}"><td><button type="button" data-onedrive-select="${escapeHtml(site.siteKey)}">${escapeHtml(site.title || site.ownerUpn || "Unknown owner")}</button><br><span class="mono">${escapeHtml(site.ownerUpn || "Owner unknown")}</span></td><td>${site.ageDays === null ? "Unknown" : `${site.ageDays} days`}</td><td>${escapeHtml(site.sharingCapability || "Unknown")}</td><td>${site.flags?.length ? governanceStatusPill(`${site.flags.length} flag${site.flags.length === 1 ? "" : "s"}`, "warning") : "No known flags"}</td><td>${site.review ? escapeHtml(site.review.outcome.replaceAll("-", " ")) : governanceStatusPill("Not reviewed", "warning")}</td></tr>`).join("");
+      const source = oneDriveData.source === "backend" ? `SharePoint admin export · ${oneDriveData.generatedAt ? new Date(oneDriveData.generatedAt).toLocaleString() : "timestamp unavailable"}${oneDriveData.staleHours === null ? "" : ` · ${oneDriveData.staleHours} hours old`}` : SAMPLE_LABEL;
+      root.innerHTML = `<header class="governance-cases-header"><div><h2>OneDrive review</h2><p>Review personal-site metadata, then optionally scan a bounded set of sharing permissions. File contents are never read.</p></div><button class="command-btn mono" type="button" data-onedrive-refresh>Refresh</button></header>
+        <div class="hub-banner" role="status">${escapeHtml(source)}${oneDriveData.stale ? " · STALE — reviews disabled" : ""}${oneDriveData.error ? ` · ${escapeHtml(oneDriveData.error)}` : ""}</div><div class="triage-kpis">${kpis}</div>
+        <div class="hub-banner">The default inventory uses SharePoint Online admin metadata. An owner-initiated scan can inspect item names and sharing-permission metadata for up to 100 items and three folder levels; it never downloads contents and clearly warns when truncated. ${staleCount} site${staleCount === 1 ? "" : "s"} ${staleCount === 1 ? "shows" : "show"} no activity for 180+ days; missing activity remains Unknown.</div>
+        <div class="onedrive-layout"><section class="onedrive-panel" aria-label="OneDrive personal sites"><div class="onedrive-toolbar"><label>Search<input id="onedrive-search" type="search" value="${escapeHtml(oneDriveFilters.query)}" placeholder="Owner or personal site"></label><label>Filter<select id="onedrive-status">${[["all", "All personal sites"], ["unreviewed", "Not reviewed"], ["reviewed", "Reviewed"], ["external", "External sharing"], ["stale", "180+ days inactive"], ["ownerUnknown", "Owner unknown"]].map(([key, label]) => `<option value="${key}"${oneDriveFilters.status === key ? " selected" : ""}>${label}</option>`).join("")}</select></label><span class="triage-filter-count">${filtered.length} of ${sites.length} sites</span></div>${filtered.length ? `<div class="onedrive-list-scroll"><table class="case-table onedrive-table"><thead><tr><th>Personal site / owner</th><th>Last activity</th><th>Sharing</th><th>Review flags</th><th>Review</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="triage-empty">${sites.length ? "No sites match these filters." : "No OneDrive admin export is available. Run the evidence exporter with OneDrive collection enabled."}</div>`}</section><aside class="onedrive-panel" aria-label="Selected OneDrive review">${oneDriveDetailHtml(selected)}</aside></div>`;
+      const form = document.getElementById("onedrive-review-form");
+      form?.addEventListener("submit", saveOneDriveReview);
+    }
+
+    async function saveOneDriveReview(event) {
+      event.preventDefault();
+      const site = oneDriveData.sites.find(item => item.siteKey === oneDriveData.selectedKey);
+      if (!site || oneDriveData.source !== "backend") return;
+      const form = event.currentTarget;
+      const data = new FormData(form);
+      const reason = String(data.get("reason") || "").trim();
+      const errorHost = document.getElementById("onedrive-error");
+      if (reason.length < 10) { if (errorHost) errorHost.textContent = "Enter at least 10 characters of review rationale."; return; }
+      const button = form.querySelector("button[type=submit]");
+      button.disabled = true;
+      button.textContent = "Saving…";
+      try {
+        await postJson("api/onedrive/review", "POST", { siteKey: site.siteKey, outcome: data.get("outcome"), reason, expectedVersion: site.review?.version || 0 });
+        showToast("OneDrive review recorded");
+        await loadOneDrive();
+      } catch (error) {
+        if (errorHost) errorHost.textContent = error.message;
+        button.disabled = false;
+        button.textContent = "Save review";
+      }
+    }
+
+    document.addEventListener("input", event => {
+      if (event.target.id !== "onedrive-search") return;
+      const caret = event.target.selectionStart;
+      oneDriveFilters.query = event.target.value;
+      renderOneDrive();
+      const input = document.getElementById("onedrive-search");
+      input?.focus(); input?.setSelectionRange(caret, caret);
+    });
+    document.addEventListener("change", event => {
+      if (event.target.id === "onedrive-status") { oneDriveFilters.status = event.target.value; renderOneDrive(); }
+    });
+    document.addEventListener("click", event => {
+      const select = event.target.closest("[data-onedrive-select]");
+      if (select) { oneDriveData.selectedKey = select.dataset.onedriveSelect; oneDriveSharing = null; oneDrivePermissionSelection = new Set(); return renderOneDrive(); }
+      if (event.target.closest("[data-onedrive-refresh]")) return loadOneDrive();
+      const scan = event.target.closest("[data-onedrive-scan], [data-onedrive-rescan]");
+      if (scan) return loadOneDriveSharing(scan.dataset.onedriveScan || scan.dataset.onedriveRescan);
+      if (event.target.closest("[data-onedrive-propose]")) return proposeOneDriveSelected();
+      const confirm = event.target.closest("[data-onedrive-confirm]");
+      if (confirm) return confirmOneDriveRevocation(confirm.dataset.onedriveConfirm);
+    });
+    document.addEventListener("change", event => {
+      const checkbox = event.target.closest("[data-onedrive-permission]");
+      if (!checkbox) return;
+      const key = checkbox.dataset.onedrivePermission;
+      if (checkbox.checked) {
+        if (oneDrivePermissionSelection.size >= 10) { checkbox.checked = false; showToast("Select no more than 10 permissions per preview."); return; }
+        oneDrivePermissionSelection.add(key);
+      } else oneDrivePermissionSelection.delete(key);
+      renderOneDrive();
+    });
+
+
+    // ---- Owner hub and posture (Phase 1, read-only) ------------------------
+    // The dashboard records owner progress and decisions. It never changes the tenant.
+    const SAMPLE_LABEL = "Sanitized pilot fixture — not tenant data. Changes made here are not saved.";
+    const STEP_ORDER = ["contacts", "membership", "permissions", "links", "metadata"];
+    const STEP_LABELS = { contacts: "Contacts", membership: "Membership", permissions: "SharePoint permissions", links: "Sharing links", metadata: "Metadata" };
+    const RISK_TONE = { High: "danger", Medium: "warning", Low: "success", Unknown: "muted" };
+    const sampleOwnerTasks = [
+      { taskId: "team-001-c1", workspaceId: "team-001", workspaceName: "Finance Operations", riskLevel: "High", riskScore: 62, status: "in-progress", steps: { contacts: { done: true } }, currentStep: "membership", dueAt: "2026-10-23T00:00:00Z", escalationLevel: 0, assigneeKind: "owners", overdue: false, version: 1, context: { guests: 2, members: 46, shadowUsers: [{ id: "u-9", name: "Direct Reader" }] } },
+      { taskId: "team-002-c1", workspaceId: "team-002", workspaceName: "Facilities Projects", riskLevel: "Medium", riskScore: 31, status: "open", steps: {}, currentStep: "contacts", dueAt: "2026-09-25T00:00:00Z", escalationLevel: 2, assigneeKind: "owners", overdue: true, version: 0, context: { guests: 0, members: 28, shadowUsers: null } },
+      { taskId: "team-004-c1", workspaceId: "team-004", workspaceName: "Legacy Intranet Working Group", riskLevel: "Unknown", riskScore: null, status: "open", steps: {}, currentStep: "contacts", dueAt: "2026-10-30T00:00:00Z", escalationLevel: 0, assigneeKind: "governance-queue", overdue: false, version: 0, context: { guests: 0, members: 11, shadowUsers: null } },
+      { taskId: "mover-sample-1", taskType: "mover-review", workspaceName: "Access review: Pat Mover", riskLevel: "Unknown", riskScore: null, status: "open", steps: {}, dueAt: "2026-10-23T00:00:00Z", escalationLevel: 0, assigneeKind: "manager", overdue: false, version: 0, itemsSource: "graph", subject: { displayName: "Pat Mover", oldRole: "Sales Analyst", newRole: "Finance Analyst", effectiveAt: "2026-10-01T00:00:00Z" }, items: [
+        { workspaceId: "team-002", workspaceName: "Facilities Projects", access: "member", expected: false, decision: null, reason: null },
+        { workspaceId: "team-own", workspaceName: "Sales Leadership", access: "owner", expected: false, decision: null, reason: null },
+        { workspaceId: "team-001", workspaceName: "Finance Operations", access: "member", expected: true, decision: null, reason: null }
+      ] }
+    ];
+    const sampleNotifications = { mode: "dry-run", notifications: [
+      { event: "assigned", workspaceName: "Finance Operations", recipientName: "Adele Vance", status: "simulated", updatedAt: "2026-10-09T03:00:00Z" },
+      { event: "escalation-2", workspaceName: "Facilities Projects", recipientName: "Pradeep Gupta (manager)", status: "simulated", updatedAt: "2026-10-09T03:00:00Z" },
+      { event: "assigned", workspaceName: "Access review: Pat Mover", recipientName: "Manager", status: "skipped", updatedAt: "2026-10-09T03:00:00Z", detail: "No usable email address for this person." }
+    ] };
+    const sampleDecisionRegister = [
+      { decisionId: "team-005-c1-d6", workspaceName: "Human Resources Leadership", choice: "keep", status: "recorded", decidedByName: "Adele Vance", decidedAt: "2026-10-02T00:00:00Z", executionStatus: "not-executed" },
+      { decisionId: "team-003-c1-d7", taskId: "team-003-c1", workspaceId: "team-003", workspaceName: "Partner Enablement", choice: "delete", status: "pending-approval", decidedBy: "owner-sample", decidedByName: "Pradeep Gupta", decidedAt: "2026-10-08T00:00:00Z", reason: "The partnership ended and the site no longer has a business purpose.", blockers: [], evidence: { legalHold: false, retentionLocked: false }, executionStatus: "not-executed" }
+    ];
+    const samplePosture = {
+      collectedAt: "2026-10-09T03:00:00Z",
+      posture: {
+        discovered: 3, managed: 3, unmanaged: 0, managedPct: 100,
+        policies: [
+          { policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", evaluated: 3, compliant: 1, violating: 2, unknown: 0, notEvaluated: 0, coveragePct: 100, nativeControl: "SharePoint Advanced Management site ownership policy" },
+          { policyId: "workspace-activity-source-available", title: "Activity evidence is available", evaluated: 0, compliant: 0, violating: 0, unknown: 3, notEvaluated: 3, coveragePct: 0, nativeControl: "Tenant-approved Teams activity source" },
+          { policyId: "workspace-exposure-source-available", title: "Exposure evidence is available", evaluated: 0, compliant: 0, violating: 0, unknown: 3, notEvaluated: 3, coveragePct: 0, nativeControl: "SharePoint Data Access Governance" }
+        ],
+        violations: { open: 2, fixed: 1 },
+        topRules: [{ policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", violating: 2 }],
+        riskLevels: { High: 1, Medium: 1, Low: 0, Unknown: 1 }
+      },
+      workspaces: [
+        { id: "team-001", name: "Finance Operations", guests: 2, shadowUsers: { count: 1 }, labels: ["Confidential"], risk: { level: "High", score: 62, missing: ["highRiskObjects"], inputs: [{ label: "Owners", points: 10, max: 25, observed: "1 owner" }, { label: "Exposure", points: 25, max: 25, observed: "High exposure" }, { label: "Guests", points: 5, max: 10, observed: "2 guests" }, { label: "Shadow users", points: 8, max: 15, observed: "1 shadow user" }, { label: "Sensitivity label", points: 0, max: 10, observed: "Confidential" }, { label: "High-risk objects", points: null, max: 15, observed: "Unknown" }] } },
+        { id: "team-002", name: "Facilities Projects", guests: 0, shadowUsers: null, labels: [], risk: { level: "Medium", score: 31, missing: ["shadowUsers", "highRiskObjects"], inputs: [{ label: "Owners", points: 10, max: 25, observed: "1 owner" }, { label: "Exposure", points: 12, max: 25, observed: "Medium exposure" }, { label: "Guests", points: 0, max: 10, observed: "0 guests" }, { label: "Shadow users", points: null, max: 15, observed: "Unknown" }, { label: "Sensitivity label", points: 10, max: 10, observed: "No sensitivity label" }, { label: "High-risk objects", points: null, max: 15, observed: "Unknown" }] } },
+        { id: "team-004", name: "Legacy Intranet Working Group", guests: 0, shadowUsers: null, labels: null, risk: { level: "Unknown", score: null, missing: ["exposure", "shadowUsers", "sensitivityLabel", "highRiskObjects"], inputs: [{ label: "Owners", points: 25, max: 25, observed: "0 owners" }, { label: "Exposure", points: null, max: 25, observed: "Unknown" }, { label: "Guests", points: 0, max: 10, observed: "0 guests" }, { label: "Shadow users", points: null, max: 15, observed: "Unknown" }, { label: "Sensitivity label", points: null, max: 10, observed: "Unknown" }, { label: "High-risk objects", points: null, max: 15, observed: "Unknown" }] } }
+      ],
+      sources: [
+        { source: "graph-teams", status: "ok", finishedAt: "2026-10-09T03:00:00Z", ageHours: 5.2, stale: false, recordsRead: 3, warnings: [], error: null },
+        { source: "owner-tasks", status: "ok", finishedAt: "2026-10-09T03:00:00Z", ageHours: 5.2, stale: false, recordsRead: 3, warnings: [], error: null },
+        { source: "policy-evaluation", status: "ok", finishedAt: "2026-10-09T03:00:00Z", ageHours: 5.2, stale: false, recordsRead: 3, warnings: [], error: null },
+        { source: "site-principals-feed", status: "partial", finishedAt: "2026-10-07T01:00:00Z", ageHours: 52, stale: true, recordsRead: 1, warnings: ["Feed covers 1 of 3 workspaces."], error: null }
+      ]
+    };
+    let ownerHub = { source: "unavailable", tasks: [], decisions: [], actions: [] };
+    const sampleActionHistory = [
+      { actionId: "sample-1", workspaceName: "Vendor Collaboration", targetDisplayName: "Guest Gail (external)", targetUserType: "Guest", actionType: "remove-member", executionMode: "dry-run", status: "simulated", confirmedByName: "Pradeep Gupta", completedAt: "2026-10-05T14:00:00Z" }
+    ];
+    let postureData = { source: "unavailable", collectedAt: null, posture: null, workspaces: [], sources: [], history: null };
+    let baselinePreview = null;
+    let baselineFormState = { workspaceId: "", reason: "" };
+    let triageData = { source: "unavailable", findings: [], cases: [], selectedKey: null, detail: null, error: null };
+    let triageFilters = { query: "", status: "open", severity: "all" };
+    const sampleOneDrive = {
+      source: "sample", generatedAt: "2026-10-09T03:00:00Z", stale: false, staleHours: 5,
+      sites: [
+        { siteKey: "https://contoso-my.sharepoint.com/personal/adele_vance_contoso_com", url: "https://contoso-my.sharepoint.com/personal/adele_vance_contoso_com", title: "Adele Vance", ownerUpn: "adele.vance@example.com", lastActivityAt: "2026-09-28T00:00:00Z", storageMb: 18420, sharingCapability: "ExternalUserAndGuestSharing", lockState: "Unlock", status: "Active", ageDays: 12, flags: ["External sharing enabled"], reviewStatus: "not-reviewed", review: null },
+        { siteKey: "https://contoso-my.sharepoint.com/personal/ben_lee_contoso_com", url: "https://contoso-my.sharepoint.com/personal/ben_lee_contoso_com", title: "Ben Lee", ownerUpn: "ben.lee@example.com", lastActivityAt: "2025-12-10T00:00:00Z", storageMb: 5320, sharingCapability: "Anyone", lockState: "Unlock", status: "Active", ageDays: 304, flags: ["External sharing enabled", "No activity for 180+ days"], reviewStatus: "not-reviewed", review: null },
+        { siteKey: "https://contoso-my.sharepoint.com/personal/casey_park_contoso_com", url: "https://contoso-my.sharepoint.com/personal/casey_park_contoso_com", title: "Casey Park", ownerUpn: null, lastActivityAt: null, storageMb: null, sharingCapability: null, lockState: null, status: "Unknown", ageDays: null, flags: ["Owner unknown"], reviewStatus: "owner-follow-up", review: { outcome: "owner-follow-up", reason: "Resolve the account owner from the approved directory source.", reviewedByName: "Governance operator", reviewedAt: "2026-10-08T00:00:00Z", version: 1 } }
+      ]
+    };
+    let oneDriveData = { source: "unavailable", sites: [], stale: true, generatedAt: null, selectedKey: null, error: null };
+    let oneDriveFilters = { query: "", status: "all" };
+    let oneDriveSharing = null;
+    let oneDrivePermissionSelection = new Set();
+    Object.assign(samplePosture.posture, {
+      stale: { thresholdDays: 180, stale: [{ id: "team-004", name: "Legacy Intranet Working Group", activityDays: 240, owners: [] }], active: 1, unknown: 1 },
+      violationList: [
+        { workspaceId: "team-002", workspaceName: "Facilities Projects", policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", observed: "1 owner", suppression: null },
+        { workspaceId: "team-004", workspaceName: "Legacy Intranet Working Group", policyId: "workspace-owner-minimum-two", title: "At least two workspace owners", observed: "0 owners", suppression: null }
+      ]
+    });
+    Object.assign(samplePosture.workspaces[0], { renewedAt: "2026-07-01T00:00:00Z", expiresAt: "2026-12-28T00:00:00Z" });
+    Object.assign(samplePosture.workspaces[1], { renewedAt: "2026-05-20T00:00:00Z", expiresAt: "2026-11-16T00:00:00Z" });
+    samplePosture.history = {
+      points: [
+        { day: "2026-10-03", discovered: 3, riskLevels: { High: 1, Medium: 1, Low: 0, Unknown: 1 }, exposure: { High: 1, Medium: 1, Low: 0, Unknown: 1 }, openViolations: 3, guests: 3, guestsUnknown: 0 },
+        { day: "2026-10-06", discovered: 3, riskLevels: { High: 1, Medium: 1, Low: 0, Unknown: 1 }, exposure: { High: 1, Medium: 1, Low: 0, Unknown: 1 }, openViolations: 3, guests: 2, guestsUnknown: 0 },
+        { day: "2026-10-09", discovered: 3, riskLevels: { High: 1, Medium: 1, Low: 0, Unknown: 1 }, exposure: { High: 1, Medium: 1, Low: 0, Unknown: 1 }, openViolations: 2, guests: 2, guestsUnknown: 0 }
+      ],
+      summary: { from: "2026-10-03", to: "2026-10-09", changes: { highRisk: 0, highExposure: 0, openViolations: -1, guests: -1 } }
+    };
+    const sampleBaselineData = {
+      source: "sample",
+      baselines: [{ workspaceId: "team-001", workspaceName: "Finance Operations", version: 1, status: "active", reason: "Approved starting state after owner review.", approvedByName: "Adele Vance", approvedAt: "2026-09-15T00:00:00Z", knownFields: ["owners", "guests", "sensitivity label"], unknownFields: ["exposure"] }],
+      alerts: [{ alertId: "team-001-guests", workspaceId: "team-001", workspaceName: "Finance Operations", label: "Guests", field: "guests", from: "1", to: "4", severity: "medium", direction: "worse", status: "open", cycle: 1, version: 2, openedAt: "2026-10-08T03:00:00Z", lastSeenAt: "2026-10-09T03:00:00Z" }],
+      history: []
+    };
+    let wizard = null;
+    let approvalReview = null;
+    let lifecycleReview = null;
+
+    function fetchJson(url) {
+      return fetch(url, { headers: { Accept: "application/json" }, credentials: "same-origin" }).then(response => {
+        if (!response.ok) throw new Error(`${url} returned ${response.status}`);
+        return response.json();
+      });
+    }
+
+    function riskPill(level) { return governanceStatusPill(level || "Unknown", RISK_TONE[level] || "muted"); }
+
+    function statusText(task) {
+      if (task.status === "decided") return "Decided";
+      if (task.status === "pending-approval") return "Awaiting approver";
+      if (task.status === "in-progress") return `In progress · step ${Math.min(STEP_ORDER.filter(step => task.steps?.[step]?.done).length + 1, 5)} of 5`;
+      return "Open";
+    }
+
+    function escalationText(task) {
+      if (!task.escalationLevel) return task.overdue ? "Overdue" : "On time";
+      return ["", "Reminder due", "Manager notified", "Governance queue"][task.escalationLevel] || "Escalated";
+    }
+
+    async function loadOwnerHub() {
+      try {
+        const [tasksPayload, decisionsPayload, actionsPayload] = await Promise.all([
+          fetchJson("api/owner/tasks"),
+          fetchJson("api/decisions").catch(() => ({ decisions: [] })),
+          fetchJson("api/actions").catch(() => ({ actions: [] }))
+        ]);
+        ownerHub = { source: "backend", tasks: Array.isArray(tasksPayload.tasks) ? tasksPayload.tasks : [], decisions: Array.isArray(decisionsPayload.decisions) ? decisionsPayload.decisions : [], actions: Array.isArray(actionsPayload.actions) ? actionsPayload.actions : [] };
+      } catch {
+        if (ownerHub.source !== "sample") ownerHub = { source: "sample", tasks: structuredClone(sampleOwnerTasks), decisions: structuredClone(sampleDecisionRegister), actions: structuredClone(sampleActionHistory) };
+      }
+      if (activeView === "owner") renderOwnerHub();
+    }
+
+    function renderOwnerHub() {
+      const tasks = ownerHub.tasks;
+      const sourceLabel = ownerHub.source === "backend" ? `${tasks.length} task${tasks.length === 1 ? "" : "s"} assigned to you` : ownerHub.source === "sample" ? SAMPLE_LABEL : "Loading";
+      const rows = tasks.map(task => {
+        const closed = task.status === "decided" || task.status === "pending-approval";
+        const assignee = task.assigneeKind === "owners" ? "You (owner)" : task.assigneeKind === "manager" ? (task.taskType === "mover-review" ? "You (manager)" : "Manager") : "Governance queue";
+        return `<tr><td><strong>${escapeHtml(task.workspaceName)}</strong></td><td>${task.taskType === "mover-review" ? "Role change" : riskPill(task.riskLevel)}</td><td>${escapeHtml(statusText(task))}</td><td>${formatCaseDate(task.dueAt)}${task.overdue ? ` ${governanceStatusPill("Overdue", "danger")}` : ""}</td><td>${escapeHtml(escalationText(task))}</td><td>${escapeHtml(assignee)}</td><td>${closed ? "" : `<button class="command-btn mono" type="button" data-open-task="${escapeHtml(task.taskId)}">${task.taskType === "mover-review" ? "Review access" : task.status === "in-progress" ? "Resume review" : "Start review"}</button>`}</td></tr>`;
+      }).join("");
+      const register = ownerHub.decisions.map(item => `<tr><td>${escapeHtml(item.workspaceName || item.workspaceId)}</td><td>${escapeHtml(item.choice)}</td><td><span class="case-status ${item.status === "recorded" || item.status === "approved-not-executed" ? "approved" : item.status === "blocked" || item.status === "rejected" ? "failed" : "pending"}">${escapeHtml(item.status)}</span></td><td>${escapeHtml(item.decidedByName || item.decidedBy || "Unknown")}</td><td>${formatCaseDate(item.decidedAt)}</td><td>${escapeHtml(item.executionStatus || "not-executed")}</td><td>${["archive", "delete"].includes(item.choice) && item.status === "pending-approval" ? `<button class="command-btn mono" type="button" data-approval-review="${escapeHtml(item.decisionId)}">Review ${escapeHtml(item.choice)}</button>` : item.status === "approved-not-executed" && item.availableActions?.length ? `<button class="command-btn mono" type="button" data-lifecycle-execute="${escapeHtml(item.decisionId)}">Execute ${escapeHtml(item.choice)}…</button>` : item.executionStatus === "executed-and-verified" ? governanceStatusPill("Completed + verified", "success") : item.executionStatus === "execution-uncertain" ? governanceStatusPill("Manual reconciliation", "danger") : item.executionStatus === "simulated" ? governanceStatusPill("Dry run · no change", "muted") : item.status === "approved-not-executed" ? "Approved · not executed" : ""}</td></tr>`).join("");
+      const actionRows = ownerHub.actions.map(item => `<tr><td>${escapeHtml(item.workspaceName || item.workspaceId)}</td><td>${escapeHtml(item.targetDisplayName || item.targetUserId)}${item.targetUserType === "Guest" ? ` ${governanceStatusPill("Guest", "warning")}` : ""}</td><td>${escapeHtml(item.actionType)}</td><td>${escapeHtml(item.executionMode || "—")}</td><td><span class="case-status ${item.status === "verified" ? "approved" : item.status === "failed" ? "failed" : "pending"}">${escapeHtml(item.status)}</span></td><td>${escapeHtml(item.confirmedByName || item.confirmedBy || "Not confirmed")}</td><td>${formatCaseDate(item.completedAt || item.requestedAt)}</td></tr>`).join("");
+      document.getElementById("owner-view").innerHTML = `<div class="governance-cases-header"><div><h2>My workspaces</h2><p>Every workspace you are accountable for, with its open review, due date and status.</p></div><span class="case-status proposed">RECORDS DECISIONS ONLY</span></div>
+        <div class="hub-banner">${escapeHtml(sourceLabel)}</div>
+        <section class="case-panel"><header class="case-panel-header"><h3>Open reviews</h3><p>Complete the five steps, then choose keep, archive or delete. If a workspace is not yours, say so and it is reassigned.</p></header>${tasks.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Risk</th><th>Status</th><th>Due</th><th>Escalation</th><th>Assigned to</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="case-empty">${ownerHub.source === "backend" ? "No workspaces are assigned to you." : "Loading your workspaces."}</div>`}<p class="hub-note">Unanswered reviews escalate to your manager and then the governance queue. Non-response never archives or deletes a workspace.</p></section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Decision register</h3><p>Who decided what, when, and whether anything has been executed. A different Approver must review delete requests. Approval still does not delete anything.</p></header>${ownerHub.decisions.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Decision</th><th>Outcome</th><th>Decided by</th><th>When</th><th>Execution</th><th></th></tr></thead><tbody>${register}</tbody></table></div>` : `<div class="case-empty">No decisions recorded yet.</div>`}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Executed actions</h3><p>Every removal an owner confirmed, whether it ran or was a dry run, and whether Microsoft 365 confirmed it. Visible to governance roles.</p></header>${ownerHub.actions.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Person</th><th>Action</th><th>Mode</th><th>Result</th><th>Confirmed by</th><th>When</th></tr></thead><tbody>${actionRows}</tbody></table></div>` : `<div class="case-empty">No removals have been confirmed yet.</div>`}</section>`;
+    }
+
+    function openApprovalReview(decisionId) {
+      const decision = ownerHub.decisions.find(item => item.decisionId === decisionId);
+      if (!decision || decision.status !== "pending-approval") return;
+      approvalReview = decision;
+      const blockers = (decision.blockers || []).length ? `<ul class="hub-inputs">${decision.blockers.map(item => `<li class="missing">${escapeHtml(item)}</li>`).join("")}</ul>` : decision.choice === "delete" ? "Hold and retention were positively clear in the evidence supplied at decision time. The executor checks freshness again." : "No legal hold was reported in the evidence supplied at decision time.";
+      const sample = ownerHub.source === "sample";
+      const choice = decision.choice;
+      document.getElementById("wizard-dialog").innerHTML = `<header class="dialog-header"><div><h2 id="wizard-title">Second approval required</h2><p>${escapeHtml(decision.workspaceName || decision.workspaceId)} · ${escapeHtml(choice)} request</p></div><button class="dialog-close" type="button" data-wizard-close aria-label="Close approval review">×</button></header>
+        <div class="dialog-body">${sample ? `<div class="hub-banner">${escapeHtml(SAMPLE_LABEL)}</div>` : ""}<div class="hub-banner">This is a governance approval, not an execution control. Even an approved ${escapeHtml(choice)} remains “approved · not executed” until a separate Executor confirms it.</div><dl class="detail-list"><div class="detail-row"><dt>Requested by</dt><dd>${escapeHtml(decision.decidedByName || decision.decidedBy || "Unknown")}</dd></div><div class="detail-row"><dt>Reason</dt><dd>${escapeHtml(decision.reason || "No reason supplied")}</dd></div><div class="detail-row"><dt>Evidence</dt><dd>${escapeHtml(JSON.stringify(decision.evidence || {}))}</dd></div><div class="detail-row"><dt>Safety gate</dt><dd>${blockers}</dd></div></dl><label class="hub-form">Review rationale<textarea id="approval-review-reason" rows="3" maxlength="500" placeholder="Record why you approved or rejected"${sample ? " disabled" : ""}></textarea></label><div id="approval-review-error" class="hub-error" role="alert"></div></div>
+        <footer class="dialog-actions"><button class="command-btn mono" type="button" data-wizard-close>Close</button><button class="command-btn mono" type="button" data-approval-outcome="reject"${sample ? " disabled" : ""}>Reject request</button><button class="command-btn primary mono" type="button" data-approval-outcome="approve"${sample ? " disabled" : ""}>Approve · not execute</button></footer>`;
+      const dialog = document.getElementById("wizard-dialog");
+      if (!dialog.open) dialog.showModal();
+    }
+
+    async function submitApprovalReview(outcome) {
+      if (!approvalReview) return;
+      if (ownerHub.source !== "backend") return showToast("Sample mode. Nothing was saved.");
+      const reason = document.getElementById("approval-review-reason")?.value.trim() || "";
+      if (outcome === "reject" && reason.length < 5) {
+        document.getElementById("approval-review-error").textContent = "Give at least 5 characters so the requester knows what to change.";
+        return;
+      }
+      const decisionId = approvalReview.decisionId;
+      const button = document.querySelector(`[data-approval-outcome="${outcome}"]`);
+      if (button) { button.disabled = true; button.textContent = "Recording…"; }
+      try {
+        const result = await postJson(`api/decisions/${encodeURIComponent(decisionId)}/review`, "POST", { outcome, reason });
+        const index = ownerHub.decisions.findIndex(item => item.decisionId === decisionId);
+        if (index >= 0) ownerHub.decisions[index] = result.decision;
+        approvalReview = null;
+        document.getElementById("wizard-dialog").close();
+        showToast(outcome === "approve" ? "Approved; deletion was not executed." : "Delete request rejected.");
+        await loadOwnerHub();
+      } catch (error) {
+        const host = document.getElementById("approval-review-error");
+        if (host) host.textContent = error.message;
+        if (button) { button.disabled = false; button.textContent = outcome === "approve" ? "Approve · not execute" : "Reject request"; }
+      }
+    }
+
+    async function openLifecycleExecution(decisionId) {
+      const decision = ownerHub.decisions.find(item => item.decisionId === decisionId);
+      if (!decision || !decision.availableActions?.length) return showToast("This decision is not available for execution by your current role.");
+      if (ownerHub.source !== "backend") return showToast("Sample mode. No tenant action can run.");
+      let task;
+      let workspace = null;
+      try {
+        const detail = await fetchJson(`api/owner/tasks/${encodeURIComponent(decision.taskId)}`);
+        task = detail.task;
+        workspace = detail.workspace || null;
+      } catch (error) { return showToast(`Could not reload the approved decision: ${error.message}`); }
+      if (task?.decision?.decisionId !== decisionId) return showToast("The approved decision is no longer current. Reload the register.");
+      lifecycleReview = { decision, task, workspace, confirmation: "", error: "" };
+      const verb = decision.choice === "archive" ? "archive this Team" : "soft-delete this Microsoft 365 group";
+      const token = `${decision.choice.toUpperCase()} ${decision.workspaceName || decision.workspaceId}`;
+      const facts = workspace || {};
+      const freshness = facts.evidence?.generatedAt ? `${formatCaseDate(facts.evidence.generatedAt)} · ${Math.max(0, Math.round((Date.now() - new Date(facts.evidence.generatedAt).getTime()) / 3600000))} hours old` : "Unknown";
+      const factValue = value => value === true ? "Applied" : value === false ? "Explicitly clear" : "Unknown";
+      const evidence = decision.choice === "delete"
+        ? `<div class="hub-banner"><strong>Hold / retention preflight (server rechecks):</strong><br>Legal hold: ${factValue(facts.legalHold)}<br>Retention lock: ${factValue(facts.retentionLocked)}<br>Evidence timestamp: ${escapeHtml(freshness)}<br>A stale or unknown value blocks deletion. This is a Microsoft 365 group soft-delete; recovery window and retained data follow tenant policy.</div>`
+        : `<div class="hub-banner"><strong>Archive preflight (server rechecks):</strong><br>Legal hold: ${factValue(facts.legalHold)}<br>Evidence timestamp: ${escapeHtml(freshness)}<br>Archiving restricts Team activity. It does not delete the group or its content.</div>`;
+      const uncertain = decision.executionStatus === "execution-uncertain" ? `<div class="hub-error">This decision has an uncertain prior execution. Do not retry from this screen; reconcile the workspace in Microsoft 365 first.</div>` : "";
+      document.getElementById("wizard-dialog").innerHTML = `<header class="dialog-header"><div><h2 id="wizard-title">Execute approved ${escapeHtml(decision.choice)}</h2><p>${escapeHtml(decision.workspaceName || decision.workspaceId)} · approval by ${escapeHtml(decision.reviewedByName || decision.reviewedBy || "Approver")}</p></div><button class="dialog-close" type="button" data-wizard-close aria-label="Close lifecycle execution">×</button></header>
+        <div class="dialog-body"><div class="hub-banner"><strong>Disruptive tenant action.</strong> Only continue if the approval, scope, and evidence have been rechecked. The server validates role, independent approval, freshness, safety gates, and task version.</div>${evidence}${uncertain}<p>To ${verb}, type exactly:</p><p class="mono"><strong>${escapeHtml(token)}</strong></p><label class="hub-form">Confirmation phrase<input id="lifecycle-confirmation" type="text" autocomplete="off" spellcheck="false" aria-label="Type the exact lifecycle confirmation phrase"${uncertain ? " disabled" : ""}></label><p class="detail-note">Configured mode: the service reports simulation or live. Live requires tenant-admin enablement. A failed verification requires manual reconciliation.</p><div class="hub-error" id="lifecycle-error" role="alert">${escapeHtml(lifecycleReview.error)}</div></div>
+        <footer class="dialog-actions"><button class="command-btn mono" type="button" data-wizard-close>Cancel</button><button class="command-btn primary mono" type="button" data-lifecycle-submit>Continue to server validation</button></footer>`;
+      const dialog = document.getElementById("wizard-dialog");
+      if (!dialog.open) dialog.showModal();
+    }
+
+    async function executeApprovedLifecycle() {
+      if (!lifecycleReview) return;
+      const decision = lifecycleReview.decision;
+      const task = lifecycleReview.task;
+      const confirmation = document.getElementById("lifecycle-confirmation")?.value || "";
+      const button = document.querySelector("[data-lifecycle-submit]");
+      if (button) { button.disabled = true; button.textContent = "Checking approval and evidence…"; }
+      try {
+        const result = await postJson(`api/owner/tasks/${encodeURIComponent(task.taskId)}/decisions/${encodeURIComponent(decision.decisionId)}/execute`, "POST", { expectedVersion: task.version, confirmation });
+        const index = ownerHub.decisions.findIndex(item => item.decisionId === decision.decisionId);
+        if (index >= 0) ownerHub.decisions[index] = result.decision;
+        lifecycleReview = null;
+        document.getElementById("wizard-dialog").close();
+        showToast(result.executionMode === "live" ? `${decision.choice} completed and verified` : `${decision.choice} dry-run recorded; nothing changed`);
+        await loadOwnerHub();
+      } catch (error) {
+        const host = document.getElementById("lifecycle-error");
+        if (host) host.textContent = error.message;
+        if (button) { button.disabled = false; button.textContent = "Continue to server validation"; }
+      }
+    }
+
+    async function openWizard(taskId) {
+      const task = ownerHub.tasks.find(item => item.taskId === taskId);
+      if (!task) return;
+      if (task.taskType === "mover-review") return openMover(task);
+      let context = task.context || null;
+      if (ownerHub.source === "backend") {
+        try {
+          const detail = await fetchJson(`api/owner/tasks/${encodeURIComponent(taskId)}`);
+          context = detail.workspace ? { guests: detail.workspace.guests, members: detail.workspace.members, shadowUsers: detail.workspace.shadowUsers ? detail.workspace.shadowUsers.users : null, risk: detail.workspace.risk || null, metadata: detail.metadata || null } : null;
+        } catch { context = null; }
+      } else if (context && !context.risk) {
+        context = { ...context, risk: samplePosture.workspaces.find(item => item.id === task.workspaceId)?.risk || null };
+      }
+      const next = STEP_ORDER.find(step => !task.steps?.[step]?.done);
+      wizard = { taskId, context, step: next || "submit", error: "" };
+      renderWizard();
+      const dialog = document.getElementById("wizard-dialog");
+      if (!dialog.open) dialog.showModal();
+    }
+
+    function wizardTask() { return ownerHub.tasks.find(item => item.taskId === wizard?.taskId); }
+
+    function stepForm(step, task) {
+      const saved = task.steps?.[step]?.data || (step === "contacts" ? { primary: wizard.context?.metadata?.primaryContact, secondary: wizard.context?.metadata?.secondaryContact } : step === "metadata" ? { description: wizard.context?.metadata?.description, businessPurpose: wizard.context?.metadata?.businessPurpose } : {});
+      const ctx = wizard.context;
+      const check = (name, text) => `<label class="check"><input type="checkbox" data-field="${name}"${saved[name] ? " checked" : ""}> <span>${text}</span></label>`;
+      if (step === "contacts") return `<div class="hub-form"><p>Name a primary and a secondary contact for this workspace.</p><label>Primary contact<input type="text" data-field="primary" maxlength="200" value="${escapeHtml(saved.primary || "")}"></label><label>Secondary contact<input type="text" data-field="secondary" maxlength="200" value="${escapeHtml(saved.secondary || "")}"></label></div>`;
+      if (step === "membership") return `<div class="hub-form"><p>${ctx ? `${escapeHtml(String(ctx.members ?? "Unknown"))} members and ${escapeHtml(String(ctx.guests ?? "Unknown"))} guests.` : "Membership counts are unavailable."} Review who belongs here. You can remove people below.</p><div id="member-review">${memberReviewHtml()}</div>${check("reviewed", "I reviewed the members and guests.")}</div>`;
+      if (step === "permissions") {
+        const shadow = ctx?.shadowUsers;
+        const shadowText = shadow === null || shadow === undefined ? "Shadow users: Unknown. No site-permission source is connected for this workspace." : shadow.length ? `Shadow users (site access without team membership): ${shadow.map(user => escapeHtml(user.name || user.id)).join(", ")}.` : "No shadow users were found.";
+        return `<div class="hub-form"><p>${shadowText}</p>${check("reviewed", "I reviewed SharePoint site permissions.")}${check("shadowUsersAcknowledged", "I acknowledge the shadow-user result above, including Unknown.")}</div>`;
+      }
+      if (step === "links") return `<div class="hub-form"><p>Review sharing links and direct grants to people who are not in the team. Owner, inherited and team-member access is never listed for revocation.</p><div id="sharing-review">${sharingReviewHtml()}</div>${check("reviewed", "I reviewed the sharing links for this workspace.")}</div>`;
+      if (step === "metadata") return `<div class="hub-form"><label>Description<textarea data-field="description" rows="2" maxlength="200">${escapeHtml(saved.description || "")}</textarea></label><label>Business purpose<textarea data-field="businessPurpose" rows="2" maxlength="200">${escapeHtml(saved.businessPurpose || "")}</textarea></label></div>`;
+      return `<div class="hub-form"><p>Is this workspace still needed?</p>
+        ${[["keep", "Keep", "Renew the workspace until the next review."], ["archive", "Archive", "Requires a different Approver. An Executor must later type a confirmation phrase; archival is reversible and does not delete files."], ["delete", "Delete", "Requires a different Approver and fresh hold/retention evidence. An Executor must later type a confirmation phrase; deletion is a recoverable Microsoft 365 group soft-delete, not a file purge."], ["not-responsible", "I am not responsible for this", "Reassign to my manager, then the governance queue."]].map(([value, label, help]) => `<label class="choice check"><input type="radio" name="choice" value="${value}"> <span><strong>${label}</strong><small>${help}</small></span></label>`).join("")}
+        <label>Reason (required for archive or delete)<textarea data-field="reason" rows="2" maxlength="500"></textarea></label></div>`;
+    }
+
+    function riskContextHtml() {
+      const risk = wizard?.context?.risk;
+      if (!risk) return `<details class="hub-banner"><summary>Why this review</summary>Risk details are not available for this workspace.</details>`;
+      const inputs = [...risk.inputs].sort((a, b) => (b.points ?? -1) - (a.points ?? -1));
+      const list = inputs.map(input => `<li class="${input.points === null ? "missing" : ""}">${escapeHtml(input.label)}: ${escapeHtml(input.observed)} (${input.points === null ? "not scored" : `${input.points} of ${input.max}`})</li>`).join("");
+      const score = risk.score === null ? "Not enough evidence to score" : `Score ${risk.score}`;
+      return `<details class="hub-banner" open><summary>Why this review: ${riskPill(risk.level)} ${escapeHtml(score)}</summary><ul class="hub-inputs">${list}</ul></details>`;
+    }
+
+    function renderWizard() {
+      const task = wizardTask();
+      if (!task) return;
+      if (wizard.mover) return renderMover(task);
+      const sample = ownerHub.source === "sample" ? `<div class="hub-banner">${escapeHtml(SAMPLE_LABEL)}</div>` : "";
+      const steps = [...STEP_ORDER, "submit"].map((step, index) => `<li class="${task.steps?.[step]?.done ? "done" : ""}"${step === wizard.step ? ' aria-current="step"' : ""}>${index + 1}. ${step === "submit" ? "Decide" : STEP_LABELS[step]}</li>`).join("");
+      const isSubmit = wizard.step === "submit";
+      document.getElementById("wizard-dialog").innerHTML = `<header class="dialog-header"><div><h2 id="wizard-title">${escapeHtml(task.workspaceName)}</h2><p>Renewal review · ${riskPill(task.riskLevel)} · due ${formatCaseDate(task.dueAt)}</p></div><button class="dialog-close" type="button" data-wizard-close aria-label="Close review">×</button></header>
+        <div class="dialog-body">${sample}${riskContextHtml()}<ol class="hub-steps" aria-label="Review steps">${steps}</ol>${stepForm(wizard.step, task)}<div class="hub-error" role="alert" id="wizard-error">${escapeHtml(wizard.error)}</div></div>
+        <footer class="dialog-actions"><button class="command-btn mono" type="button" data-wizard-close>Close</button>${isSubmit ? `<button class="command-btn primary mono" type="button" data-wizard-submit>Record decision</button>` : `<button class="command-btn primary mono" type="button" data-wizard-next>Save step</button>`}</footer>`;
+      if (wizard.step === "membership") ensureMembers();
+      if (wizard.step === "links") ensureSharing();
+    }
+
+    function readStepInputs(step) {
+      const data = {};
+      document.querySelectorAll("#wizard-dialog [data-field]").forEach(input => {
+        data[input.dataset.field] = input.type === "checkbox" ? input.checked : input.value.trim();
+      });
+      return data;
+    }
+
+    function stepProblem(step, data) {
+      if (step === "contacts" && !data.primary) return "Enter a primary contact.";
+      if (["membership", "permissions", "links"].includes(step) && !data.reviewed) return "Confirm that you reviewed this step.";
+      if (step === "permissions" && !data.shadowUsersAcknowledged) return "Acknowledge the shadow-user result.";
+      return "";
+    }
+
+    async function postJson(url, method, body) {
+      const response = await fetch(url, { method, headers: { "Content-Type": "application/json", Accept: "application/json" }, credentials: "same-origin", body: JSON.stringify(body) });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || `Request failed (${response.status})`);
+      return payload;
+    }
+
+    function replaceTask(updated) {
+      const index = ownerHub.tasks.findIndex(item => item.taskId === updated.taskId);
+      if (index >= 0) ownerHub.tasks[index] = { ...ownerHub.tasks[index], ...updated };
+    }
+
+    async function saveWizardStep() {
+      const task = wizardTask();
+      const step = wizard.step;
+      const data = readStepInputs(step);
+      wizard.error = stepProblem(step, data);
+      if (wizard.error) return renderWizard();
+      try {
+        if (ownerHub.source === "backend") {
+          const result = await postJson(`api/owner/tasks/${encodeURIComponent(task.taskId)}/steps/${step}`, "PUT", { expectedVersion: task.version, data });
+          replaceTask(result.task);
+        } else {
+          task.steps = { ...task.steps, [step]: { done: true, data } };
+          task.status = "in-progress";
+          task.version += 1;
+        }
+        wizard.step = STEP_ORDER.find(name => !wizardTask().steps?.[name]?.done) || "submit";
+        wizard.error = "";
+      } catch (error) {
+        wizard.error = error.message;
+      }
+      renderWizard();
+      renderOwnerHub();
+    }
+
+    async function submitWizardDecision() {
+      const task = wizardTask();
+      const choice = document.querySelector("#wizard-dialog input[name=choice]:checked")?.value;
+      const reason = document.querySelector("#wizard-dialog [data-field=reason]")?.value.trim() || "";
+      if (!choice) { wizard.error = "Choose one option."; return renderWizard(); }
+      if (["archive", "delete"].includes(choice) && !reason) { wizard.error = `Enter a reason to request ${choice}.`; return renderWizard(); }
+      try {
+        let message;
+        if (ownerHub.source === "backend") {
+          const result = await postJson(`api/owner/tasks/${encodeURIComponent(task.taskId)}/decision`, "POST", { expectedVersion: task.version, choice, reason });
+          replaceTask(result.task);
+          const decision = result.decision;
+          message = choice === "not-responsible" ? `Reassigned to ${decision.nextAssignee?.name || decision.nextAssignee?.kind}.` : ["archive", "delete"].includes(choice) ? (decision.status === "blocked" ? `${choice} request blocked: ${decision.blockers.join(" ")}` : `${choice} request sent for a second Approver. Nothing has been executed.`) : "Decision recorded.";
+          ownerHub.decisions = [decision, ...ownerHub.decisions];
+        } else {
+          task.status = choice === "delete" ? "pending-approval" : choice === "not-responsible" ? "open" : "decided";
+          task.assigneeKind = choice === "not-responsible" ? "governance-queue" : task.assigneeKind;
+          message = "Sample only. Nothing was saved.";
+        }
+        document.getElementById("wizard-dialog").close();
+        wizard = null;
+        showToast(message);
+      } catch (error) {
+        wizard.error = error.message;
+        renderWizard();
+        return;
+      }
+      renderOwnerHub();
+    }
+
+    document.addEventListener("click", event => {
+      const open = event.target.closest("[data-open-task]");
+      if (open) return openWizard(open.dataset.openTask);
+      if (event.target.closest("[data-preview-removals]")) return previewRemovals();
+      if (event.target.closest("[data-preview-revocations]")) return previewRevocations();
+      const confirm = event.target.closest("[data-confirm-action]");
+      if (confirm) return confirmRemoval(confirm.dataset.confirmAction);
+      const approval = event.target.closest("[data-approval-review]");
+      if (approval) return openApprovalReview(approval.dataset.approvalReview);
+      const approvalOutcome = event.target.closest("[data-approval-outcome]");
+      if (approvalOutcome) return submitApprovalReview(approvalOutcome.dataset.approvalOutcome);
+      const lifecycleButton = event.target.closest("[data-lifecycle-execute]");
+      if (lifecycleButton) return openLifecycleExecution(lifecycleButton.dataset.lifecycleExecute);
+      if (event.target.closest("[data-lifecycle-submit]")) return executeApprovedLifecycle();
+      if (event.target.closest("[data-wizard-close]")) { document.getElementById("wizard-dialog").close(); approvalReview = null; lifecycleReview = null; wizard = null; renderOwnerHub(); return; }
+      if (event.target.closest("[data-wizard-next]")) return saveWizardStep();
+      if (event.target.closest("[data-wizard-submit]")) return submitWizardDecision();
+      if (event.target.closest("[data-mover-submit]")) return submitMover();
+    });
+
+    // ---- Mover access reviews: a manager decides keep or remove for each Team ----
+    function openMover(task) {
+      const choices = {};
+      (task.items || []).forEach(item => { if (item.decision) choices[item.workspaceId] = { choice: item.decision, reason: item.reason || "" }; });
+      wizard = { taskId: task.taskId, mover: true, choices, error: "", result: null };
+      renderWizard();
+      const dialog = document.getElementById("wizard-dialog");
+      if (!dialog.open) dialog.showModal();
+    }
+
+    function renderMover(task) {
+      const subject = task.subject || {};
+      const decided = task.status === "decided";
+      const sample = ownerHub.source === "sample" ? `<div class="hub-banner">${escapeHtml(SAMPLE_LABEL)}</div>` : "";
+      const source = task.itemsSource === "hr-feed" ? `<div class="hub-banner">These Teams come from the HR feed, not a live read of Microsoft 365. Check them before deciding.</div>` : "";
+      const flag = item => item.expected === false ? governanceStatusPill("Not in new role", "warning") : item.expected === true ? governanceStatusPill("In new role", "success") : governanceStatusPill("No baseline", "muted");
+      const rows = (task.items || []).map((item, index) => {
+        const current = wizard.choices[item.workspaceId] || {};
+        const radio = (value, label) => `<label class="check"><input type="radio" name="mv-${index}" value="${value}" data-mover-choice="${escapeHtml(item.workspaceId)}"${current.choice === value ? " checked" : ""}${decided ? " disabled" : ""}> <span>${label}</span></label>`;
+        return `<fieldset class="hub-form"><legend><strong>${escapeHtml(item.workspaceName)}</strong> ${flag(item)} ${item.access === "owner" ? governanceStatusPill("Owner", "muted") : ""}</legend>${radio("keep", "Keep access")}${radio("remove", item.access === "owner" ? "Remove (an owner is changed separately)" : "Ask the workspace owner to remove")}<label>Reason (required to keep)<input type="text" data-mover-reason="${escapeHtml(item.workspaceId)}" maxlength="300" value="${escapeHtml(current.reason || "")}"${decided ? " disabled" : ""}></label></fieldset>`;
+      }).join("");
+      const result = wizard.result ? `<div class="hub-banner"><strong>Recorded.</strong> ${escapeHtml(wizard.result)}</div>` : "";
+      document.getElementById("wizard-dialog").innerHTML = `<header class="dialog-header"><div><h2 id="wizard-title">${escapeHtml(task.workspaceName)}</h2><p>${escapeHtml(subject.oldRole || "Previous role")} to ${escapeHtml(subject.newRole || "new role")} · due ${formatCaseDate(task.dueAt)}</p></div><button class="dialog-close" type="button" data-wizard-close aria-label="Close review">×</button></header>
+        <div class="dialog-body">${sample}${source}${result}<div class="hub-banner">Decide for every Team. A removal is only a request: the workspace owner confirms it and nothing changes until they do.</div>${task.itemsTruncated ? `<div class="hub-banner">Only the first ${task.items.length} Teams are shown.</div>` : ""}${rows || `<p class="detail-note">No Teams to review.</p>`}<div class="hub-error" role="alert">${escapeHtml(wizard.error)}</div></div>
+        <footer class="dialog-actions"><button class="command-btn mono" type="button" data-wizard-close>Close</button>${decided ? "" : `<button class="command-btn primary mono" type="button" data-mover-submit>Record decisions</button>`}</footer>`;
+    }
+
+    document.addEventListener("change", event => {
+      const radio = event.target.closest("[data-mover-choice]");
+      if (!radio || !wizard?.mover) return;
+      const id = radio.dataset.moverChoice;
+      wizard.choices[id] = { ...(wizard.choices[id] || {}), choice: radio.value };
+    });
+
+    document.addEventListener("input", event => {
+      const field = event.target.closest("[data-mover-reason]");
+      if (!field || !wizard?.mover) return;
+      const id = field.dataset.moverReason;
+      wizard.choices[id] = { ...(wizard.choices[id] || {}), reason: field.value };
+    });
+
+    async function submitMover() {
+      const task = wizardTask();
+      const decisions = (task.items || []).map(item => ({ workspaceId: item.workspaceId, choice: wizard.choices[item.workspaceId]?.choice, reason: (wizard.choices[item.workspaceId]?.reason || "").trim() }));
+      const missing = (task.items || []).find((item, index) => !decisions[index].choice);
+      if (missing) { wizard.error = `Decide ${missing.workspaceName}: keep or remove.`; return renderWizard(); }
+      const noReason = (task.items || []).find((item, index) => decisions[index].choice === "keep" && decisions[index].reason.length < 5);
+      if (noReason) { wizard.error = `Say why access to ${noReason.workspaceName} is still needed.`; return renderWizard(); }
+      try {
+        let message;
+        if (ownerHub.source === "backend") {
+          const result = await postJson(`api/owner/tasks/${encodeURIComponent(task.taskId)}/mover-decision`, "POST", { decisions });
+          replaceTask(result.task);
+          message = `${result.removalRequests} removal request${result.removalRequests === 1 ? "" : "s"} sent to workspace owners.${result.unrouted.length ? ` ${result.unrouted.length} could not be routed: ${result.unrouted.map(item => `${item.workspaceName} (${item.reason})`).join(" ")}` : ""}`;
+        } else {
+          task.items = task.items.map((item, index) => ({ ...item, decision: decisions[index].choice, reason: decisions[index].reason || null }));
+          task.status = "decided";
+          message = `${decisions.filter(item => item.choice === "remove").length} removal request(s) would be sent to workspace owners. Nothing is saved in sample mode.`;
+        }
+        wizard.result = message;
+        wizard.error = "";
+      } catch (error) { wizard.error = error.message; }
+      renderWizard();
+      renderOwnerHub();
+    }
+
+    // ---- Owner-executed removal (Phase 2). Dry run by default: nothing is removed. ----
+    const sampleMemberList = [
+      { id: "00000000-0000-0000-0000-00000000a001", displayName: "Guest Gail (external)", guest: true, removable: true },
+      { id: "00000000-0000-0000-0000-00000000a002", displayName: "Member Max", guest: false, removable: true },
+      { id: "00000000-0000-0000-0000-00000000a003", displayName: "Member Mia", guest: false, removable: true }
+    ];
+
+    const sampleSharing = { truncated: false, scannedItems: 12, findings: [
+      { itemId: "item-1", permissionId: "perm-1", itemName: "Budget-FY26.xlsx", kind: "link", scope: "anonymous", type: "view" },
+      { itemId: "item-2", permissionId: "perm-2", itemName: "Vendor-List.docx", kind: "link", scope: "organization", type: "edit" },
+      { itemId: "item-1", permissionId: "perm-3", itemName: "Budget-FY26.xlsx", kind: "direct-user", grantedTo: "Isaiah Langer (not a member)" }
+    ] };
+
+    async function ensureSharing() {
+      if (!wizard || wizard.sharingRequested) return;
+      wizard.sharingRequested = true;
+      wizard.revokeSelected = new Set();
+      wizard.revocations = [];
+      wizard.revokeRejected = [];
+      const taskIdForSharing = wizard.taskId;
+      try {
+        wizard.sharing = ownerHub.source === "backend" ? await fetchJson(`api/owner/tasks/${encodeURIComponent(taskIdForSharing)}/sharing`) : structuredClone(sampleSharing);
+        if (ownerHub.source === "backend") wizard.mode = wizard.sharing.executionMode || wizard.mode || "dry-run";
+      } catch (error) {
+        wizard.sharingError = "Sharing could not be loaded.";
+      }
+      if (wizard?.taskId === taskIdForSharing) { const host = document.getElementById("sharing-review"); if (host) host.innerHTML = sharingReviewHtml(); }
+    }
+
+    function sharingReviewHtml() {
+      if (!wizard?.sharing && !wizard?.sharingError) return `<p class="detail-note">Scanning the document library (up to 100 items).</p>`;
+      if (wizard.sharingError) return `<p class="hub-error">${escapeHtml(wizard.sharingError)}</p>`;
+      const modeNote = wizard.mode === "live" ? "Live: confirmed revocations take effect in Microsoft 365." : "Dry run: confirming records what would be revoked and changes nothing.";
+      const rows = wizard.sharing.findings.map(item => `<label class="check"><input type="checkbox" data-revoke-target="${escapeHtml(`${item.itemId}|${item.permissionId}`)}"${wizard.revokeSelected.has(`${item.itemId}|${item.permissionId}`) ? " checked" : ""}> <span>${escapeHtml(item.itemName || item.itemId)} — ${item.kind === "link" ? `${governanceStatusPill(`${item.scope || "sharing"} link`, item.scope === "anonymous" ? "danger" : "warning")} ${escapeHtml(item.type || "")}` : `${governanceStatusPill("Direct grant", "warning")} ${escapeHtml(item.grantedTo || "")}`}</span></label>`).join("");
+      const note = wizard.sharing.truncated ? `<p class="detail-note">Only the first ${wizard.sharing.scannedItems} items were scanned. Others may have links that are not listed.</p>` : `<p class="detail-note">${wizard.sharing.scannedItems} items scanned.</p>`;
+      const proposals = wizard.revocations.map(action => `<li>${escapeHtml(action.targetDisplayName)} — <strong>${escapeHtml(action.status)}</strong>${["proposed", "failed", "simulated"].includes(action.status) ? ` <button class="command-btn mono" type="button" data-confirm-action="${escapeHtml(action.actionId)}">${wizard.mode === "live" ? "Confirm revoke" : "Confirm (dry run)"}</button>` : ""}${action.resultDetail ? ` <span class="hub-error">${escapeHtml(action.resultDetail)}</span>` : ""}</li>`).join("");
+      const rejected = wizard.revokeRejected.map(item => `<li>${escapeHtml(item.permissionId)}: ${escapeHtml(item.reason)}</li>`).join("");
+      return `<div class="hub-banner">${escapeHtml(modeNote)}</div>${note}${wizard.sharing.findings.length ? `<div class="hub-form">${rows}</div><p><button class="command-btn mono" type="button" data-preview-revocations>Preview revocation</button></p>` : `<p class="detail-note">No sharing links or direct grants to non-members were found.</p>`}${proposals ? `<ul class="hub-inputs">${proposals}</ul>` : ""}${rejected ? `<ul class="hub-inputs"><li class="missing">Not revoked:</li>${rejected}</ul>` : ""}`;
+    }
+
+    async function previewRevocations() {
+      const targets = [...wizard.revokeSelected].map(key => { const [itemId, permissionId] = key.split("|"); return { itemId, permissionId }; });
+      if (!targets.length) { wizard.error = "Select at least one link or grant."; return renderWizard(); }
+      try {
+        if (ownerHub.source === "backend") {
+          const result = await postJson(`api/owner/tasks/${encodeURIComponent(wizard.taskId)}/revocations`, "POST", { targets, reason: "Owner sharing review" });
+          wizard.revocations = result.actions;
+          wizard.revokeRejected = result.rejected;
+          wizard.mode = result.executionMode || wizard.mode;
+        } else {
+          wizard.revocations = targets.map(target => { const f = wizard.sharing.findings.find(x => x.permissionId === target.permissionId); return { actionId: `sample-${target.permissionId}`, targetDisplayName: `${f?.kind === "link" ? `${f.scope} link` : f?.grantedTo} on ${f?.itemName}`, status: "proposed" }; });
+          wizard.revokeRejected = [];
+        }
+        wizard.error = "";
+      } catch (error) { wizard.error = error.message; }
+      renderWizard();
+    }
+
+    document.addEventListener("change", event => {
+      const box = event.target.closest("[data-revoke-target]");
+      if (!box || !wizard?.revokeSelected) return;
+      if (box.checked) wizard.revokeSelected.add(box.dataset.revokeTarget); else wizard.revokeSelected.delete(box.dataset.revokeTarget);
+    });
+
+    async function ensureMembers() {
+      if (!wizard || wizard.membersRequested) return;
+      wizard.membersRequested = true;
+      const taskIdForMembers = wizard.taskId;
+      wizard.selected = new Set();
+      wizard.proposals = [];
+      wizard.rejected = [];
+      wizard.mode = "dry-run";
+      try {
+        if (ownerHub.source === "backend") {
+          const payload = await fetchJson(`api/owner/tasks/${encodeURIComponent(taskIdForMembers)}/members`);
+          wizard.members = payload.members || [];
+          wizard.pending = payload.pendingRequests || [];
+          wizard.mode = payload.executionMode || "dry-run";
+        } else {
+          wizard.members = structuredClone(sampleMemberList);
+          wizard.pending = wizard.taskId === "team-002-c1" ? [{ actionId: "sample-rc-1", targetUserId: sampleMemberList[1].id, targetDisplayName: "Member Max", reason: "Role change (Sales Analyst to Finance Analyst): no longer needed in the new role", status: "proposed" }] : [];
+        }
+      } catch {
+        wizard.memberError = "Members could not be loaded.";
+      }
+      if (wizard?.taskId === taskIdForMembers) refreshMemberReview();
+    }
+
+    function refreshMemberReview() {
+      const host = document.getElementById("member-review");
+      if (host) host.innerHTML = memberReviewHtml();
+    }
+
+    function memberReviewHtml() {
+      if (!wizard?.members) return `<p class="detail-note">Loading members.</p>`;
+      if (wizard.memberError) return `<p class="hub-error">${escapeHtml(wizard.memberError)}</p>`;
+      const modeNote = wizard.mode === "live" ? "Live: confirmed removals take effect in Microsoft 365." : "Dry run: confirming records what would be removed and changes nothing.";
+      const pendingHtml = (wizard.pending || []).length ? `<div class="hub-banner"><strong>Requested after a role change</strong><ul class="hub-inputs">${wizard.pending.map(action => `<li>${escapeHtml(action.targetDisplayName || action.targetUserId)}: ${escapeHtml(action.reason || "")} <strong>${escapeHtml(action.status)}</strong>${["proposed", "failed", "simulated"].includes(action.status) ? ` <button class="command-btn mono" type="button" data-confirm-action="${escapeHtml(action.actionId)}">${wizard.mode === "live" ? "Confirm removal" : "Confirm (dry run)"}</button>` : ""}${action.resultDetail ? ` <span class="hub-error">${escapeHtml(action.resultDetail)}</span>` : ""}</li>`).join("")}</ul></div>` : "";
+      const rows = wizard.members.map(member => `<label class="check"><input type="checkbox" data-remove-member="${escapeHtml(member.id)}"${wizard.selected.has(member.id) ? " checked" : ""}${member.removable ? "" : " disabled"}> <span>${escapeHtml(member.displayName || member.id)}${member.guest ? ` ${governanceStatusPill("Guest", "warning")}` : ""}</span></label>`).join("");
+      const proposals = wizard.proposals.map(action => `<li>${escapeHtml(action.targetDisplayName || action.targetUserId)} — <strong>${escapeHtml(action.status)}</strong>${action.status === "proposed" || action.status === "failed" || action.status === "simulated" ? ` <button class="command-btn mono" type="button" data-confirm-action="${escapeHtml(action.actionId)}">${wizard.mode === "live" ? "Confirm removal" : "Confirm (dry run)"}</button>` : ""}${action.resultDetail ? ` <span class="hub-error">${escapeHtml(action.resultDetail)}</span>` : ""}</li>`).join("");
+      const rejected = wizard.rejected.map(item => `<li>${escapeHtml(item.userId)}: ${escapeHtml(item.reason)}</li>`).join("");
+      return `<div class="hub-banner">${escapeHtml(modeNote)}</div>${pendingHtml}${wizard.members.length ? `<div class="hub-form">${rows}</div><p><button class="command-btn mono" type="button" data-preview-removals>Preview removal</button></p>` : `<p class="detail-note">No removable members.</p>`}${proposals ? `<ul class="hub-inputs">${proposals}</ul>` : ""}${rejected ? `<ul class="hub-inputs"><li class="missing">Not removed:</li>${rejected}</ul>` : ""}`;
+    }
+
+    async function previewRemovals() {
+      const ids = [...wizard.selected];
+      if (!ids.length) { wizard.error = "Select at least one person to remove."; return renderWizard(); }
+      try {
+        if (ownerHub.source === "backend") {
+          const result = await postJson(`api/owner/tasks/${encodeURIComponent(wizard.taskId)}/removals`, "POST", { userIds: ids, reason: "Owner membership review" });
+          wizard.proposals = result.actions;
+          wizard.rejected = result.rejected;
+          wizard.mode = result.executionMode || wizard.mode;
+        } else {
+          wizard.proposals = ids.map(id => { const m = wizard.members.find(x => x.id === id); return { actionId: `sample-${id}`, targetUserId: id, targetDisplayName: m?.displayName, status: "proposed" }; });
+          wizard.rejected = [];
+        }
+        wizard.error = "";
+      } catch (error) { wizard.error = error.message; }
+      renderWizard();
+    }
+
+    async function confirmRemoval(actionId) {
+      const action = (wizard.proposals || []).find(item => item.actionId === actionId) || (wizard.pending || []).find(item => item.actionId === actionId) || (wizard.revocations || []).find(item => item.actionId === actionId);
+      if (!action) return;
+      try {
+        if (ownerHub.source === "backend") {
+          const result = await postJson(`api/owner/tasks/${encodeURIComponent(wizard.taskId)}/actions/${encodeURIComponent(actionId)}/confirm`, "POST", {});
+          Object.assign(action, result.action);
+          wizard.mode = result.executionMode || wizard.mode;
+        } else {
+          action.status = "simulated";
+        }
+        wizard.error = "";
+      } catch (error) { wizard.error = error.message; }
+      renderWizard();
+    }
+
+    document.addEventListener("change", event => {
+      const box = event.target.closest("[data-remove-member]");
+      if (!box || !wizard?.selected) return;
+      if (box.checked) wizard.selected.add(box.dataset.removeMember); else wizard.selected.delete(box.dataset.removeMember);
+    });
+
+    // ---- AI and agents: Copilot licences, adoption and the agent inventory ----
+    const APP_LABELS = { microsoftteams: "Teams", teams: "Teams", word: "Word", excel: "Excel", powerpoint: "PowerPoint", outlook: "Outlook", onenote: "OneNote", loop: "Loop", copilotchat: "Copilot Chat", copilot: "Other" };
+    const sampleCopilot = {
+      collectedAt: "2026-10-09T03:00:00Z",
+      licences: { hasCopilotSeats: true, skus: [{ skuPartNumber: "Microsoft_365_Copilot", enabled: 200, consumed: 168, available: 32 }], otherCopilotSkus: ["Microsoft_Copilot_Studio_Messages"], seatsPurchased: 200, seatsAssigned: 168, seatsAvailable: 32, licensedUserCount: 168 },
+      adoption: { windowDays: 30, refreshDate: "2026-10-07", joinable: true, reason: null, licensed: 168, activeUsers: 121, inactiveUsers: 47, adoptionPct: 72, byApp: { microsoftteams: 98, word: 64, excel: 41, powerpoint: 28, outlook: 77, copilotchat: 110 } },
+      collection: [{ source: "copilot-licences", status: "ok" }, { source: "copilot-usage", status: "ok" }],
+      usersHidden: false,
+      reclaim: [
+        { userPrincipalName: "pilot.user1@example.com", displayName: "Pilot User 1", daysSinceActivity: null, lastActivityDate: null, accountEnabled: true },
+        { userPrincipalName: "pilot.user2@example.com", displayName: "Pilot User 2", daysSinceActivity: 143, lastActivityDate: "2026-05-19", accountEnabled: true },
+        { userPrincipalName: "pilot.user3@example.com", displayName: "Pilot User 3", daysSinceActivity: 71, lastActivityDate: "2026-07-30", accountEnabled: true },
+        { userPrincipalName: "pilot.user4@example.com", displayName: "Pilot User 4 (account disabled)", daysSinceActivity: 52, lastActivityDate: "2026-08-18", accountEnabled: false },
+        { userPrincipalName: "pilot.user5@example.com", displayName: "Pilot User 5", daysSinceActivity: 38, lastActivityDate: "2026-09-01", accountEnabled: true }
+      ]
+    };
+    const sampleAgents = {
+      staleDays: 180,
+      totals: { agents: 9, ownerless: 2, ownerUnknown: 2, stale: 3, staleUnknown: 1, broadlyShared: 4 },
+      byPlatform: [{ platform: "Copilot Studio", count: 4 }, { platform: "Teams app (bot)", count: 2 }, { platform: "Power Platform", count: 2 }, { platform: "Microsoft 365 Copilot", count: 1 }],
+      sources: [],
+      agents: [
+        { agentId: "a1", name: "HR Policy Assistant", platform: "Copilot Studio", source: "evidence-feed", owners: ["adele.vance@example.com"], ownerState: "assigned", lastModifiedAt: "2026-09-12T00:00:00Z", daysSinceModified: 27, stale: false, sharedWith: "Everyone", broadlyShared: true, status: "Published", connectors: ["SharePoint", "Dataverse"] },
+        { agentId: "a2", name: "Claims Triage Bot", platform: "Copilot Studio", source: "evidence-feed", owners: [], ownerState: "none", lastModifiedAt: "2026-02-03T00:00:00Z", daysSinceModified: 248, stale: true, sharedWith: "Everyone", broadlyShared: true, status: "Published", connectors: ["Outlook", "HTTP"] },
+        { agentId: "a3", name: "Facilities Request Agent", platform: "Copilot Studio", source: "evidence-feed", owners: ["patti.fernandez@example.com"], ownerState: "assigned", lastModifiedAt: "2026-08-30T00:00:00Z", daysSinceModified: 40, stale: false, sharedWith: "Specific people", broadlyShared: false, status: "Published", connectors: ["SharePoint"] },
+        { agentId: "a4", name: "Legacy Onboarding Helper", platform: "Copilot Studio", source: "evidence-feed", owners: [], ownerState: "none", lastModifiedAt: "2025-11-20T00:00:00Z", daysSinceModified: 323, stale: true, sharedWith: "Only owner", broadlyShared: false, status: "Draft", connectors: [] },
+        { agentId: "a5", name: "IT Service Desk", platform: "Teams app (bot)", source: "teams-app-catalog", owners: null, ownerState: "unknown", lastModifiedAt: "2026-06-04T00:00:00Z", daysSinceModified: 127, stale: false, sharedWith: "Everyone", broadlyShared: true, status: "Published", connectors: null },
+        { agentId: "a6", name: "Expense Bot", platform: "Teams app (bot)", source: "teams-app-catalog", owners: null, ownerState: "unknown", lastModifiedAt: "2025-12-01T00:00:00Z", daysSinceModified: 312, stale: true, sharedWith: "Everyone", broadlyShared: true, status: "Published", connectors: null },
+        { agentId: "a7", name: "Invoice Approval Flow Agent", platform: "Power Platform", source: "evidence-feed", owners: ["diego.siciliani@example.com"], ownerState: "assigned", lastModifiedAt: null, daysSinceModified: null, stale: null, sharedWith: "Unknown", broadlyShared: null, status: "Published", connectors: ["Dataverse"] },
+        { agentId: "a8", name: "Sales Insights", platform: "Power Platform", source: "evidence-feed", owners: ["lee.gu@example.com"], ownerState: "assigned", lastModifiedAt: "2026-09-25T00:00:00Z", daysSinceModified: 14, stale: false, sharedWith: "Specific people", broadlyShared: false, status: "Published", connectors: ["SQL", "Dataverse"] },
+        { agentId: "a9", name: "Policy Researcher", platform: "Microsoft 365 Copilot", source: "evidence-feed", owners: ["megan.bowen@example.com"], ownerState: "assigned", lastModifiedAt: "2026-09-30T00:00:00Z", daysSinceModified: 9, stale: false, sharedWith: "Specific people", broadlyShared: false, status: "Published", connectors: ["Graph connector"] }
+      ]
+    };
+    let aiHub = { source: "unavailable", copilot: null, agents: null, filter: { platform: "all", issue: "all" } };
+
+    async function loadAi() {
+      try {
+        const [copilot, agents] = await Promise.all([fetchJson("api/copilot"), fetchJson("api/agents")]);
+        aiHub = { ...aiHub, source: "backend", copilot, agents };
+      } catch {
+        if (aiHub.source !== "sample") aiHub = { ...aiHub, source: "sample", copilot: structuredClone(sampleCopilot), agents: structuredClone(sampleAgents) };
+      }
+      if (activeView === "ai") renderAi();
+    }
+
+    function copilotSectionHtml(c) {
+      if (!c || (!c.licences && !c.adoption)) return `<div class="case-empty">Copilot data has not been collected yet. It needs the collector to run with Organization.Read.All and Reports.Read.All.</div>`;
+      const l = c.licences;
+      if (l && !l.hasCopilotSeats) return `<div class="case-empty">No Microsoft 365 Copilot seat licence was found in this tenant${l.otherCopilotSkus?.length ? ` (other Copilot SKUs: ${escapeHtml(l.otherCopilotSkus.join(", "))})` : ""}.</div>`;
+      const a = c.adoption;
+      const n = value => (value === null || value === undefined ? "Unknown" : String(value));
+      const kpis = [[n(l?.seatsPurchased), "Seats purchased"], [n(l?.seatsAssigned), "Seats assigned"], [n(l?.seatsAvailable), "Seats available"], [a ? n(a.activeUsers) : "Unknown", `Active users (${a?.windowDays || 30} days)`], [a && a.adoptionPct !== null ? `${a.adoptionPct}%` : "Unknown", "Adoption"], [a ? n(a.inactiveUsers) : "Unknown", "Idle licensed users"]]
+        .map(([value, label]) => `<div class="hub-kpi"><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></div>`).join("");
+      const notice = !a ? `<p class="hub-note" style="border-top:0">Adoption is Unknown: the usage report could not be read. ${escapeHtml((c.collection || []).filter(item => item.source === "copilot-usage").map(item => item.detail).filter(Boolean).join(" "))} Licence counts above are still valid.</p>` : !a.joinable ? `<p class="hub-note" style="border-top:0">${escapeHtml(a.reason)} Counts of active users come from the report alone, so adoption and idle seats are not computed.</p>` : `<p class="hub-note" style="border-top:0">Usage report refreshed ${escapeHtml(a.refreshDate || "at an unknown date")}. A licence holder with no activity in ${a.windowDays} days counts as idle; a user missing from the report counts as idle too.</p>`;
+      const apps = a ? Object.entries(a.byApp).sort((x, y) => y[1] - x[1]) : [];
+      const max = Math.max(1, ...apps.map(([, count]) => count));
+      const bars = apps.length ? `<div style="padding:0 18px 14px">${apps.map(([app, count]) => `<div style="display:grid;grid-template-columns:110px 1fr 40px;gap:10px;align-items:center;font-size:12px;margin:5px 0"><span>${escapeHtml(APP_LABELS[app] || app)}</span><span style="display:block;height:10px;background:var(--cp-accent-soft)"><span style="display:block;height:10px;width:${Math.round((count / max) * 100)}%;background:var(--cp-accent)"></span></span><span class="mono">${count}</span></div>`).join("")}</div>` : "";
+      const reclaimRows = (c.reclaim || []).map(person => `<tr><td><strong>${escapeHtml(person.displayName || person.userPrincipalName)}</strong><br><span class="mono">${escapeHtml(person.userPrincipalName)}</span></td><td>${person.daysSinceActivity === null || person.daysSinceActivity === undefined ? governanceStatusPill("Never used", "danger") : `${person.daysSinceActivity} days ago`}</td><td>${person.accountEnabled === false ? governanceStatusPill("Account disabled", "warning") : ""}</td></tr>`).join("");
+      const reclaim = c.usersHidden ? `<p class="hub-note">Names of idle licence holders are hidden by the COPILOT_SHOW_USERS setting. Counts are still shown.</p>` : (c.reclaim || []).length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Idle licence holder</th><th>Last Copilot activity</th><th></th></tr></thead><tbody>${reclaimRows}</tbody></table></div><p class="hub-note">Candidates to reclaim or retrain. Visible to governance roles only. Activity is monitoring data about people: use it to manage licences, and set COPILOT_SHOW_USERS=false to show counts only.</p>` : a?.joinable ? `<div class="case-empty">Every licence holder was active in the last ${a.windowDays} days.</div>` : "";
+      return `<div class="hub-kpis" style="padding:14px 18px 0">${kpis}</div>${notice}${bars ? `<p class="hub-note" style="border-top:0">Active users by app</p>${bars}` : ""}${reclaim}`;
+    }
+
+    function agentsSectionHtml(g) {
+      if (!g || !g.agents) return `<div class="case-empty">The agent inventory has not been collected yet.</div>`;
+      const t = g.totals;
+      const kpis = [[t.agents, "Agents found"], [t.ownerless, "No owner"], [t.ownerUnknown, "Owner unknown"], [t.stale, `Not changed in ${g.staleDays}+ days`], [t.broadlyShared, "Shared with everyone"]].map(([value, label]) => `<div class="hub-kpi"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`).join("");
+      const f = aiHub.filter;
+      const platforms = ["all", ...g.byPlatform.map(item => item.platform)];
+      const issues = [["all", "All"], ["none", "No owner"], ["unknown", "Owner unknown"], ["stale", "Stale"], ["everyone", "Shared with everyone"]];
+      const keep = agent => (f.platform === "all" || agent.platform === f.platform) && (f.issue === "all" || (f.issue === "none" && agent.ownerState === "none") || (f.issue === "unknown" && agent.ownerState === "unknown") || (f.issue === "stale" && agent.stale === true) || (f.issue === "everyone" && agent.broadlyShared === true));
+      const shown = g.agents.filter(keep);
+      const owner = agent => agent.ownerState === "assigned" ? escapeHtml(agent.owners.join(", ")) : agent.ownerState === "none" ? governanceStatusPill("No owner", "danger") : governanceStatusPill("Owner unknown", "muted");
+      const rows = shown.map(agent => `<tr><td><strong>${escapeHtml(agent.name)}</strong><br><span class="mono">${escapeHtml(agent.source === "teams-app-catalog" ? "Teams app catalog" : "Administrator feed")}</span></td><td>${escapeHtml(agent.platform)}</td><td>${owner(agent)}</td><td>${agent.daysSinceModified === null ? "Unknown" : `${agent.daysSinceModified} days ago`}${agent.stale ? ` ${governanceStatusPill("Stale", "warning")}` : ""}</td><td>${escapeHtml(agent.sharedWith)}${agent.broadlyShared ? ` ${governanceStatusPill("Broad", "warning")}` : ""}</td><td>${escapeHtml(agent.status)}</td><td>${agent.connectors === null ? "Unknown" : escapeHtml(agent.connectors.join(", ") || "None")}</td></tr>`).join("");
+      const filterBar = `<div class="hub-banner" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:0"><label>Platform <select id="ai-platform">${platforms.map(p => `<option value="${escapeHtml(p)}"${f.platform === p ? " selected" : ""}>${p === "all" ? "All" : escapeHtml(p)}</option>`).join("")}</select></label><label>Issue <select id="ai-issue">${issues.map(([value, label]) => `<option value="${value}"${f.issue === value ? " selected" : ""}>${label}</option>`).join("")}</select></label><span>${shown.length} of ${g.agents.length} shown</span></div>`;
+      return `<div class="hub-kpis" style="padding:14px 18px 0">${kpis}</div><p class="hub-note" style="border-top:0">By platform: ${g.byPlatform.map(item => `${escapeHtml(item.platform)} ${item.count}`).join(" · ") || "none"}. Owner and age are Unknown when the source does not provide them; Unknown is never treated as fine.</p>${filterBar}${shown.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Agent</th><th>Platform</th><th>Owner</th><th>Last changed</th><th>Shared with</th><th>Status</th><th>Connectors</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="case-empty">No agents match the filters.</div>`}<p class="hub-note">Sources: organisation-published Teams apps that contain a bot are read automatically. Copilot Studio, Power Platform and Agent 365 agents come from the administrator feed (the <span class="mono">agents</span> list in the evidence file), because those platforms are not listed by one tenant API.</p>`;
+    }
+
+    function renderAi() {
+      const label = aiHub.source === "backend" ? `Copilot data collected ${aiHub.copilot?.collectedAt ? new Date(aiHub.copilot.collectedAt).toLocaleString() : "at an unknown time"}` : aiHub.source === "sample" ? SAMPLE_LABEL.replace("Changes made here are not saved.", "Names are fictional.") : "Loading";
+      document.getElementById("ai-view").innerHTML = `<div class="governance-cases-header"><div><h2>AI and agents</h2><p>Who has a Copilot licence and uses it, and which agents exist, who owns them and who can use them.</p></div><span class="case-status proposed">NO TENANT CHANGES</span></div>
+        <div class="hub-banner">${escapeHtml(label)}</div>
+        <section class="case-panel"><header class="case-panel-header"><h3>Copilot licences and adoption</h3><p>Seats bought and assigned, who used Copilot in the last 30 days, and which seats sit idle.</p></header>${copilotSectionHtml(aiHub.copilot)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Agent inventory</h3><p>Agents and bots found in the tenant, with owner, age and who can use them.</p></header>${agentsSectionHtml(aiHub.agents)}</section>`;
+    }
+
+    document.addEventListener("change", event => {
+      if (event.target.id === "ai-platform") { aiHub.filter.platform = event.target.value; renderAi(); }
+      if (event.target.id === "ai-issue") { aiHub.filter.issue = event.target.value; renderAi(); }
+    });
+
+    // ---- Requests: self-service workspace requests (record only, nothing is provisioned) ----
+    const sampleCatalog = [
+      { templateId: "project-team", name: "Project team", description: "A time-bound team for a project. Internal people only.", visibility: ["Private"], guestsAllowed: false, minOwners: 2 },
+      { templateId: "department", name: "Department or function", description: "A long-running team for an organisational unit.", visibility: ["Private", "Public"], guestsAllowed: false, minOwners: 2 },
+      { templateId: "partner-collaboration", name: "Partner collaboration", description: "A team that includes named external guests. Reviewed more often.", visibility: ["Private"], guestsAllowed: true, minOwners: 2 }
+    ];
+    const sampleRequests = [
+      { requestId: "sample-1", name: "Apollo Launch", templateName: "Project team", visibility: "Private", owners: ["a@contoso.com", "b@contoso.com"], status: "pending", requestedByName: "Pilot Requester", requestedAt: "2026-10-07T00:00:00Z", provisioning: "not-executed" }
+    ];
+    let requestsHub = { source: "unavailable", templates: [], requests: [], scope: "mine", selectedTemplate: null, error: "" };
+
+    async function loadRequests() {
+      try {
+        const [catalogPayload, requestsPayload] = await Promise.all([fetchJson("api/catalog"), fetchJson("api/requests")]);
+        requestsHub = { ...requestsHub, source: "backend", templates: catalogPayload.templates || [], requests: requestsPayload.requests || [], scope: requestsPayload.scope || "mine" };
+      } catch {
+        if (requestsHub.source !== "sample") requestsHub = { ...requestsHub, source: "sample", templates: structuredClone(sampleCatalog), requests: structuredClone(sampleRequests), scope: "all" };
+      }
+      requestsHub.selectedTemplate = requestsHub.selectedTemplate || requestsHub.templates[0]?.templateId || null;
+      if (activeView === "requests") renderRequests();
+    }
+
+    function renderRequests() {
+      const hub = requestsHub;
+      const template = hub.templates.find(item => item.templateId === hub.selectedTemplate);
+      const label = hub.source === "backend" ? (hub.scope === "all" ? "You can decide requests as a governance operator." : "Showing your requests.") : hub.source === "sample" ? SAMPLE_LABEL : "Loading";
+      const options = hub.templates.map(item => `<option value="${escapeHtml(item.templateId)}"${item.templateId === hub.selectedTemplate ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("");
+      const form = template ? `<div class="hub-form" style="padding:14px 18px"><label>Template<select id="rq-template">${options}</select></label><p class="detail-note">${escapeHtml(template.description)} Needs at least ${template.minOwners} owners. ${template.guestsAllowed ? "Guests are allowed." : "Guests are not allowed."}</p>
+        <label>Workspace name<input id="rq-name" type="text" maxlength="64" value="${escapeHtml(hub.draft?.name || "")}"></label>
+        <label>Purpose (at least 20 characters)<textarea id="rq-purpose" rows="2" maxlength="1000">${escapeHtml(hub.draft?.purpose || "")}</textarea></label>
+        <label>Visibility<select id="rq-visibility">${template.visibility.map(v => `<option>${escapeHtml(v)}</option>`).join("")}</select></label>
+        <label>Owners, one per line (name@company.com)<textarea id="rq-owners" rows="3" maxlength="600">${escapeHtml((hub.draft?.owners || []).join("\n"))}</textarea></label>
+        ${template.guestsAllowed ? `<label class="check"><input id="rq-guests" type="checkbox"> <span>External guests will be added</span></label>` : ""}
+        <div class="hub-error" role="alert" id="rq-error">${escapeHtml(hub.error)}</div><p><button class="command-btn primary mono" type="button" data-submit-request>Submit request</button></p></div>` : `<div class="case-empty">The catalog is not available.</div>`;
+      const rows = hub.requests.map(item => {
+        const pill = item.status === "approved" ? "success" : item.status === "rejected" ? "danger" : "warning";
+        const actions = item.status === "pending" && hub.scope === "all" ? `<button class="command-btn mono" type="button" data-decide-request="${escapeHtml(item.requestId)}" data-outcome="approve">Approve</button> <button class="command-btn mono" type="button" data-decide-request="${escapeHtml(item.requestId)}" data-outcome="reject">Reject</button>` : item.status === "approved" && item.provisioning !== "provisioned" && hub.scope === "all" ? `<button class="command-btn mono" type="button" data-provision-request="${escapeHtml(item.requestId)}">Provision</button>` : "";
+        return `<tr><td><strong>${escapeHtml(item.name)}</strong><br><span class="mono">${escapeHtml(item.templateName)} · ${escapeHtml(item.visibility)}</span></td><td>${escapeHtml((item.owners || []).join(", "))}</td><td>${governanceStatusPill(item.status, pill)}${item.decisionReason ? `<br><span class="mono">${escapeHtml(item.decisionReason)}</span>` : ""}</td><td>${escapeHtml(item.requestedByName || "Unknown")}<br>${formatCaseDate(item.requestedAt)}</td><td>${escapeHtml(item.provisioning || "not-executed")}${item.provisioningDetail ? `<br><span class="mono">${escapeHtml(item.provisioningDetail)}</span>` : ""}</td><td>${actions}</td></tr>`;
+      }).join("");
+      document.getElementById("requests-view").innerHTML = `<div class="governance-cases-header"><div><h2>Requests</h2><p>Ask for a new workspace from an approved template. A governance operator reviews it.</p></div><span class="case-status proposed">CREATED ONLY WHEN PROVISIONED</span></div>
+        <div class="hub-banner">${escapeHtml(label)} Approval is recorded only; creating the workspace is a separate step for the Executor role, and it is a dry run unless live execution is enabled.</div>
+        <section class="case-panel"><header class="case-panel-header"><h3>New workspace request</h3><p>Guardrails are checked again on the server: owners, visibility, guests and name.</p></header>${form}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>${hub.scope === "all" ? "All requests" : "My requests"}</h3><p>Status and decision for each request.</p></header>${hub.requests.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Owners</th><th>Status</th><th>Requested</th><th>Provisioning</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="case-empty">No requests yet.</div>`}</section>`;
+    }
+
+    async function submitRequest() {
+      const value = id => document.getElementById(id)?.value ?? "";
+      const body = { templateId: requestsHub.selectedTemplate, name: value("rq-name"), purpose: value("rq-purpose"), visibility: value("rq-visibility"), owners: value("rq-owners").split(/\r?\n/).map(item => item.trim()).filter(Boolean), guestsRequested: Boolean(document.getElementById("rq-guests")?.checked) };
+      try {
+        requestsHub.draft = body;
+        if (requestsHub.source === "backend") {
+          const result = await postJson("api/requests", "POST", body);
+          requestsHub.requests = [result.request, ...requestsHub.requests];
+        } else {
+          const minOwners = requestsHub.templates.find(t => t.templateId === body.templateId)?.minOwners || 2;
+          if (body.name.trim().length < 3) throw new Error("The name must be at least 3 characters.");
+          if (body.purpose.trim().length < 20) throw new Error("Describe the purpose in at least 20 characters.");
+          if (new Set(body.owners.map(owner => owner.toLowerCase())).size < minOwners) throw new Error(`Name at least ${minOwners} different owners.`);
+          requestsHub.requests = [{ requestId: `sample-${Date.now()}`, name: body.name || "Untitled", templateName: requestsHub.templates.find(t => t.templateId === body.templateId)?.name, visibility: body.visibility, owners: body.owners, status: "pending", requestedByName: "You (sample)", requestedAt: new Date().toISOString(), provisioning: "not-executed" }, ...requestsHub.requests];
+        }
+        requestsHub.error = "";
+        requestsHub.draft = null;
+        showToast(requestsHub.source === "backend" ? "Request submitted" : "Sample only. Nothing was saved.");
+      } catch (error) { requestsHub.error = error.message; }
+      renderRequests();
+    }
+
+    async function provisionRequestUi(requestId) {
+      try {
+        if (requestsHub.source === "backend") {
+          const result = await postJson(`api/requests/${encodeURIComponent(requestId)}/provision`, "POST", {});
+          requestsHub.requests = requestsHub.requests.map(item => item.requestId === requestId ? result.request : item);
+          showToast(result.request.provisioning === "provisioned" ? "Workspace created" : result.request.provisioning === "simulated" ? "Dry run: nothing was created" : "Provisioning failed. See the detail.");
+        } else {
+          requestsHub.requests = requestsHub.requests.map(item => item.requestId === requestId ? { ...item, provisioning: "simulated", provisioningDetail: "Sample only. Nothing was created." } : item);
+          showToast("Sample only. Nothing was created.");
+        }
+      } catch (error) { showToast(error.message); }
+      renderRequests();
+    }
+
+    async function decideRequestUi(requestId, outcome) {
+      const reason = outcome === "reject" ? (window.prompt("Why is it rejected? The requester will see this.") || "") : "";
+      if (outcome === "reject" && !reason) return;
+      try {
+        if (requestsHub.source === "backend") {
+          const result = await postJson(`api/requests/${encodeURIComponent(requestId)}/decision`, "POST", { outcome, reason });
+          requestsHub.requests = requestsHub.requests.map(item => item.requestId === requestId ? result.request : item);
+        } else {
+          requestsHub.requests = requestsHub.requests.map(item => item.requestId === requestId ? { ...item, status: outcome === "approve" ? "approved" : "rejected", decisionReason: reason || null } : item);
+        }
+        showToast(outcome === "approve" ? "Approved. Nothing was created." : "Rejected");
+      } catch (error) { showToast(error.message); }
+      renderRequests();
+    }
+
+    document.addEventListener("change", event => {
+      if (event.target.id === "rq-template") { requestsHub.selectedTemplate = event.target.value; requestsHub.error = ""; renderRequests(); }
+    });
+
+    document.addEventListener("click", event => {
+      if (event.target.closest("[data-submit-request]")) return submitRequest();
+      const provisionButton = event.target.closest("[data-provision-request]");
+      if (provisionButton) return provisionRequestUi(provisionButton.dataset.provisionRequest);
+      const decide = event.target.closest("[data-decide-request]");
+      if (decide) return decideRequestUi(decide.dataset.decideRequest, decide.dataset.outcome);
+    });
+
+    // ---- Posture: stale workspaces, drift, risk definition ----
+    const RISK_INPUT_LABELS = { owners: "Owners", exposure: "Exposure", guests: "Guests", shadowUsers: "Shadow users", sensitivityLabel: "Sensitivity label", highRiskObjects: "High-risk objects" };
+    const sampleDefinition = { active: { version: 0, weights: { owners: 25, exposure: 25, guests: 10, shadowUsers: 15, sensitivityLabel: 10, highRiskObjects: 15 }, thresholds: { high: 50, medium: 25 }, minCoverage: 0.5 }, isDefault: true, history: [] };
+    const sampleGuests = {
+      reviewDays: 180,
+      totals: { guestAccounts: 2, workspacesWithGuests: 2, workspacesUnknown: 0, needReview: 1, unknownAge: 0, inOwnerlessWorkspaces: 0 },
+      domains: [{ domain: "partner.com", count: 1 }, { domain: "other.org", count: 1 }],
+      incomplete: [{ workspaceId: "team-006", workspaceName: "Vendor Collaboration", guests: 30, listed: 25 }],
+      guests: [
+        { id: "g1", displayName: "Gail (partner)", mail: "gail@partner.com", workspaceCount: 2, workspaces: [{ name: "Vendor Collaboration" }, { name: "FY24 Acquisition" }], ageDays: 640, needsReview: true, inOwnerlessWorkspace: false },
+        { id: "g2", displayName: "Gus (other)", mail: "gus@other.org", workspaceCount: 1, workspaces: [{ name: "Vendor Collaboration" }], ageDays: 30, needsReview: false, inOwnerlessWorkspace: false }
+      ]
+    };
+    const sampleChanges = [
+      { changeId: "s1", day: "2026-10-08", workspaceName: "Vendor Collaboration", label: "Guests", from: "9", to: "13", direction: "worse", severity: "high" },
+      { changeId: "s2", day: "2026-10-07", workspaceName: "Finance Operations", label: "Owners", from: "2", to: "1", direction: "worse", severity: "medium" }
+    ];
+
+    function guestsSectionHtml(g) {
+      if (!g) return `<div class="case-empty">Guest inventory is not available.</div>`;
+      const t = g.totals;
+      const incomplete = g.incomplete.length ? `<p class="hub-note" style="border-top:0">The guest list is incomplete for ${g.incomplete.length} workspace${g.incomplete.length === 1 ? "" : "s"} (${g.incomplete.map(item => `${escapeHtml(item.workspaceName)}: ${item.listed} of ${item.guests} listed`).join("; ")}). Counts above reflect only the guests listed.</p>` : "";
+      const rows = g.guests.slice(0, 50).map(guest => `<tr><td><strong>${escapeHtml(guest.displayName || guest.id)}</strong><br><span class="mono">${escapeHtml(guest.mail || "No mail")}</span></td><td>${guest.workspaceCount}: ${escapeHtml(guest.workspaces.map(item => item.name).join(", "))}</td><td>${guest.ageDays === null ? "Unknown" : `${guest.ageDays} days`}</td><td>${guest.needsReview === null ? governanceStatusPill("Unknown", "muted") : guest.needsReview ? governanceStatusPill("Review", "warning") : governanceStatusPill("Recent", "success")}${guest.inOwnerlessWorkspace ? ` ${governanceStatusPill("No owner", "danger")}` : ""}</td></tr>`).join("");
+      return `<div class="hub-kpis" style="padding:14px 18px 0">${[[t.guestAccounts, "Guest accounts"], [t.workspacesWithGuests, "Workspaces with guests"], [t.needReview, `Older than ${g.reviewDays} days`], [t.inOwnerlessWorkspaces, "In a workspace with no owner"]].map(([value, label]) => `<div class="hub-kpi"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`).join("")}</div>${incomplete}${g.guests.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Guest</th><th>Workspaces</th><th>Account age</th><th>Review</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="case-empty">No guest accounts were listed.</div>`}<p class="hub-note">Age is measured from when the guest account was created; sign-in activity is not collected. Remove a guest through the owner review, which re-checks membership first.</p>`;
+    }
+
+    function staleSectionHtml(p) {
+      const stale = p.stale;
+      if (!stale) return `<div class="case-empty">Stale-workspace data is not available.</div>`;
+      const rows = stale.stale.map(item => `<tr><td><strong>${escapeHtml(item.name)}</strong></td><td>${item.activityDays} days</td><td>${Array.isArray(item.owners) ? (item.owners.length ? escapeHtml(item.owners.join(", ")) : "No owner") : "Unknown"}</td></tr>`).join("");
+      return `<p class="hub-note" style="border-top:0">${stale.stale.length} stale (no activity for over ${stale.thresholdDays} days), ${stale.active} active, ${stale.unknown} with no activity source. A workspace with no source is Unknown, never stale.</p>${stale.stale.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Last activity</th><th>Owners</th></tr></thead><tbody>${rows}</tbody></table></div>` : ""}`;
+    }
+
+    function changesSectionHtml(changes) {
+      if (!changes || !changes.length) return `<div class="case-empty">No changes detected between collector runs in the last 30 days.</div>`;
+      const rows = changes.slice(0, 50).map(item => `<tr><td>${escapeHtml(item.day)}</td><td><strong>${escapeHtml(item.workspaceName)}</strong></td><td>${escapeHtml(item.label)}</td><td>${escapeHtml(item.from)} <span aria-hidden="true">→</span> ${escapeHtml(item.to)}</td><td>${governanceStatusPill(item.direction === "worse" ? `Worse · ${item.severity}` : item.direction === "better" ? "Better" : "Changed", item.direction === "worse" ? (item.severity === "high" ? "danger" : "warning") : item.direction === "better" ? "success" : "muted")}</td></tr>`).join("");
+      return `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Day</th><th>Workspace</th><th>What changed</th><th>From → to</th><th>Direction</th></tr></thead><tbody>${rows}</tbody></table></div><p class="hub-note">Only facts known on both runs are compared. A change to or from Unknown is a data change, not drift.</p>`;
+    }
+
+    function definitionSectionHtml(definition) {
+      if (!definition) return `<div class="case-empty">Risk definition is not available.</div>`;
+      const a = definition.active;
+      const weightRows = Object.entries(RISK_INPUT_LABELS).map(([id, label]) => `<label>${label} (0 to 50)<input id="rd-w-${id}" type="number" min="0" max="50" step="1" value="${a.weights[id]}"></label>`).join("");
+      const version = a.version ? `Version ${a.version}` : "Default (risk-v1)";
+      return `<div class="hub-form" style="padding:14px 18px"><p class="detail-note">${escapeHtml(version)}. A change needs the Approver role and a reason, and applies at the next collector run. Preview shows which workspaces would change level first.</p>
+        <div class="hub-kpis">${weightRows}<label>High from score<input id="rd-high" type="number" min="2" max="100" step="1" value="${a.thresholds.high}"></label><label>Medium from score<input id="rd-medium" type="number" min="1" max="99" step="1" value="${a.thresholds.medium}"></label><label>Minimum evidence (0.3 to 1)<input id="rd-cov" type="number" min="0.3" max="1" step="0.05" value="${a.minCoverage}"></label></div>
+        <label>Reason for the change<textarea id="rd-reason" rows="2" maxlength="500" placeholder="At least 10 characters"></textarea></label>
+        <p><button class="command-btn mono" type="button" data-rd-preview>Preview impact</button> <button class="command-btn primary mono" type="button" data-rd-save>Save definition</button></p><div id="rd-preview" role="status"></div></div>`;
+    }
+
+    function readDefinitionForm() {
+      const num = id => Number(document.getElementById(id)?.value);
+      const weights = Object.fromEntries(Object.keys(RISK_INPUT_LABELS).map(id => [id, num(`rd-w-${id}`)]));
+      return { weights, thresholds: { high: num("rd-high"), medium: num("rd-medium") }, minCoverage: num("rd-cov"), reason: document.getElementById("rd-reason")?.value.trim() || "" };
+    }
+
+    async function previewDefinition() {
+      const out = document.getElementById("rd-preview");
+      if (postureData.source !== "backend") { out.innerHTML = `<p class="hub-error">Preview needs the backend. This is sample data.</p>`; return; }
+      try {
+        const result = await postJson("api/risk/definition/preview", "POST", readDefinitionForm());
+        const counts = (c) => ["High", "Medium", "Low", "Unknown"].map(level => `${level} ${c[level]}`).join(" · ");
+        const list = result.changes.map(item => `<li>${escapeHtml(item.workspaceName)}: ${escapeHtml(item.from)} → ${escapeHtml(item.to)}</li>`).join("");
+        out.innerHTML = `<div class="hub-banner">Now: ${escapeHtml(counts(result.before))}<br>After: ${escapeHtml(counts(result.after))}<br>${result.changes.length} workspace${result.changes.length === 1 ? "" : "s"} would change level.</div>${list ? `<ul class="hub-inputs">${list}</ul>` : ""}`;
+      } catch (error) { out.innerHTML = `<p class="hub-error">${escapeHtml(error.message)}</p>`; }
+    }
+
+    async function saveDefinition() {
+      const out = document.getElementById("rd-preview");
+      if (postureData.source !== "backend") { out.innerHTML = `<p class="hub-error">Saving needs the backend. This is sample data.</p>`; return; }
+      try {
+        await postJson("api/risk/definition", "PUT", readDefinitionForm());
+        showToast("Saved. It applies at the next collector run.");
+        await loadPosture();
+      } catch (error) { out.innerHTML = `<p class="hub-error">${escapeHtml(error.message)}</p>`; }
+    }
+
+    document.addEventListener("click", event => {
+      if (event.target.closest("[data-rd-preview]")) return previewDefinition();
+      if (event.target.closest("[data-rd-save]")) return saveDefinition();
+    });
+
+    // ---- Posture: filters, saved views, export, false-positive tags, trend ----
+    const POSTURE_VIEWS_KEY = "posture-views-v1";
+    let postureFilters = { query: "", level: "all", guests: false };
+
+    function loadSavedPostureViews() {
+      try { const parsed = JSON.parse(localStorage.getItem(POSTURE_VIEWS_KEY) || "{}"); return parsed && typeof parsed === "object" ? parsed : {}; } catch { return {}; }
+    }
+
+    function matchesPostureFilters(workspace) {
+      const f = postureFilters;
+      if (f.level !== "all" && (workspace.risk?.level || "Unknown") !== f.level) return false;
+      if (f.guests && !(workspace.guests > 0)) return false;
+      return !f.query || String(workspace.name || "").toLowerCase().includes(f.query.toLowerCase());
+    }
+
+    // Spreadsheet apps run a cell that starts with these characters as a formula.
+    function safeCsvCell(value) {
+      const text = String(value ?? "");
+      return csvCell(/^[=+\-@\t\r]/.test(text) ? `'${text}` : text);
+    }
+
+    function exportPostureCsv() {
+      const rows = postureData.workspaces.filter(matchesPostureFilters).map(ws => [ws.name, ws.risk?.level || "Unknown", ws.risk?.score ?? "Unknown", ws.guests ?? "Unknown", ws.shadowUsers ? ws.shadowUsers.count : "Unknown", Array.isArray(ws.labels) ? ws.labels.join("; ") || "None" : "Unknown", (ws.risk?.missing || []).join("; ")]);
+      const csv = [["Workspace", "Risk", "Score", "Guests", "Shadow users", "Sensitivity label", "Unknown inputs"], ...rows].map(row => row.map(safeCsvCell).join(",")).join("\r\n");
+      downloadFile(`workspace-risk-${todayKey()}.csv`, `\uFEFF${csv}`, "text/csv;charset=utf-8");
+      showToast(`Exported ${rows.length} workspace${rows.length === 1 ? "" : "s"}`);
+    }
+
+    function rerenderPostureKeepingFocus() {
+      const activeId = document.activeElement?.id;
+      const caret = document.activeElement?.selectionStart;
+      renderPosture();
+      const again = activeId && document.getElementById(activeId);
+      if (again) { again.focus(); if (typeof caret === "number" && again.setSelectionRange) again.setSelectionRange(caret, caret); }
+    }
+
+    function sparkline(values) {
+      const known = values.filter(Number.isFinite);
+      if (known.length < 2) return "";
+      const max = Math.max(...known, 1);
+      const points = values.map((value, index) => Number.isFinite(value) ? `${(index / (values.length - 1)) * 100},${22 - (value / max) * 20}` : null).filter(Boolean).join(" ");
+      return `<svg viewBox="0 0 100 24" width="100" height="24" role="img" aria-label="Trend"><polyline fill="none" stroke="currentColor" stroke-width="1.5" points="${points}"/></svg>`;
+    }
+
+    function trendChange(value) { return value === null || value === undefined ? "Unknown" : value > 0 ? `+${value}` : String(value); }
+
+    function trendSectionHtml(history) {
+      const points = history?.points || [];
+      if (points.length < 2) return `<div class="case-empty">${points.length ? "One day of history so far. A trend needs at least two daily runs." : "No history yet. The collector records one point per day."}</div>`;
+      const s = history.summary?.changes;
+      const line = s ? `Since ${escapeHtml(history.summary.from)}: high-risk workspaces ${trendChange(s.highRisk)}, high exposure ${trendChange(s.highExposure)}, open violations ${trendChange(s.openViolations)}, guests ${trendChange(s.guests)}.` : "";
+      const rows = points.slice(-10).reverse().map(p => `<tr><td>${escapeHtml(p.day)}</td><td>${p.discovered}</td><td>${p.riskLevels?.High ?? "Unknown"}</td><td>${p.exposure ? `${p.exposure.High} high · ${p.exposure.Unknown} unknown` : "Unknown"}</td><td>${p.openViolations}</td><td>${p.guestsUnknown ? "Unknown" : p.guests}</td></tr>`).join("");
+      return `<p class="hub-note" style="border-top:0">${line} Unknown stays Unknown: a day with missing data never counts as an improvement.</p><div class="hub-kpis" style="padding:0 18px">${[["High-risk workspaces", points.map(p => p.riskLevels?.High)], ["Open violations", points.map(p => p.openViolations)]].map(([label, values]) => `<div class="hub-kpi"><span>${label}</span>${sparkline(values)}</div>`).join("")}</div><div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Day</th><th>Workspaces</th><th>High risk</th><th>Exposure</th><th>Open violations</th><th>Guests</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
+
+    function violationsSectionHtml(p) {
+      const list = p.violationList || [];
+      if (!list.length) return `<div class="case-empty">No policy violations.</div>`;
+      const rows = list.map(item => {
+        const tag = item.suppression;
+        const status = tag ? `${governanceStatusPill("False positive", "muted")} until ${formatCaseDate(tag.expiresAt)}<br><span class="mono">${escapeHtml(tag.reason)}</span>` : governanceStatusPill("Open", "danger");
+        const action = tag ? `<button class="command-btn mono" type="button" data-fp-revoke="${escapeHtml(tag.suppressionId)}">Revoke</button>` : `<button class="command-btn mono" type="button" data-fp-tag data-workspace="${escapeHtml(item.workspaceId)}" data-policy="${escapeHtml(item.policyId)}">Mark false positive</button>`;
+        return `<tr><td><strong>${escapeHtml(item.workspaceName)}</strong></td><td>${escapeHtml(item.title)}</td><td>${escapeHtml(item.observed)}</td><td>${status}</td><td>${action}</td></tr>`;
+      }).join("");
+      return `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Policy</th><th>Observed</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div><p class="hub-note">A false-positive tag hides one violation from the open counts for up to 180 days, then it returns on its own. The finding is never edited. Needs the Governance operator role.</p>`;
+    }
+
+    async function tagFalsePositive(workspaceId, policyId) {
+      const reason = window.prompt("Why is this a false positive? (at least 10 characters)");
+      if (!reason) return;
+      const days = Number.parseInt(window.prompt("Hide it for how many days? (1 to 180)", "90") || "90", 10);
+      try {
+        if (postureData.source === "backend") {
+          await postJson("api/suppressions", "POST", { workspaceId, policyId, reason, days });
+          await loadPosture();
+        } else {
+          const item = postureData.posture.violationList.find(v => v.workspaceId === workspaceId && v.policyId === policyId);
+          if (item) item.suppression = { suppressionId: "sample", reason, expiresAt: new Date(Date.now() + days * 86400000).toISOString() };
+          renderPosture();
+        }
+        showToast(postureData.source === "backend" ? "Tagged as a false positive" : "Sample only. Nothing was saved.");
+      } catch (error) { showToast(error.message); }
+    }
+
+    async function revokeFalsePositive(suppressionId) {
+      try {
+        if (postureData.source === "backend") {
+          await postJson(`api/suppressions/${encodeURIComponent(suppressionId)}/revoke`, "POST", {});
+          await loadPosture();
+        } else {
+          const item = postureData.posture.violationList.find(v => v.suppression?.suppressionId === suppressionId);
+          if (item) item.suppression = null;
+          renderPosture();
+        }
+        showToast("Tag revoked");
+      } catch (error) { showToast(error.message); }
+    }
+
+    document.addEventListener("input", event => {
+      if (event.target.id === "posture-search") { postureFilters.query = event.target.value; rerenderPostureKeepingFocus(); }
+    });
+
+    document.addEventListener("change", event => {
+      const id = event.target.id;
+      if (id === "posture-level") { postureFilters.level = event.target.value; rerenderPostureKeepingFocus(); }
+      if (id === "posture-guests") { postureFilters.guests = event.target.checked; rerenderPostureKeepingFocus(); }
+      if (id === "posture-saved-view") {
+        const saved = loadSavedPostureViews()[event.target.value];
+        if (saved) { postureFilters = { query: "", level: "all", guests: false, ...saved }; rerenderPostureKeepingFocus(); }
+      }
+    });
+
+    document.addEventListener("click", event => {
+      if (event.target.closest("[data-export-posture]")) return exportPostureCsv();
+      if (event.target.closest("[data-save-view]")) {
+        const name = (window.prompt("Name this view") || "").trim().slice(0, 60);
+        if (!name) return;
+        const views = loadSavedPostureViews();
+        views[name] = { ...postureFilters };
+        localStorage.setItem(POSTURE_VIEWS_KEY, JSON.stringify(views));
+        showToast(`Saved view "${name}"`);
+        return rerenderPostureKeepingFocus();
+      }
+      const tag = event.target.closest("[data-fp-tag]");
+      if (tag) return tagFalsePositive(tag.dataset.workspace, tag.dataset.policy);
+      const revoke = event.target.closest("[data-fp-revoke]");
+      if (revoke) return revokeFalsePositive(revoke.dataset.fpRevoke);
+    });
+
+    async function loadPosture() {
+      try {
+        const [posturePayload, sourcesPayload, historyPayload, changesPayload, definitionPayload, guestsPayload, moversPayload, notificationsPayload, baselinesPayload] = await Promise.all([
+          fetchJson("api/posture"), fetchJson("api/sources"),
+          fetchJson("api/posture/history").catch(() => ({ points: [], summary: null })),
+          fetchJson("api/changes").catch(() => ({ changes: [] })),
+          fetchJson("api/risk/definition").catch(() => null),
+          fetchJson("api/guests").catch(() => null),
+          fetchJson("api/owner/tasks?scope=all").catch(() => null),
+          fetchJson("api/notifications").catch(() => null),
+          fetchJson("api/baselines").catch(() => null)
+        ]);
+        postureData = { source: "backend", collectedAt: posturePayload.collectedAt, posture: posturePayload.posture, workspaces: posturePayload.workspaces || [], sources: sourcesPayload.sources || [], history: historyPayload, changes: changesPayload.changes || [], definition: definitionPayload, guests: guestsPayload, movers: (moversPayload?.tasks || []).filter(task => task.taskType === "mover-review"), notifications: notificationsPayload, baselines: baselinesPayload };
+      } catch {
+        postureData = { source: "sample", ...structuredClone(samplePosture), movers: structuredClone(sampleOwnerTasks.filter(task => task.taskType === "mover-review")), notifications: structuredClone(sampleNotifications), baselines: structuredClone(sampleBaselineData) };
+      }
+      if (activeView === "posture") renderPosture();
+    }
+
+    function moversSectionHtml(tasks) {
+      const movers = tasks || [];
+      if (!movers.length) return `<div class="case-empty">No role changes have been received. Provide a role-change feed to start access reviews.</div>`;
+      const rows = movers.map(task => {
+        const items = task.items || [];
+        const outside = items.filter(item => item.expected === false).length;
+        const removing = items.filter(item => item.decision === "remove").length;
+        const status = task.status === "decided" ? `Decided: ${items.length - removing} kept, ${removing} removal request${removing === 1 ? "" : "s"}` : task.overdue ? "Overdue" : "Waiting for the manager";
+        return `<tr><td><strong>${escapeHtml(task.subject?.displayName || "Unknown")}</strong></td><td>${escapeHtml(task.subject?.oldRole || "Unknown")} to ${escapeHtml(task.subject?.newRole || "Unknown")}</td><td>${items.length}${outside ? ` (${outside} not in new role)` : ""}</td><td>${escapeHtml(status)}</td><td>${formatCaseDate(task.dueAt)}</td><td>${escapeHtml(escalationText(task))}</td></tr>`;
+      }).join("");
+      return `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Person</th><th>Role change</th><th>Teams</th><th>Status</th><th>Due</th><th>Escalation</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
+
+    function renewalSectionHtml(workspaces) {
+      const list = workspaces || [];
+      const withDate = list.filter(ws => ws.expiresAt).sort((left, right) => new Date(left.expiresAt) - new Date(right.expiresAt));
+      const without = list.length - withDate.length;
+      const now = Date.now();
+      const kpis = [[withDate.length, "With an expiration date"], [without, "No expiration date reported"], [withDate.filter(ws => new Date(ws.expiresAt) - now < 30 * 86400000).length, "Expire within 30 days"]].map(([value, label]) => `<div class="hub-kpi"><strong>${value}</strong><span>${escapeHtml(label)}</span></div>`).join("");
+      const rows = withDate.slice(0, 8).map(ws => `<tr><td><strong>${escapeHtml(ws.name)}</strong></td><td>${formatCaseDate(ws.renewedAt)}</td><td>${formatCaseDate(ws.expiresAt)}</td><td>${Math.ceil((new Date(ws.expiresAt) - now) / 86400000)} days</td></tr>`).join("");
+      return `<div class="hub-kpis" style="padding:14px 18px 0">${kpis}</div>${rows ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Last renewed</th><th>Expires</th><th>In</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="case-empty">No workspace reports an expiration date. Without a Microsoft 365 group expiration policy, workspaces never expire on their own.</div>`}<p class="hub-note">A workspace with no date has no expiration policy applied, or the tenant did not report one. It is not treated as renewed.</p>`;
+    }
+
+    function notificationsSectionHtml(payload) {
+      if (!payload) return `<div class="case-empty">Notification history is not available to you or the service is unreachable.</div>`;
+      const modeText = { off: "Off: nothing is sent or recorded.", "dry-run": "Dry run: messages are recorded but not sent.", live: "Live: messages are sent by email." }[payload.mode] || payload.mode;
+      const rows = (payload.notifications || []).slice(0, 25).map(item => `<tr><td>${formatCaseDate(item.updatedAt)}</td><td>${escapeHtml(item.event)}</td><td>${escapeHtml(item.workspaceName || "")}</td><td>${escapeHtml(item.recipientName || "Unknown")}</td><td><span class="case-status ${item.status === "sent" ? "approved" : item.status === "failed" ? "failed" : "pending"}">${escapeHtml(item.status)}</span>${item.detail ? `<br><span class="mono">${escapeHtml(item.detail)}</span>` : ""}</td></tr>`).join("");
+      return `<p class="hub-note" style="border-top:0">${escapeHtml(modeText)}</p>${rows ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>When</th><th>Event</th><th>Workspace</th><th>Recipient</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="case-empty">No notifications recorded yet.</div>`}`;
+    }
+
+    function baselineSectionHtml(payload, workspaces) {
+      if (!payload) return `<div class="case-empty">Baseline service is unavailable.</div>`;
+      const baselines = payload.baselines || [];
+      const alerts = (payload.alerts || []).filter(alert => ["open", "acknowledged"].includes(alert.status));
+      const baselineRows = baselines.map(item => `<tr><td><strong>${escapeHtml(item.workspaceName)}</strong></td><td>v${item.version}</td><td>${formatCaseDate(item.approvedAt)}</td><td>${escapeHtml(item.approvedByName || item.approvedBy || "Unknown")}</td><td>${item.knownFields?.length || 0} known · ${item.unknownFields?.length || 0} Unknown</td></tr>`).join("");
+      const alertRows = alerts.map(alert => `<tr><td><strong>${escapeHtml(alert.workspaceName)}</strong><br><span class="mono">${escapeHtml(alert.label)}</span></td><td>${escapeHtml(alert.from)} <span aria-hidden="true">→</span> ${escapeHtml(alert.to)}</td><td>${governanceStatusPill(alert.severity, alert.severity === "high" ? "danger" : "warning")}</td><td>${governanceStatusPill(alert.status, alert.status === "acknowledged" ? "success" : "warning")}${alert.currentUnknown ? `<br><span class="mono">Current value Unknown; alert remains open</span>` : ""}</td><td>${formatCaseDate(alert.lastSeenAt || alert.openedAt)}</td><td>${alert.status === "open" && postureData.source === "backend" ? `<button class="command-btn mono" type="button" data-drift-ack="${escapeHtml(alert.alertId)}" data-version="${alert.version}">Acknowledge</button>` : alert.acknowledgedByName ? `By ${escapeHtml(alert.acknowledgedByName)}` : "—"}</td></tr>`).join("");
+      const workspaceOptions = workspaces.map(ws => `<option value="${escapeHtml(ws.id)}"${baselineFormState.workspaceId === ws.id ? " selected" : ""}>${escapeHtml(ws.name)}</option>`).join("");
+      const previewMatches = baselinePreview && baselinePreview.workspaceId === baselineFormState.workspaceId;
+      const preview = previewMatches ? `<div class="hub-banner" id="baseline-preview-result"><strong>Preview for ${escapeHtml(baselinePreview.workspaceName)}</strong><br>${baselinePreview.isFirstBaseline ? "No active baseline exists; this will establish version 1." : `${baselinePreview.changes.length} change(s) from current version ${baselinePreview.existingVersion}.`}<br>Known: ${escapeHtml(baselinePreview.knownFields.join(", ") || "None")}<br>Unknown (not assumed safe): ${escapeHtml(baselinePreview.unknownFields.join(", ") || "None")}${baselinePreview.changes.length ? `<ul class="hub-inputs">${baselinePreview.changes.map(change => `<li>${escapeHtml(change.label)}: ${escapeHtml(change.from)} → ${escapeHtml(change.to)} (${escapeHtml(change.direction)})</li>`).join("")}</ul>` : ""}<p style="margin:8px 0 0">Approving makes this the expected state for later drift checks. It does not change Microsoft 365.</p></div>` : "";
+      const sample = payload.source === "sample" ? `<div class="hub-banner">${escapeHtml(SAMPLE_LABEL)}</div>` : "";
+      return `${sample}<div class="hub-banner">An Approver establishes a documented expected state. Unknown facts are excluded from comparisons and never converted to “good”. Drift alerts are deduplicated, stay open while the changed value remains, and do not cause tenant changes.</div>
+        ${postureData.source === "backend" && workspaces.length ? `<form id="baseline-form" class="onedrive-form" style="padding:14px 18px;border-bottom:1px solid var(--cp-border)"><strong>Set or refresh an approved baseline</strong><label>Workspace<select name="workspaceId" required><option value="">Choose a workspace…</option>${workspaceOptions}</select></label><label>Approval reason<textarea name="reason" minlength="10" maxlength="500" required placeholder="Why is this the correct expected state? (at least 10 characters)">${escapeHtml(baselineFormState.reason)}</textarea></label><div class="triage-actions"><button class="command-btn mono" type="button" data-baseline-preview>Preview current state</button><button class="command-btn primary mono" type="submit"${previewMatches ? "" : " disabled"}>Approve baseline</button></div></form>` : ""}${preview}
+        <section class="case-panel-header"><h3>Approved baselines</h3><p>${baselines.length} active baseline${baselines.length === 1 ? "" : "s"}; not configured workspaces do not generate baseline alerts.</p></section>${baselineRows ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Version</th><th>Approved</th><th>Approver</th><th>Coverage</th></tr></thead><tbody>${baselineRows}</tbody></table></div>` : `<div class="case-empty">No approved baseline yet. An Approver can preview and establish one above.</div>`}
+        <section class="case-panel-header" style="border-top:1px solid var(--cp-border)"><h3>Drift alerts</h3><p>Meaningful changes against the approved baseline. Acknowledgement is recorded and audited; it does not reset the baseline.</p></section>${alertRows ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace / field</th><th>Baseline → current</th><th>Severity</th><th>State</th><th>Last seen</th><th></th></tr></thead><tbody>${alertRows}</tbody></table></div>` : `<div class="case-empty">No open drift alerts. A source becoming Unknown does not resolve an alert; it remains open and is marked Unknown.</div>`}`;
+    }
+
+    async function previewSelectedBaseline() {
+      baselineFormState.workspaceId = document.querySelector("#baseline-form [name=workspaceId]")?.value || "";
+      baselineFormState.reason = document.querySelector("#baseline-form [name=reason]")?.value || "";
+      const workspaceId = baselineFormState.workspaceId;
+      if (!workspaceId) { showToast("Choose a workspace to preview."); return; }
+      if (postureData.source !== "backend") {
+        const ws = postureData.workspaces.find(item => item.id === workspaceId);
+        baselinePreview = { ...sampleBaselineData.baselines[0], workspaceId, workspaceName: ws?.name || workspaceId, existingVersion: 0, isFirstBaseline: true, knownFields: ["owners", "guests", "labels"], unknownFields: ["exposure"], changes: [] };
+        renderPosture(); return;
+      }
+      try {
+        const result = await postJson("api/baselines/preview", "POST", { workspaceId });
+        baselinePreview = result.preview;
+        renderPosture();
+      } catch (error) { showToast(error.message); }
+    }
+
+    async function approveBaseline(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const workspaceId = new FormData(form).get("workspaceId");
+      const reason = String(new FormData(form).get("reason") || "").trim();
+      baselineFormState = { workspaceId: String(workspaceId || ""), reason };
+      if (!baselinePreview || baselinePreview.workspaceId !== workspaceId) { showToast("Preview this workspace before approving its baseline."); return; }
+      if (reason.length < 10) { showToast("Enter at least 10 characters of approval rationale."); return; }
+      if (postureData.source !== "backend") { showToast("Sample mode. Nothing was saved."); return; }
+      const button = form.querySelector("button[type=submit]");
+      button.disabled = true;
+      try {
+        await postJson(`api/baselines/${encodeURIComponent(workspaceId)}`, "PUT", { expectedVersion: baselinePreview.existingVersion, reason });
+        baselinePreview = null;
+        baselineFormState = { workspaceId: "", reason: "" };
+        showToast("Approved baseline saved");
+        await loadPosture();
+      } catch (error) { showToast(error.message); button.disabled = false; }
+    }
+
+    async function acknowledgeDrift(alertId, version) {
+      if (postureData.source !== "backend") return showToast("Sample mode. Nothing was saved.");
+      const reason = window.prompt("Optional acknowledgement note (not a baseline reset):", "Reviewed; follow-up is tracked.");
+      if (reason === null) return;
+      try {
+        await postJson(`api/drift-alerts/${encodeURIComponent(alertId)}/acknowledge`, "POST", { expectedVersion: Number(version), reason });
+        showToast("Drift alert acknowledged");
+        await loadPosture();
+      } catch (error) { showToast(error.message); }
+    }
+
+    document.addEventListener("click", event => {
+      if (event.target.closest("[data-baseline-preview]")) return previewSelectedBaseline();
+      const ack = event.target.closest("[data-drift-ack]");
+      if (ack) return acknowledgeDrift(ack.dataset.driftAck, ack.dataset.version);
+    });
+    document.addEventListener("submit", event => {
+      if (event.target.id === "baseline-form") return approveBaseline(event);
+    });
+    document.addEventListener("change", event => {
+      if (event.target.closest("#baseline-form [name=workspaceId]")) {
+        baselineFormState.workspaceId = event.target.value;
+        baselinePreview = null;
+        renderPosture();
+      }
+    });
+    document.addEventListener("input", event => {
+      if (event.target.closest("#baseline-form [name=reason]")) baselineFormState.reason = event.target.value;
+    });
+
+    function renderPosture() {
+      const data = postureData;
+      const root = document.getElementById("posture-view");
+      if (!data.posture) { root.innerHTML = `<div class="governance-cases-header"><div><h2>Posture</h2><p>Policy coverage, risk and data-source health.</p></div></div><div class="case-empty">Loading posture.</div>`; return; }
+      const p = data.posture;
+      const sourceLabel = data.source === "backend" ? `Collected ${data.collectedAt ? new Date(data.collectedAt).toLocaleString() : "at an unknown time"}` : SAMPLE_LABEL;
+      const staleCount = data.sources.filter(item => item.stale || item.status === "failed").length;
+      const kpis = [[p.discovered, "Workspaces discovered"], [`${p.managed} of ${p.discovered}`, `Managed${p.managedPct === null ? "" : ` · ${p.managedPct}%`}`], [p.violations.open, "Open violations"], [p.violations.fixed, "Fixed violations"], [p.riskLevels.High, "High risk"], [staleCount, "Sources needing attention"]]
+        .map(([value, label]) => `<div class="hub-kpi"><strong>${escapeHtml(String(value))}</strong><span>${escapeHtml(label)}</span></div>`).join("");
+      const policyRows = p.policies.map(row => `<tr><td><strong>${escapeHtml(row.title)}</strong><br><span class="mono">${escapeHtml(row.nativeControl || "")}</span></td><td>${row.evaluated} of ${p.discovered}${row.coveragePct === null ? "" : ` (${row.coveragePct}%)`}</td><td>${row.compliant}</td><td>${row.violating}${row.suppressed ? ` <span class="mono">(+${row.suppressed} tagged)</span>` : ""}</td><td>${row.notEvaluated ? `${row.notEvaluated} Unknown` : "0"}</td><td>${data.source === "backend" && row.source ? `<a href="${escapeHtml(row.source)}" target="_blank" rel="noopener">Findings</a>` : "—"}</td></tr>`).join("");
+      const top = p.topRules.length ? p.topRules.map(rule => `<li>${escapeHtml(rule.title)} — ${rule.violating} workspace${rule.violating === 1 ? "" : "s"}</li>`).join("") : "<li>No open violations.</li>";
+      const riskRows = data.workspaces.filter(matchesPostureFilters).map(ws => {
+        const risk = ws.risk;
+        const detail = risk ? `<details><summary>Inputs</summary><ul class="hub-inputs">${risk.inputs.map(input => `<li class="${input.points === null ? "missing" : ""}">${escapeHtml(input.label)}: ${escapeHtml(input.observed)} (${input.points === null ? "not scored" : `${input.points} of ${input.max}`})</li>`).join("")}</ul></details>` : "";
+        const score = !risk ? "Not scored" : risk.score === null ? "Unknown (not enough evidence)" : `${risk.score}${risk.missing.length ? ` (${risk.missing.length} input${risk.missing.length === 1 ? "" : "s"} unknown)` : ""}`;
+        return `<tr><td><strong>${escapeHtml(ws.name)}</strong></td><td>${riskPill(risk?.level)}</td><td>${escapeHtml(score)}${detail}</td><td>${ws.guests ?? "Unknown"}</td><td>${ws.shadowUsers ? ws.shadowUsers.count : "Unknown"}</td><td>${Array.isArray(ws.labels) ? (ws.labels.length ? escapeHtml(ws.labels.join(", ")) : "None") : "Unknown"}</td></tr>`;
+      }).join("");
+      const savedViews = loadSavedPostureViews();
+      const filterBar = `<div class="hub-banner" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:0"><label>Search <input id="posture-search" type="search" value="${escapeHtml(postureFilters.query)}" placeholder="Workspace name"></label><label>Risk <select id="posture-level">${["all", "High", "Medium", "Low", "Unknown"].map(v => `<option value="${v}"${postureFilters.level === v ? " selected" : ""}>${v === "all" ? "All" : v}</option>`).join("")}</select></label><label><input id="posture-guests" type="checkbox"${postureFilters.guests ? " checked" : ""}> Has guests</label><label>Saved views <select id="posture-saved-view"><option value="">Choose…</option>${Object.keys(savedViews).map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}</select></label><button class="command-btn mono" type="button" data-save-view>Save view</button><button class="command-btn mono" type="button" data-export-posture>Export CSV</button><span>${data.workspaces.filter(matchesPostureFilters).length} of ${data.workspaces.length} shown</span></div>`;
+      const sourceRows = data.sources.map(item => `<tr><td class="mono">${escapeHtml(item.source)}</td><td><span class="case-status ${item.status === "ok" ? "approved" : item.status === "failed" ? "failed" : "pending"}">${escapeHtml(item.status)}</span>${item.stale ? ` ${governanceStatusPill("Stale", "warning")}` : ""}</td><td>${formatCaseDate(item.finishedAt)}</td><td>${item.ageHours} h</td><td>${item.recordsRead}</td><td>${escapeHtml([...(item.warnings || []), item.error].filter(Boolean).join(" ") || "None")}</td></tr>`).join("");
+      root.innerHTML = `<div class="governance-cases-header"><div><h2>Posture</h2><p>Policy coverage, risk and data-source health. Unknown is shown as Unknown, never as compliant.</p></div><span class="case-status proposed">NO TENANT CHANGES</span></div>
+        <div class="hub-banner">${escapeHtml(sourceLabel)}</div><div class="hub-kpis">${kpis}</div>
+        <section class="case-panel"><header class="case-panel-header"><h3>Policy coverage</h3><p>Workspaces where each policy could be evaluated, against all discovered workspaces.</p></header><div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Policy</th><th>Evaluated</th><th>Compliant</th><th>Violating</th><th>Not evaluated</th><th>Source</th></tr></thead><tbody>${policyRows}</tbody></table></div><p class="hub-note">Rules with the most violations:</p><ul class="hub-inputs" style="padding:0 18px 14px">${top}</ul></section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Risk by workspace</h3><p>Model risk-v1. Unknown inputs add no points and block a Low rating.</p></header>${filterBar}<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Workspace</th><th>Risk</th><th>Score</th><th>Guests</th><th>Shadow users</th><th>Sensitivity label</th></tr></thead><tbody>${riskRows}</tbody></table></div></section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Open violations</h3><p>Each policy violation by workspace. Tag a genuine false positive so it stops counting for a limited time.</p></header>${violationsSectionHtml(p)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Trend</h3><p>One point per collector day: risk, exposure, violations and guests over time.</p></header>${trendSectionHtml(data.history)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Recent changes</h3><p>What changed between collector runs: owners, guests, exposure, privacy and labels.</p></header>${changesSectionHtml(data.changes ?? sampleChanges)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Guests</h3><p>External guest accounts across all workspaces, merged by person.</p></header>${guestsSectionHtml(data.guests ?? sampleGuests)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Role changes (movers)</h3><p>Access reviews raised when someone changes role. A manager decides keep or remove for each Team.</p></header>${moversSectionHtml(data.movers)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Renewal state (Microsoft 365 group expiration)</h3><p>Reported from Microsoft 365. Renewal itself is handled by the native expiration policy, not by this dashboard.</p></header>${renewalSectionHtml(data.workspaces)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Notifications</h3><p>Reminders and escalations to owners and managers. Addresses are never shown.</p></header>${notificationsSectionHtml(data.notifications)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Approved baselines and drift alerts</h3><p>Approvers define expected state; operators acknowledge drift without resetting the baseline.</p></header>${baselineSectionHtml(data.baselines, data.workspaces)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Stale workspaces</h3><p>No sourced activity for a long time. Candidates for the owner review.</p></header>${staleSectionHtml(p)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Risk definition</h3><p>How much each input is worth and where the levels start.</p></header>${definitionSectionHtml(data.definition ?? sampleDefinition)}</section>
+        <section class="case-panel hub-section"><header class="case-panel-header"><h3>Collector and scan transparency</h3><p>Last run of each data source. Stale sources and failures stay visible.</p></header>${data.sources.length ? `<div class="table-scroll"><table class="case-table hub-table"><thead><tr><th>Source</th><th>Status</th><th>Last run</th><th>Age</th><th>Records</th><th>Warnings</th></tr></thead><tbody>${sourceRows}</tbody></table></div>` : `<div class="case-empty">No collector runs have been recorded yet.</div>`}</section>`;
+    }
+
     function setView(view, updateHash = true) {
       activeView = view;
       document.querySelectorAll(".view-tab").forEach(tab => tab.setAttribute("aria-selected", String(tab.dataset.view === view)));
       document.getElementById("governance-view").hidden = view !== "governance";
       document.getElementById("overview-view").hidden = view !== "overview";
+      document.getElementById("owner-view").hidden = view !== "owner";
+      document.getElementById("findings-view").hidden = view !== "findings";
+      document.getElementById("onedrive-view").hidden = view !== "onedrive";
+      document.getElementById("posture-view").hidden = view !== "posture";
+      document.getElementById("requests-view").hidden = view !== "requests";
+      document.getElementById("ai-view").hidden = view !== "ai";
       document.getElementById("tracker-view").hidden = view !== "tracker";
       document.getElementById("overall-tracker").hidden = view !== "tracker";
       if (updateHash) history.replaceState(null, "", `#${view}`);
       if (view === "governance") renderGovernance();
+      if (view === "owner") { renderOwnerHub(); loadOwnerHub(); }
+      if (view === "findings") loadTriage();
+      if (view === "onedrive") loadOneDrive();
+      if (view === "posture") { renderPosture(); loadPosture(); }
+      if (view === "requests") { renderRequests(); loadRequests(); }
+      if (view === "ai") { renderAi(); loadAi(); }
       if (view === "overview") renderOverview();
     }
 

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Deploys the read-only GCC High collector + API infrastructure and publishes the Functions app.
+    Deploys the GCC High collector + protected governance API and publishes the Functions app.
 
 .DESCRIPTION
     Run from the customer's secure environment (AVD) after az login to Azure Government.
@@ -49,6 +49,7 @@ if (-not $SkipInfra) {
 
 $functionAppName = $outputs.functionAppName.value
 $apiPath = $outputs.workspacesApiPath.value
+$apiAudience = $outputs.apiAudience.value
 $identityClientId = $outputs.collectorIdentityClientId.value
 
 Write-Host "Publishing Functions app to $functionAppName..." -ForegroundColor Cyan
@@ -64,9 +65,10 @@ finally {
 Write-Host '' 
 Write-Host 'Deployment complete.' -ForegroundColor Green
 Write-Host "Workspaces API: $apiPath"
+Write-Host "API audience: $apiAudience"
 Write-Host "Collector identity client ID: $identityClientId"
 Write-Host ''
 Write-Host 'Next steps (customer administrator):' -ForegroundColor Cyan
 Write-Host '  1. Grant the collector identity the reviewed read-only Microsoft Graph application permissions and admin consent.'
-Write-Host '  2. Configure App Service Authentication (Entra) on the Function app and restrict access to the governance group.'
-Write-Host '  3. Set the dashboard data source to the Workspaces API URL above.'
+Write-Host '  2. Define and assign the documented governance app roles on the API enterprise application.'
+Write-Host '  3. Set the dashboard data source and API token audience to the values above.'

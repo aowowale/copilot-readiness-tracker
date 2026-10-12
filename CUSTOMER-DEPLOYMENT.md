@@ -1,6 +1,8 @@
 # Customer deployment and tenant connection
 
-This guide describes the production path for installing the dashboard in a customer's GCC High environment. The current `index.html` is a browser-only prototype with sample governance records. Installing that file by itself does not connect it to Microsoft 365.
+This guide describes the production path for installing the dashboard in a customer's GCC High environment. The repository includes an Azure Functions backend, storage, authenticated UI, and an installer. A browser-only `file://` open uses sanitized sample data; the tenant deployment is not proven until the installer and live reads are validated in the target tenant.
+
+Use [docs/COST-AND-COMPONENTS.md](docs/COST-AND-COMPONENTS.md) for the current cost model and [docs/PUSH-BUTTON-READINESS.md](docs/PUSH-BUTTON-READINESS.md) for the remaining customer-handoff work.
 
 ## Recommended architecture
 
@@ -9,7 +11,7 @@ Deploy the solution into a customer-owned Azure Government subscription:
 ```mermaid
 flowchart LR
     User[Authorized governance user] -->|Entra sign-in| Web[Azure App Service]
-    Web --> API[Protected read-only API]
+    Web --> API[Protected governance API]
     API --> Store[(Customer-owned data store)]
     Timer[Scheduled collector] -->|Managed identity| Graph[Microsoft Graph GCC High]
     Timer -->|Managed identity or certificate| SPO[SharePoint Online admin]
@@ -24,7 +26,7 @@ flowchart LR
 - **Customer-owned storage** holds only the fields needed by the dashboard. Azure Storage is sufficient for a small deployment; Azure SQL is appropriate when the customer requires relational reporting and longer history.
 - **Microsoft Entra authentication** restricts the web app to an approved customer governance group.
 - **Read identities are separate from user access.** Browser code never receives an application credential or tenant-wide Graph token.
-- **Remediation is not part of the first deployment.** Any future write action needs a separate execute identity, approval workflow, dry run, policy checks, and audit record.
+- **Microsoft 365 remediation is not part of the first deployment.** The API can transition internal governance cases with role separation and audit evidence, but it cannot modify tenant resources. Any future tenant write action needs a separate execute identity, approval workflow, dry run, policy checks, and independent verification.
 
 Use GCC High endpoints throughout:
 
@@ -60,6 +62,19 @@ Use at least two security principals:
 1. **Dashboard sign-in app**: authenticates users to the web application/API. It has no tenant inventory application permissions. Access is assigned only to a customer-managed governance group.
 2. **Read-only collector identity**: a managed identity is preferred when the chosen SharePoint tooling supports it. Otherwise use a certificate credential stored in customer-controlled Key Vault. Do not use a client secret for the production collector.
 
+Define these app-role values on the dashboard/API app registration and assign them through customer-managed Entra groups:
+
+| App-role value | Purpose |
+| --- | --- |
+| `Governance.Reader` | Tenant-wide workspace and case visibility without workflow mutation |
+| `Workspace.Owner` | Reserved for object-scoped owner tasks; it does not grant tenant-wide API reads |
+| `Governance.Operator` | Triage, assign, request owner or approval action, cancel, and reopen expired exceptions |
+| `Approver` | Approve or reject requests and grant governed exceptions |
+| `Executor` | Move approved cases through execution, failure or retry, verification, and closure |
+| `Auditor` | Read tenant-wide cases and evidence without workflow mutation |
+
+Use stable role **values** exactly as shown because the API authorizes against the token's `roles` claim. Enable **Assignment required** on the enterprise application. Keep approver and executor group membership separate where customer policy requires separation of duties.
+
 For stricter separation, give the SharePoint/RCD collector its own managed identity because SharePoint administration can require a broader role than Graph inventory.
 
 Start with only the application permissions required by the pilot queries. The expected Graph permission set must be reviewed against the exact endpoints before consent, but typically includes read access for groups, Teams, Team members, channels, channel members, and channel file locations. Candidate permissions include:
@@ -76,6 +91,32 @@ Some endpoints offer resource-specific consent permissions, but those require pe
 The SharePoint Online Management Shell supports unattended connections using managed identity or an application certificate. For GCC High, use the customer's `*.sharepoint.us` admin URL and `-Region ITAR`. The customer administrator must approve the identity and the minimum SharePoint role/permissions needed for the selected inventory and RCD cmdlets.
 
 ## Installation sequence
+
+### Scripted install (any tenant, commercial or Azure Government)
+
+Steps 2 to 5 below are automated by `scripts/Install-Governance.ps1`. It is safe to re-run.
+
+```powershell
+# 1. Which tenants can host a deployment? (offline, read-only)
+.\scripts\Get-TenantInventory.ps1
+
+# 2. Check everything first; changes nothing
+.\scripts\Install-Governance.ps1 -TenantId <tenant> -SubscriptionId <sub> -Location <region> -PreflightOnly
+
+# 3. Install (Azure Government: az cloud set --name AzureUSGovernment, then az login first)
+.\scripts\Install-Governance.ps1 -TenantId <tenant> -SubscriptionId <sub> -Location <region>
+
+# 4. Prove it works: every route, app roles, and one real collector run
+.\scripts\Test-Deployment.ps1 -TenantId <tenant>
+```
+
+Preflight checks the tools, the Azure cloud and sign-in, the subscription and its tenant, the region, your Azure roles (Contributor plus the ability to assign roles), and your Entra roles (create app registrations, grant Graph permissions). It stops before changing anything if a check fails. To keep another window's subscription untouched, run it in an isolated profile: `$env:AZURE_CONFIG_DIR = "$HOME\.azure-<name>"`.
+
+The installer needs both an Azure subscription and a tenant administrator. If different people hold those, run it with `-SkipGraphGrants` and have a Global Administrator grant the Graph permissions it prints. It grants the collector identity read-only application permissions only: `Group.Read.All`, `Team.ReadBasic.All`, `TeamMember.Read.All`, `Channel.ReadBasic.All` and `User.Read.All` (manager lookup), plus `Reports.Read.All` with `-IncludeUsageReports`. It assigns the installing user `Governance.Reader` and `Governance.Operator`; assign `Approver`, `Executor` and `Workspace.Owner` to the right people in Entra.
+
+The dashboard page and the API are served from the same function app, so one sign-in protects both. The sign-in client secret is stored as an app setting; rotate it before its one-year expiry (rerun the installer).
+
+Notifications are recorded but not sent by default (`-NotificationMode dry-run`). To send reminders and escalations by email, add `-EnableExecution -NotificationMode live -NotificationSender <mailbox> [-NotificationOperatorEmail <team mailbox>]`. That grants the executor identity `Mail.Send`, which allows sending as any mailbox until you restrict it: create an Exchange Online application access policy limiting the executor to the sender mailbox. The installer prints this reminder, and sets `APP_URL` so messages link back to the dashboard.
 
 ### 1. Validate the tenant before building
 
@@ -107,9 +148,9 @@ Use managed identities, HTTPS-only access, TLS 1.2 or later, diagnostic logs, re
 
 ### 3. Configure dashboard authentication
 
-Create a single-tenant Entra app registration for dashboard sign-in and configure App Service Authentication against the GCC High tenant. Require authentication for every route, including the API. Set **Assignment required** on the enterprise application and assign only the approved governance group.
+Create a single-tenant Entra app registration for dashboard/API sign-in, expose an API Application ID URI such as `api://<client-id>`, and add the app roles above. Supply its client ID as the required `apiClientId` Bicep parameter. The template configures App Service Authentication against the GCC High issuer, restricts the accepted audience, requires HTTPS, and returns `401` for unauthenticated requests. Set **Assignment required** on the enterprise application and assign only approved role groups.
 
-The API must validate the token issuer, tenant, audience, and expiration. Do not rely on hidden navigation or frontend checks for authorization.
+App Service Authentication validates the token issuer, tenant, audience, and expiration. The API separately validates app roles for every route. Do not rely on hidden navigation or frontend checks for authorization.
 
 ### 4. Configure the collector identity
 
@@ -131,7 +172,41 @@ The collector should write snapshots rather than expose Graph directly to the br
 
 Return `Unknown` when a source is missing, stale, unsupported, or failed. Never translate missing activity into `Inactive`.
 
-Expose a read-only endpoint such as `GET /api/workspaces` and replace the hardcoded `governanceWorkspaces` array in `index.html` with that response. Keep a clearly labeled sample-data fallback only for demonstration mode.
+Expose `GET /api/workspaces` and replace the hardcoded `governanceWorkspaces` array in `index.html` with that response. Keep a clearly labeled sample-data fallback only for demonstration mode.
+
+The initial policy layer exposes:
+
+- `GET /api/findings`, with optional `status`, `policyId`, `resourceId`, and `limit` filters.
+- `GET /api/policies`, containing the active versioned policy catalog.
+
+The `workspace-health-v1` pack checks for at least two owners and whether approved activity and SharePoint exposure evidence is available. It keeps missing evidence explicit as `unknown`. Ownership findings generate stable internal cases in `detected`, dry-run state; repeated collections do not replace a case that an operator has already progressed. Resolved findings remain available as evidence. No policy in this pack changes a Team, site, owner, member, sharing setting, or lifecycle state.
+
+The case workflow also exposes:
+
+- `GET /api/cases`
+- `GET /api/cases/{caseId}`
+- `GET /api/exceptions`
+- `POST /api/cases/{caseId}/transition`
+
+A transition request includes the caller's last observed version so stale browser sessions cannot overwrite another decision:
+
+```json
+{
+    "transition": "triage",
+    "expectedVersion": 0,
+    "reason": "Source evidence validated"
+}
+```
+
+The response contains the updated case and its audit event. A stale version or invalid lifecycle jump returns `409`. The case update and transition evidence are committed atomically in the current Azure Tables pilot store.
+
+The published UI includes a Findings queue with evidence and case-history detail, plus second-approver reviews for archive and delete decisions. An Executor may separately simulate or execute an approved lifecycle action. Live mode requires the explicit `ENABLE_LIFECYCLE_EXECUTION` flag, `EXECUTION_MODE=live`, and the separate executor identity. The user must type the workspace-specific confirmation. Deletion requires a fresh evidence feed with both `legalHold=false` and `retentionLocked=false`. Archive is verified through `isArchived`; delete is verified as Microsoft 365 group soft-delete, not a content purge. Inconclusive Graph results are marked uncertain and require manual reconciliation, never blind retry.
+
+OneDrive review starts from `Export-WorkspaceEvidence.ps1 -IncludeOneDrive`, which supplies personal-site owner, last-content-activity, storage, sharing-capability and site-state metadata. The UI lets the owner or a Governance.Operator record retain, owner-follow-up or escalate. The owner may request a bounded scan (100 items, 3 folder levels) of item names and permission metadata (no file contents), then propose selected link/direct-grant removals. The server resolves the owner and drive, blocks the owner's own permission, requires the reviewer not be the target, re-reads every selected permission before execution, and verifies after. Stale exports disable the flow, truncated scans are labeled, and dry-run is default. `-EnableOneDriveSharingReview` grants collector `Sites.Read.All`; live removal also needs `-EnableExecution -EnableLinkRevocation -ExecutionMode live`. This is not a tenant-wide complete file scan; it is a bounded action review.
+
+Provisioning can apply sensitivity labels when the customer supplies the verified mapping from catalog display names to label GUIDs: `-EnableSensitivityLabels -SensitivityLabelIdsJson '{"Internal":"<guid>","Confidential":"<guid>"}'`. The installer validates the map and grants executor `Group.ReadWrite.All`. Without a mapping, live provisioning fails before group creation. After create, the service applies the label and reads it back before declaring success. If readback fails, the group id is retained for manual reconciliation. Verify the exact catalog labels and Graph behavior in the tenant first.
+
+Approvers can preview and set a versioned baseline per workspace (`GET /api/baselines`, `POST /api/baselines/preview`, `PUT /api/baselines/{workspaceId}`). The collector compares later snapshots, keeps Unknown separate, and opens deduplicated drift alerts. Operators can acknowledge alerts without resetting the baseline. Alert email uses the existing `NOTIFICATION_MODE`; no tenant state is reverted.
 
 ### 6. Add collection in stages
 
@@ -155,9 +230,14 @@ Acceptance criteria:
 - Owners, members, guests, and channels match authoritative admin views.
 - Parent, private-channel, and shared-channel SharePoint sites correlate correctly.
 - Missing or unsupported values display as `Unknown` with a reason.
+- Repeated policy evaluation keeps stable finding and case IDs without duplicating cases.
+- Missing activity or exposure evidence produces `unknown` data-quality findings, not healthy results.
+- Correcting an ownership finding marks the finding resolved without automatically closing or overwriting its governance case.
 - The API rejects unauthenticated users and users outside the approved group.
+- Each role can perform only its documented transitions, and stale versions return `409` without changing the case.
+- Every successful transition records actor, time, source and target status, reason, policy version, and correlation ID.
 - Collector failures are logged and do not overwrite a good snapshot with empty data.
-- No write permission or remediation endpoint exists.
+- The default collector is read-only and execution is dry-run. Optional live executor capabilities are separate and require explicit deployment settings. Executor paths cover member removal, selected Team/OneDrive item-sharing revocation, approved request provisioning and explicitly armed approved archive/delete decisions. The OneDrive export/scan is bounded, and site-level shadow access is not changed. Sensitivity-label application requires an explicit, tenant-verified mapping. No owner decision, baseline approval, case transition, OneDrive metadata review or drift acknowledgement silently mutates Microsoft 365.
 
 ### 8. Promote to production
 
@@ -175,5 +255,6 @@ Provide these four answers before creating deployable infrastructure:
 2. Which storage service is approved: Azure Storage, Azure SQL, Cosmos DB, or another platform?
 3. Can an Entra administrator grant application permissions and can a SharePoint Administrator support the pilot?
 4. Which Team-level activity report or audit source is available and approved in the customer's GCC High tenant?
+5. Which Entra groups will receive each governance app role, and which roles must remain separated?
 
 The first production milestone should be a read-only pilot for 5-10 representative Teams, not a tenant-wide rollout.

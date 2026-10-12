@@ -12,6 +12,9 @@
     "// tenant": "Customer directory (tenant) ID. Identifier only, not a secret.",
     "GRAPH_TENANT_ID": "00000000-0000-0000-0000-000000000000",
 
+    "// local authentication": "Set true only in an unshared local environment. This bypass applies to read routes only; case transitions always require an authenticated app role.",
+    "ALLOW_LOCAL_AUTH": "false",
+
     "// collector identity": "Client ID of the user-assigned managed identity used by the collector.",
     "COLLECTOR_CLIENT_ID": "",
 
@@ -24,6 +27,30 @@
     "// storage": "Table endpoint for snapshots. For Azure Government use table.core.usgovcloudapi.net.",
     "STORAGE_TABLE_ENDPOINT": "https://examplegovacct.table.core.usgovcloudapi.net",
     "STORAGE_TABLE_NAME": "workspaces",
+
+    "// controlled pilot feed": "Leave empty. For a test only, provide normalized JSON; never place production HR data in source control.",
+    "ROLE_CHANGE_FEED_JSON": "",
+    "MAX_ROLE_CHANGES": "100",
+
+    "// shadow users": "Optional JSON keyed by workspace id: {\"<teamId>\":[{\"id\":\"<userObjectId>\",\"name\":\"...\"}]}. Export from a SharePoint permissions report. Empty = shadow users stay Unknown.",
+    "SITE_PRINCIPALS_FEED_JSON": "",
+
+    "// owner managers": "Reads each owner's manager (needs User.Read.All) so a 'not responsible' answer reassigns to the manager. Set false to skip; reassignment then goes to the governance queue.",
+    "RESOLVE_OWNER_MANAGERS": "true",
+
+    "// source freshness": "Hours after which a data source is shown as stale.",
+    "STALE_SOURCE_HOURS": "36",
+
+    "// evidence feed": "Blob endpoint holding feeds/evidence.json (see scripts/Export-WorkspaceEvidence.ps1). Empty = no feed is read. A feed older than EVIDENCE_MAX_AGE_HOURS is ignored.",
+    "STORAGE_BLOB_ENDPOINT": "",
+    "EVIDENCE_MAX_AGE_HOURS": "72",
+
+    "// lifecycle execution": "Live archive/delete requires ENABLE_LIFECYCLE_EXECUTION=true, EXECUTION_MODE=live, and the Executor app role. Dry run never changes tenant state.",
+    "ENABLE_LIFECYCLE_EXECUTION": "false",
+    "// OneDrive sharing writes": "Live OneDrive sharing revocation additionally requires the explicit administrator opt-in and the separate executor Files.ReadWrite.All permission.",
+    "ENABLE_ONEDRIVE_SHARING_REVOCATION": "false",
+    "// sensitivity labels": "JSON map of requested label display names to verified tenant label GUIDs. Live provisioning refuses unmapped labels.",
+    "SENSITIVITY_LABEL_IDS": "{}",
 
     "// schedule": "NCRONTAB. Default 03:00 daily.",
     "COLLECTOR_SCHEDULE": "0 0 3 * * *"

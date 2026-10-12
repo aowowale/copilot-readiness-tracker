@@ -1,0 +1,44 @@
+{
+  "roleChanges": [
+    {
+      "caseId": "pilot-user-001-2026-09-17",
+      "userId": "00000000-0000-0000-0000-000000000001",
+      "userDisplayName": "Pilot User 001",
+      "oldRole": "Finance Analyst",
+      "newRole": "Operations Analyst",
+      "effectiveAt": "2026-09-17T00:00:00Z",
+      "source": "sanitized pilot fixture",
+      "before": {
+        "department": "Finance",
+        "organization": "Example Organization",
+        "positionCode": "FIN-ANALYST",
+        "managerId": "00000000-0000-0000-0000-000000000010",
+        "workerType": "Employee",
+        "employmentStatus": "Active",
+        "dutyLocation": "US"
+      },
+      "after": {
+        "department": "Operations",
+        "organization": "Example Organization",
+        "positionCode": "OPS-ANALYST",
+        "managerId": "00000000-0000-0000-0000-000000000020",
+        "workerType": "Employee",
+        "employmentStatus": "Active",
+        "dutyLocation": "US"
+      },
+      "currentEntitlements": [
+        {
+          "resourceId": "finance-team",
+          "resourceName": "Finance Team",
+          "classification": "role-based"
+        },
+        {
+          "resourceId": "operations-project",
+          "resourceName": "Operations Project",
+          "classification": "project/discretionary"
+        }
+      ],
+      "allowedResourceIds": ["operations-team", "operations-project"]
+    }
+  ]
+}

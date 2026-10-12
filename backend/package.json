@@ -10,11 +10,16 @@
   },
   "scripts": {
     "start": "func start",
-    "check": "node --check src/index.js"
+    "check": "node --check src/index.js",
+    "test": "node --test --test-concurrency=1"
   },
   "dependencies": {
     "@azure/data-tables": "^13.3.0",
     "@azure/functions": "^4.5.0",
-    "@azure/identity": "^4.4.1"
+    "@azure/identity": "^4.4.1",
+    "@azure/storage-blob": "^12.34.0"
+  },
+  "devDependencies": {
+    "azurite": "^3.37.0"
   }
 }
