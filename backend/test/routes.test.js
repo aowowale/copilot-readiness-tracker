@@ -13,7 +13,10 @@ test("every HTTP route is under api/ except the dashboard page", () => {
   }
   assert.ok(routes.length >= 15);
   for (const { file, route } of routes) {
-    if (file === "site.js") continue;
+    if (file === "site.js") {
+      assert.equal(route, "/", "the dashboard must use only the root route, never a wildcard that can shadow API routes");
+      continue;
+    }
     assert.match(route, /^api\//, `${file} route '${route}' needs the api/ prefix`);
   }
 });

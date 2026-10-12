@@ -158,7 +158,7 @@ $azVersion = try { (az version --output json | ConvertFrom-Json).'azure-cli' } c
 Add-Check 'Azure CLI installed' ([bool]$azVersion) $(if ($azVersion) { $azVersion } else { 'Install from https://aka.ms/installazurecli' })
 
 $nodeVersion = try { (node --version) -replace '^v', '' } catch { $null }
-Add-Check 'Node.js 20 or later' ($nodeVersion -and [version]($nodeVersion -replace '^(\d+\.\d+\.\d+).*', '$1') -ge [version]'20.0.0') $(if ($nodeVersion) { "found $nodeVersion" } else { 'Install Node.js 20 LTS' })
+Add-Check 'Node.js 24 or later' ($nodeVersion -and [version]($nodeVersion -replace '^(\d+\.\d+\.\d+).*', '$1') -ge [version]'24.0.0') $(if ($nodeVersion) { "found $nodeVersion" } else { 'Install Node.js 24 LTS' })
 Add-Check 'npm installed' ([bool](Get-Command npm -ErrorAction SilentlyContinue)) 'needed to install backend dependencies'
 
 if (-not $azVersion) {
@@ -225,7 +225,7 @@ if ($PreflightOnly) { Write-Host "`nPreflight passed. Nothing was changed." -For
 
 # ------------------------------------------------------------------ providers and group
 Step 'Resource providers and resource group'
-foreach ($provider in 'Microsoft.Web', 'Microsoft.Storage', 'Microsoft.Insights', 'Microsoft.ManagedIdentity', 'Microsoft.Authorization') {
+foreach ($provider in 'Microsoft.Web', 'Microsoft.Storage', 'Microsoft.Insights', 'Microsoft.OperationalInsights', 'Microsoft.ManagedIdentity', 'Microsoft.Authorization') {
     $state = az provider show --namespace $provider --subscription $SubscriptionId --query registrationState --output tsv 2>$null
     if ($state -ne 'Registered') {
         Write-Host "Registering $provider..."
@@ -256,20 +256,30 @@ if (-not $existingApp) {
 } else { Write-Host "Using existing app registration $appName" }
 $appObjectId = $existingApp.id
 $apiClientId = $existingApp.appId
+$oauth2PermissionScopes = @(@{
+    id = $scopeId; value = 'user_impersonation'; type = 'User'; isEnabled = $true
+    adminConsentDisplayName = 'Access the governance API'; adminConsentDescription = 'Allows the signed-in user to call the governance API.'
+    userConsentDisplayName = 'Access the governance API'; userConsentDescription = 'Allows the app to call the governance API on your behalf.'
+})
 
 Invoke-GraphRest -Method PATCH -Path "/v1.0/applications/$appObjectId" -Body @{
     identifierUris = @("api://$apiClientId")
     appRoles       = $roleDefinitions
     api            = @{
         requestedAccessTokenVersion = 2
-        oauth2PermissionScopes      = @(@{
-            id = $scopeId; value = 'user_impersonation'; type = 'User'; isEnabled = $true
-            adminConsentDisplayName = 'Access the governance API'; adminConsentDescription = 'Allows the signed-in user to call the governance API.'
-            userConsentDisplayName = 'Access the governance API'; userConsentDescription = 'Allows the app to call the governance API on your behalf.'
-        })
-        preAuthorizedApplications   = @(@{ appId = $azureCliAppId; delegatedPermissionIds = @($scopeId) })
+        oauth2PermissionScopes      = $oauth2PermissionScopes
     }
     web            = @{ implicitGrantSettings = @{ enableIdTokenIssuance = $true } }
+} | Out-Null
+
+Invoke-WithRetry {
+    Invoke-GraphRest -Method PATCH -Path "/v1.0/applications/$appObjectId" -Body @{
+        api = @{
+            requestedAccessTokenVersion = 2
+            oauth2PermissionScopes      = $oauth2PermissionScopes
+            preAuthorizedApplications   = @(@{ appId = $azureCliAppId; delegatedPermissionIds = @($scopeId) })
+        }
+    }
 } | Out-Null
 
 $apiSp = (Invoke-GraphRest -Method GET -Path "/v1.0/servicePrincipals?`$filter=appId eq '$apiClientId'&`$select=id").value | Select-Object -First 1
@@ -393,22 +403,44 @@ if (-not $SkipCodeDeploy) {
         try { Invoke-Az { npm ci --omit=dev --no-audit --no-fund } 'npm ci' | Out-Null } finally { Pop-Location }
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::CreateFromDirectory($stage, $zip)
-        Invoke-Az { az functionapp deployment source config-zip --resource-group $ResourceGroup --subscription $SubscriptionId --name $functionApp --src $zip --output none } 'Zip deploy' | Out-Null
+        $knownDeploymentLogIds = @()
+        try {
+            $knownDeploymentLogIds = @(az webapp log deployment show --resource-group $ResourceGroup --subscription $SubscriptionId --name $functionApp --output json 2>$null | ConvertFrom-Json | Select-Object -ExpandProperty id)
+        } catch { }
+        Invoke-WithRetry {
+            Invoke-Az { az functionapp deployment source config-zip --resource-group $ResourceGroup --subscription $SubscriptionId --name $functionApp --src $zip --output none } 'Zip deploy'
+        } -Tries 4 -DelaySeconds 20 | Out-Null
+
+        Write-Host 'Waiting for Kudu to finish the ZIP deployment...'
+        $deployed = $false
+        foreach ($attempt in 1..30) {
+            try {
+                $deploymentLogs = @(az webapp log deployment show --resource-group $ResourceGroup --subscription $SubscriptionId --name $functionApp --output json 2>$null | ConvertFrom-Json)
+                $newLogs = @($deploymentLogs | Where-Object { $_.id -notin $knownDeploymentLogIds })
+                if ($newLogs | Where-Object { $_.message -like 'Deployment successful.*' }) { $deployed = $true; break }
+                $failure = $newLogs | Where-Object { $_.message -match 'Deployment failed|Error' } | Select-Object -First 1
+                if ($failure) { throw $failure.message }
+            } catch {
+                if ($_.Exception.Message -match 'Deployment failed|Error') { throw }
+            }
+            Start-Sleep -Seconds 10
+        }
+        if (-not $deployed) { throw 'Kudu did not report a successful ZIP deployment in time.' }
     } finally {
         Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
     }
 
-    Write-Host 'Waiting for the app to answer...'
+    Write-Host 'Waiting for Azure Functions to discover the deployment...'
     $ready = $false
     foreach ($attempt in 1..30) {
         try {
-            $response = Invoke-WebRequest -Uri $appUrl -MaximumRedirection 0 -SkipHttpErrorCheck -TimeoutSec 20
-            if ($response.StatusCode -in 200, 302, 401) { $ready = $true; break }
+            $discovered = az functionapp function show --resource-group $ResourceGroup --subscription $SubscriptionId --name $functionApp --function-name collectorRun --query name --output tsv 2>$null
+            if ($LASTEXITCODE -eq 0 -and $discovered) { $ready = $true; break }
         } catch { }
         Start-Sleep -Seconds 10
     }
-    if (-not $ready) { Write-Warning 'The app did not answer in time. Check the function app logs, then run Test-Deployment.ps1.' }
+    if (-not $ready) { throw 'Azure Functions did not discover the deployed collectorRun function in time.' }
 }
 
 # ------------------------------------------------------------------ record the result

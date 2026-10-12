@@ -309,7 +309,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
     serverFarmId: plan.id
     httpsOnly: true
     siteConfig: {
-      linuxFxVersion: 'Node|20'
+      linuxFxVersion: 'Node|24'
       alwaysOn: true
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
@@ -333,6 +333,10 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: 'node'
+        }
+        {
+          name: 'AzureWebJobsDisableHomepage'
+          value: 'true'
         }
         {
           name: 'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET'

@@ -68,6 +68,8 @@ Guests and the deleted owner scenario receive no licenses. The five Copilot pers
 | 2026-10-12 | SharePoint authentication retry | Graph device-code login succeeded, then SharePoint WAM native interop failed before elevation; changed both SharePoint seed paths to modern authentication with an explicit system browser |
 | 2026-10-12 | OneDrive content seed | Uploaded the Alex, Adele, and Patti test files after narrowly elevating the administrator on their personal sites; removed all three elevations afterward |
 | 2026-10-12 | Post-OneDrive verification | Confirmed the departed account remains absent and SAMTest Legacy Intranet WG remains ownerless |
+| 2026-10-12 | Azure dry-run deployment | Deployed the authenticated dashboard, API, scheduled collector, StorageV2 account, Application Insights, and read-only collector identity on a B1 Linux plan |
+| 2026-10-12 | Live smoke test | All 20 checks passed, including Easy Auth, app roles, protected routes, dashboard routing, one real Graph collection, stored state, owner tasks, and risk scoring |
 
 ## Seed results and exceptions
 
@@ -93,6 +95,31 @@ Current subscription consumption after seeding:
 | Copilot Studio tenant capacity | 0 / 25 user assignments (not user-assignable) |
 | Standalone EMS E5 | 0 / 1 |
 
+## Azure dry-run deployment result
+
+The first live deployment used Node.js 24 on a B1 Linux App Service plan in Azure US Gov Virginia. It created a Function App, StorageV2 account, Application Insights resource, Entra API application, and one user-assigned collector identity. The collector received nine reviewed read-only Microsoft Graph application permissions. No executor identity or tenant-write permission was deployed, and execution and notifications remained dry-run.
+
+The deployment test passed all 20 checks:
+
+- Anonymous API access was refused, while the signed-in operator token carried the expected governance roles.
+- Nine representative read APIs returned authenticated JSON, the dashboard loaded at `/`, and an unknown `/api/*` path returned `404` instead of the page.
+- The operator-protected manual collector endpoint completed one real read-only Graph run.
+- Eight workspaces were collected and stored, eight owner tasks were created, and all eight workspaces received risk scores.
+
+The repository regression suite also passed all 170 tests with no failures or skips. Storage-backed tests launch Azurite from an isolated local temporary directory so repositories stored under OneDrive do not block emulator startup.
+
+The deployed component list and planning estimate are maintained in [COST-AND-COMPONENTS.md](COST-AND-COMPONENTS.md). This B1 pilot remains in the documented **$25-$40/month Azure planning range**, excluding Microsoft 365 licensing and optional customer network/security services. Replace that estimate with Azure Cost Management actuals after 7 and 30 days.
+
+## Deployment lessons made repeatable
+
+- Microsoft Graph may reject a single PATCH that creates a delegated scope and preauthorizes it simultaneously. Publish the scope first, then PATCH preauthorization after the scope exists.
+- Register `Microsoft.OperationalInsights` as well as the obvious Web, Storage, Insights, and Managed Identity providers because monitoring dependencies can require it.
+- Align local and Azure runtimes on Node.js 24; current Azure SDK dependencies no longer support Node.js 20 in this project.
+- Treat ZIP publication as an asynchronous operation and retry transient SCM connection failures. Do not consider HTTP `202` final until Kudu reports deployment success and the function is discovered.
+- Disable the stock Azure Functions homepage and bind the dashboard explicitly to `/`. A wildcard dashboard route can shadow specific API routes in Azure even when local registration looks correct.
+- Invoke operational collection through the Easy Auth-protected `POST /api/collector/run` route with `Governance.Operator`. Host-key retrieval can fail independently of the application, and the protected route preserves the same Entra role boundary as the rest of the service.
+- Keep tenant IDs, subscription IDs, resource names, credentials, tokens, and user identifiers in ignored local state only; public evidence should report generalized components and counts.
+
 ## Planned sequence
 
 1. Create ordinary workspace users and six interactive governance personas.
@@ -101,7 +128,7 @@ Current subscription consumption after seeding:
 4. Assign five Copilot seats and one Copilot Studio seat to designated interactive personas.
 5. Provision OneDrive personal sites, then seed representative OneDrive sharing scenarios.
 6. Verify directory objects, licenses, Teams/channels, and cleanup boundaries.
-7. Deploy Azure resources in dry-run execution mode and validate every API route and collector.
+7. Deploy Azure resources in dry-run execution mode and validate every API route and collector. Completed with all 20 live checks passing.
 
 ## Security and handoff principles
 

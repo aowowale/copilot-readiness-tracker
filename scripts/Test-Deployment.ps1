@@ -38,17 +38,33 @@ function Read-JwtPayload([string]$Token) {
     [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($part)) | ConvertFrom-Json
 }
 
-function Call([string]$Path, [hashtable]$Headers, [string]$Method = 'GET') {
+function Call([string]$Path, [hashtable]$Headers, [string]$Method = 'GET', [int]$TimeoutSec = 60) {
     try {
-        $r = Invoke-WebRequest -Uri "$appUrl$Path" -Method $Method -Headers $Headers -MaximumRedirection 0 -SkipHttpErrorCheck -TimeoutSec 60
+        $r = Invoke-WebRequest -Uri "$appUrl$Path" -Method $Method -Headers $Headers -MaximumRedirection 0 -SkipHttpErrorCheck -TimeoutSec $TimeoutSec
         [pscustomobject]@{ Status = [int]$r.StatusCode; Body = $r.Content }
     } catch { [pscustomobject]@{ Status = 0; Body = $_.Exception.Message } }
+}
+
+function Call-WithoutRedirect([string]$Path) {
+    $handler = [Net.Http.HttpClientHandler]::new()
+    $handler.AllowAutoRedirect = $false
+    $client = [Net.Http.HttpClient]::new($handler)
+    try {
+        $client.Timeout = [TimeSpan]::FromSeconds(60)
+        $response = $client.GetAsync("$appUrl$Path").GetAwaiter().GetResult()
+        [pscustomobject]@{ Status = [int]$response.StatusCode; Body = $response.Content.ReadAsStringAsync().GetAwaiter().GetResult() }
+    } catch {
+        [pscustomobject]@{ Status = 0; Body = $_.Exception.Message }
+    } finally {
+        $client.Dispose()
+        $handler.Dispose()
+    }
 }
 
 Write-Host "Testing $appUrl`n"
 
 # 1. The platform must refuse anonymous requests.
-$anonymous = Call '/api/policies' @{}
+$anonymous = Call-WithoutRedirect '/api/policies'
 Record 'Anonymous requests are refused' ($anonymous.Status -in 301, 302, 401, 403) "status $($anonymous.Status)"
 
 # 2. Token for the signed-in user.
@@ -81,20 +97,13 @@ Record 'Unknown API route returns 404, not the page' ($missing.Status -eq 404) "
 if (-not $SkipCollector) {
     Write-Host "`nTriggering one collector run (reads the tenant, read-only)..."
     $startedAt = (Get-Date).ToUniversalTime()
-    $masterKey = (az functionapp keys list --resource-group $state.resourceGroup --name $state.functionApp --subscription $state.subscriptionId --query masterKey --output tsv 2>$null)
-    $trigger = Call '/admin/functions/collector' ($auth + @{ 'x-functions-key' = $masterKey; 'Content-Type' = 'application/json' }) 'POST'
-    Record 'Collector trigger accepted' ($trigger.Status -in 200, 202) "status $($trigger.Status)"
+    $trigger = Call '/api/collector/run' $auth 'POST' ([Math]::Max(60, $CollectorTimeoutMinutes * 60))
+    Record 'Collector trigger accepted' ($trigger.Status -eq 200) "status $($trigger.Status)"
 
-    if ($trigger.Status -in 200, 202) {
-        $source = $null
-        $deadline = (Get-Date).AddMinutes($CollectorTimeoutMinutes)
-        while ((Get-Date) -lt $deadline) {
-            Start-Sleep -Seconds 15
-            $sources = (Call '/api/sources' $auth).Body | ConvertFrom-Json
-            $source = $sources.sources | Where-Object { $_.source -eq 'graph-teams' -and [datetime]$_.finishedAt -ge $startedAt } | Select-Object -First 1
-            if ($source) { break }
-        }
-        Record 'Collector finished and recorded its run' ([bool]$source) $(if (-not $source) { "no graph-teams run within $CollectorTimeoutMinutes minutes. Check the function app logs." })
+    if ($trigger.Status -eq 200) {
+        $sources = (Call '/api/sources' $auth).Body | ConvertFrom-Json
+        $source = $sources.sources | Where-Object { $_.source -eq 'graph-teams' -and [datetime]$_.finishedAt -ge $startedAt } | Select-Object -First 1
+        Record 'Collector finished and recorded its run' ([bool]$source) $(if (-not $source) { 'no graph-teams run was recorded. Check the function app logs.' })
         if ($source) {
             Record 'Graph collection succeeded' ($source.status -in 'ok', 'partial') "status $($source.status), $($source.recordsRead) workspaces$(if ($source.warnings) { '; ' + ($source.warnings -join ' ') })$(if ($source.error) { '; ' + $source.error })"
             $workspaces = ((Call '/api/workspaces' $auth).Body | ConvertFrom-Json)

@@ -8,7 +8,7 @@
     administrator must consent to them separately (see CUSTOMER-DEPLOYMENT.md).
 
 .NOTES
-    Requires: Azure CLI, Azure Functions Core Tools (func), Node.js 20+.
+    Requires: Azure CLI, Azure Functions Core Tools (func), Node.js 24+.
 #>
 [CmdletBinding()]
 param(

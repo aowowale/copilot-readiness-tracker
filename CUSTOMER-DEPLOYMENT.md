@@ -110,11 +110,13 @@ Steps 2 to 5 below are automated by `scripts/Install-Governance.ps1`. It is safe
 .\scripts\Test-Deployment.ps1 -TenantId <tenant>
 ```
 
+`Test-Deployment.ps1` obtains a delegated API token for the signed-in operator, verifies Easy Auth and every read route, checks the dashboard and missing-route behavior, and calls `POST /api/collector/run`. That endpoint requires `Governance.Operator`, runs the same read-only collector used by the timer, waits for completion, and writes only governance snapshots, findings, tasks, and run history to the deployment's own storage. It does not enable an executor identity or mutate Microsoft 365. Use `-SkipCollector` when validating only authentication, routes, and the dashboard.
+
 Preflight checks the tools, the Azure cloud and sign-in, the subscription and its tenant, the region, your Azure roles (Contributor plus the ability to assign roles), and your Entra roles (create app registrations, grant Graph permissions). It stops before changing anything if a check fails. To keep another window's subscription untouched, run it in an isolated profile: `$env:AZURE_CONFIG_DIR = "$HOME\.azure-<name>"`.
 
 The installer needs both an Azure subscription and a tenant administrator. If different people hold those, run it with `-SkipGraphGrants` and have a Global Administrator grant the Graph permissions it prints. It grants the collector identity read-only application permissions only: `Group.Read.All`, `Team.ReadBasic.All`, `TeamMember.Read.All`, `Channel.ReadBasic.All` and `User.Read.All` (manager lookup), plus `Reports.Read.All` with `-IncludeUsageReports`. It assigns the installing user `Governance.Reader` and `Governance.Operator`; assign `Approver`, `Executor` and `Workspace.Owner` to the right people in Entra.
 
-The dashboard page and the API are served from the same function app, so one sign-in protects both. The sign-in client secret is stored as an app setting; rotate it before its one-year expiry (rerun the installer).
+The dashboard page and the API are served from the same function app, so one sign-in protects both. `AzureWebJobsDisableHomepage=true` lets the dashboard own `/`, while its explicit root-only route cannot intercept `/api/*`. The sign-in client secret is stored as an app setting; rotate it before its one-year expiry (rerun the installer).
 
 Notifications are recorded but not sent by default (`-NotificationMode dry-run`). To send reminders and escalations by email, add `-EnableExecution -NotificationMode live -NotificationSender <mailbox> [-NotificationOperatorEmail <team mailbox>]`. That grants the executor identity `Mail.Send`, which allows sending as any mailbox until you restrict it: create an Exchange Online application access policy limiting the executor to the sender mailbox. The installer prints this reminder, and sets `APP_URL` so messages link back to the dashboard.
 

@@ -1,4 +1,5 @@
 import { app } from "@azure/functions";
+import { authorize } from "../lib/auth.js";
 import { getConfig } from "../lib/config.js";
 import { createGraphClient } from "../lib/graph.js";
 import { collectWorkspaces } from "../lib/collect.js";
@@ -360,7 +361,23 @@ async function collector(myTimer, context) {
   context.log(`Collector wrote ${workspaces.length} workspace(s). Warnings: ${warnings.length}.`);
 }
 
+async function runCollector(request, context) {
+  const authorization = authorize(request, ["Governance.Operator"], { allowLocal: false });
+  if (!authorization.ok) {
+    return { status: authorization.status, jsonBody: { error: authorization.error } };
+  }
+
+  try {
+    await collector({ isPastDue: false }, context);
+    return { status: 200, jsonBody: { source: "backend", status: "completed" } };
+  } catch (error) {
+    context.error(`Manual collector run failed: ${error.message}`);
+    return { status: 500, jsonBody: { error: "Collector run failed." } };
+  }
+}
+
 app.timer("collector", {
   schedule: process.env.COLLECTOR_SCHEDULE || "0 0 3 * * *",
   handler: collector
 });
+app.http("collectorRun", { methods: ["POST"], authLevel: "anonymous", route: "api/collector/run", handler: runCollector });

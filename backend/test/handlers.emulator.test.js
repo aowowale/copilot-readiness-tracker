@@ -23,7 +23,7 @@ before(async () => {
   });
   delete process.env.ALLOW_LOCAL_AUTH;
   app.http = (name, options) => { handlers.set(name, options.handler); };
-  for (const file of ["owner", "requests", "risk", "notifications", "cases", "findings", "onedrive", "baselines"]) await import(`../src/functions/${file}.js`);
+  for (const file of ["owner", "requests", "risk", "notifications", "cases", "findings", "onedrive", "baselines", "collector"]) await import(`../src/functions/${file}.js`);
   process.env.EXECUTION_MODE = "dry-run";
   app.http = originalHttp;
   config = { storageConnectionString: emulator.connectionString, storageTableName: "workspaces" };
@@ -55,7 +55,7 @@ const wsTask = (id, workspaceId, assignee) => ({ taskId: id, taskType: "renewal"
 
 test("handlers register and refuse unauthenticated callers", async (t) => {
   if (skip(t)) return;
-  for (const name of ["ownerTasks", "ownerTaskDetail", "requests", "riskDefinition", "notifications", "ownerMoverDecision", "ownerLifecycleExecute", "cases", "case-detail", "case-transition", "findings", "policies", "oneDriveInventory", "oneDriveReview", "oneDriveSharing", "oneDriveSharingPropose", "oneDriveSharingConfirm", "baselines", "baselinePreview", "baselineApprove", "driftAlertAcknowledge"]) assert.ok(handlers.has(name), `${name} is registered`);
+  for (const name of ["ownerTasks", "ownerTaskDetail", "requests", "riskDefinition", "notifications", "ownerMoverDecision", "ownerLifecycleExecute", "cases", "case-detail", "case-transition", "findings", "policies", "oneDriveInventory", "oneDriveReview", "oneDriveSharing", "oneDriveSharingPropose", "oneDriveSharingConfirm", "baselines", "baselinePreview", "baselineApprove", "driftAlertAcknowledge", "collectorRun"]) assert.ok(handlers.has(name), `${name} is registered`);
   assert.equal((await call("ownerTasks")).status, 401);
   assert.equal((await call("requests")).status, 401);
   assert.equal((await call("notifications")).status, 401);
@@ -63,6 +63,8 @@ test("handlers register and refuse unauthenticated callers", async (t) => {
   assert.equal((await call("findings")).status, 401);
   assert.equal((await call("oneDriveInventory")).status, 401);
   assert.equal((await call("baselines")).status, 401);
+  assert.equal((await call("collectorRun")).status, 401);
+  assert.equal((await call("collectorRun", { as: reader })).status, 403);
   assert.equal((await call("oneDriveSharing", { query: "siteKey=https%3A%2F%2Fcontoso-my.sharepoint.com%2Fpersonal%2Fa" })).status, 401);
 });
 

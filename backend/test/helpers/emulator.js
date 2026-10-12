@@ -1,5 +1,8 @@
 import { spawn } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
 import { createConnection, createServer } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Starts the Azurite table emulator on a free port. Returns null when it cannot start, so the
@@ -25,9 +28,14 @@ const canConnect = (port) => new Promise((resolve) => {
 
 export async function startEmulator() {
   let child;
+  let workingDirectory;
+  const clean = () => {
+    if (workingDirectory) rmSync(workingDirectory, { recursive: true, force: true });
+  };
   try {
     const port = await freePort();
-    child = spawn(process.execPath, [BIN, "--tableHost", "127.0.0.1", "--tablePort", String(port), "--silent", "--skipApiVersionCheck", "--inMemoryPersistence"], { stdio: "ignore" });
+    workingDirectory = mkdtempSync(join(tmpdir(), "sam-azurite-"));
+    child = spawn(process.execPath, [BIN, "--tableHost", "127.0.0.1", "--tablePort", String(port), "--silent", "--skipApiVersionCheck", "--inMemoryPersistence"], { cwd: workingDirectory, stdio: "ignore" });
     let exited = false;
     let ready = false;
     child.on("exit", () => { exited = true; });
@@ -40,10 +48,18 @@ export async function startEmulator() {
     const connectionString = `DefaultEndpointsProtocol=http;AccountName=${ACCOUNT};AccountKey=${KEY};TableEndpoint=http://127.0.0.1:${port}/${ACCOUNT};`;
     return {
       connectionString,
-      stop: () => child.kill()
+      stop: () => {
+        child.once("exit", clean);
+        child.kill();
+      }
     };
   } catch {
-    child?.kill();
+    if (child?.exitCode === null) {
+      child.once("exit", clean);
+      child.kill();
+    } else {
+      clean();
+    }
     return null;
   }
 }
