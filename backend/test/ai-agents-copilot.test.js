@@ -166,6 +166,19 @@ test("the usage report falls back to the preview path, and a missing report leav
   assert.match(result.sources.at(-1).detail, /404|Not available/);
 });
 
+test("a fresh evidence usage report bypasses unsupported sovereign-cloud report routes", async () => {
+  const graph = fakeCopilotGraph({
+    skus: [{ skuId: "s1", skuPartNumber: "Microsoft_365_Copilot", consumedUnits: 1, prepaidUnits: { enabled: 1 } }],
+    users: [{ id: "1", userPrincipalName: "ann@contoso.com" }],
+    reportFails: true
+  });
+  const evidenceReport = parseUsageReport(csv);
+  const result = await collectCopilot(graph, { graphBaseUrl: "https://graph.microsoft.us/v1.0" }, now, evidenceReport);
+  assert.equal(graph.urls.length, 0);
+  assert.equal(result.adoption.joinable, true);
+  assert.match(result.sources.at(-1).detail, /evidence feed/);
+});
+
 test("a tenant with no Copilot seat licence is reported as such, not as zero adoption", async () => {
   const graph = fakeCopilotGraph({ skus: [{ skuId: "x", skuPartNumber: "SPE_E5" }] });
   const result = await collectCopilot(graph, { graphBaseUrl: "https://graph.example/v1.0" }, now);

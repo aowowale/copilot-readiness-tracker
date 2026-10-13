@@ -24,6 +24,8 @@ The target experience is a customer-owned, parameter-driven deployment that perf
 - Plan-first uninstall, checksummed rollback, manifest/checksum backup and restore, and scale profiles.
 - PR validation, environment-approved OIDC deployment, semantic releases, checksums, and provenance attestations.
 - Certificate-backed unattended SharePoint evidence export with explicit tenant-wide consent.
+- Feature-specific live readiness checks, constrained Mail.Send setup, and freshness-governed Teams activity, Purview lifecycle, Copilot usage, and agent evidence imports.
+- Same-tenant disposable deployment state isolation and a guarded deploy/rollback/uninstall/reinstall/restore exercise runner.
 
 ## Required human gates
 
@@ -44,9 +46,9 @@ These should remain explicit even in a polished installer:
 
 ### P0: required
 
-- Validate the unified entry point and Key Vault migration against a fresh customer-like subscription before declaring general availability.
+- Validate the unified entry point and Key Vault migration against a fresh customer-like subscription before declaring general availability. The guarded exercise is implemented; a second enabled subscription is still required for destructive execution.
 - Add Azure Monitor alerts for stale collector sources and permission drift after enough production telemetry exists to set defensible thresholds.
-- Exercise uninstall/rollback in a disposable Azure subscription; local plan and checksum paths are tested today, but destructive production testing remains an explicit customer change.
+- Exercise the guarded uninstall/rollback runner in a disposable Azure subscription; local state isolation, plans, checksums, backup/restore, and emulator paths are tested today.
 - Package module/tool prerequisites with version checks and installation guidance for Azure CLI, Node.js, Graph PowerShell, and SharePoint Online PowerShell.
 - Extend the v1 release manifest with post-deployment resource outputs. Version, source commit, default feature posture, permission documentation, checksums, and sanitized pilot evidence are included today.
 - Decide whether each customer accepts SharePoint `Sites.FullControl.All` for unattended tenant administration; otherwise retain the documented delegated administrator export.

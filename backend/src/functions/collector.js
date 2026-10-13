@@ -289,7 +289,8 @@ async function collector(myTimer, context) {
   }
 
   try {
-    const copilot = await collectCopilot(graph, config);
+    const feedFresh = evidenceFeed && evidenceAgeHours(evidenceFeed) <= config.evidenceMaxAgeHours;
+    const copilot = await collectCopilot(graph, config, new Date(), feedFresh ? evidenceFeed.copilotUsage : null);
     await writeCopilot(config, { collectedAt, licences: copilot.licences, adoption: copilot.adoption, sources: copilot.sources });
     for (const item of copilot.sources) {
       await record({

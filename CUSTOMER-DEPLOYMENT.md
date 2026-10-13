@@ -9,10 +9,10 @@ Use [docs/COST-AND-COMPONENTS.md](docs/COST-AND-COMPONENTS.md) for the current c
 Generate the versioned source, documentation, permission manifest, checksums, and sanitized pilot evidence from the repository root:
 
 ```powershell
-.\scripts\New-CustomerRelease.ps1 -Version 1.1.0
+.\scripts\New-CustomerRelease.ps1 -Version 1.2.0
 ```
 
-The command writes `artifacts/m365-copilot-readiness-v1.1.0.zip` and a companion `.zip.sha256` file. Verify the companion hash before extracting the archive. The package excludes install state, Azure CLI profiles, local settings, credentials, dependencies, and live tenant identifiers. Its default deployment posture is read-only and dry-run.
+The command writes `artifacts/m365-copilot-readiness-v1.2.0.zip` and a companion `.zip.sha256` file. Verify the companion hash before extracting the archive. The package excludes install state, Azure CLI profiles, local settings, credentials, dependencies, and live tenant identifiers. Its default deployment posture is read-only and dry-run.
 
 ## Unified customer deployment
 

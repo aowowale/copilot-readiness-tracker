@@ -1,5 +1,6 @@
 import { parseSitePrincipalsFeed } from "./shadow-users.js";
 import { parseAgentsFeed } from "./agents.js";
+import { parseUsageReport } from "./copilot.js";
 
 // Workspace evidence feed. Some facts have no Graph source (SharePoint exposure and
 // high-risk objects from Data Access Governance, legal hold and retention from Purview,
@@ -14,6 +15,7 @@ const COUNT_FIELDS = ["exposureCount", "highRiskObjects", "activityDays", "activ
 const BOOLEAN_FIELDS = ["legalHold", "retentionLocked", "rcd"];
 const MAX_ONEDRIVE_SITES = 10000;
 const ONEDRIVE_SHARING = new Set(["Disabled", "ExistingExternalUserSharingOnly", "ExternalUserSharingOnly", "ExternalUserAndGuestSharing", "Anyone"]);
+const MAX_COPILOT_USAGE_CSV_BYTES = 20 * 1024 * 1024;
 
 function parseOneDriveSites(input) {
   if (input === undefined) return [];
@@ -106,7 +108,13 @@ export function parseEvidenceFeed(text) {
   // Agents that no tenant API lists (Copilot Studio and Power Platform exports, Agent 365).
   const { agents, problems: agentProblems } = parseAgentsFeed(parsed.agents);
   const onedrive = parseOneDriveSites(parsed.onedrive);
-  return { generatedAt: generatedAt.toISOString(), sources, workspaces, agents, onedrive, onedriveComplete: parsed.onedriveComplete === true, problems: [...problems, ...agentProblems] };
+  let copilotUsage = null;
+  if (parsed.copilotUsageCsv !== undefined) {
+    if (typeof parsed.copilotUsageCsv !== "string" || Buffer.byteLength(parsed.copilotUsageCsv) > MAX_COPILOT_USAGE_CSV_BYTES) throw new Error("The evidence feed copilotUsageCsv must be a string no larger than 20 MB.");
+    copilotUsage = parseUsageReport(parsed.copilotUsageCsv);
+    if (copilotUsage.people.length > MAX_WORKSPACES) throw new Error(`The Copilot usage export exceeds ${MAX_WORKSPACES} users.`);
+  }
+  return { generatedAt: generatedAt.toISOString(), sources, workspaces, agents, onedrive, onedriveComplete: parsed.onedriveComplete === true, copilotUsage, problems: [...problems, ...agentProblems] };
 }
 
 export function sitePrincipalsFromEvidence(feed) {

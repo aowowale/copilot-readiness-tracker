@@ -43,6 +43,25 @@ Recommended objectives:
 
 Test restore quarterly into an isolated recovery resource group. Validate record counts, checksums, authenticated routes, source freshness, and role boundaries. Customer policy and Azure regional capabilities control the final objectives.
 
+## Optional production capabilities
+
+Keep execution in dry-run until each selected capability passes `Test-OptionalCapabilities.ps1` and its synthetic mutation test.
+
+- Restrict live `Mail.Send` with `Configure-MailSendRestriction.ps1`. The policy must grant the approved sender and deny an out-of-scope mailbox before notifications are enabled.
+- Supply verified sensitivity-label GUID mappings in `execution.sensitivityLabelIds`; provisioning fails before group creation when a label is unmapped and verifies the assigned label and owners after creation.
+- Build `evidence.json` with `Export-WorkspaceEvidence.ps1`. `-TeamsActivityCsv` supplies customer-approved GCC High Teams activity, `-LifecycleEvidenceCsv` supplies explicit Purview hold/retention determinations, and `-CopilotUsageCsv` supplies the Admin Center usage export.
+- Microsoft Graph Copilot usage report APIs are not available in US Government L4/L5. GCC High adoption therefore uses a fresh customer-approved export in the evidence feed; licensing and Teams app catalog collection remain API-backed.
+- Archive and delete require fresh evidence, independent request/approval/execution actors, typed confirmation, explicit lifecycle enablement, and post-action verification.
+- Sharing revocation re-reads each permission immediately before execution and blocks owner, inherited, changed, and actor-self access removal.
+
+Run the non-mutating readiness report after deployment:
+
+```powershell
+.\scripts\Test-OptionalCapabilities.ps1 -TenantId <tenant-guid> `
+  -ApprovedSender governance@contoso.com -DeniedMailbox unrelated@contoso.com `
+  -OutputPath artifacts\optional-capabilities.json
+```
+
 ## Uninstall and rollback
 
 Always inspect the uninstall plan first:
@@ -62,9 +81,21 @@ Rollback verifies the prior release checksum, redeploys that exact package, and 
   -BackupDirectory <optional-backup>
 ```
 
+For a same-tenant disposable deployment, set `SAM_INSTALL_STATE_DIR` or use the exercise runner. This prevents the disposable deployment from overwriting the pilot's tenant-keyed local state:
+
+```powershell
+.\scripts\Invoke-DisposableDeploymentExercise.ps1 `
+  -ConfigPath artifacts\disposable-exercise\customer-deployment.json `
+  -PreviousReleaseZip artifacts\m365-copilot-readiness-v1.1.0.zip `
+  -PreviousReleaseSha256 artifacts\m365-copilot-readiness-v1.1.0.zip.sha256 `
+  -DestructiveAcknowledgment 'DELETE DISPOSABLE SAM DEPLOYMENT' -Confirm:$false
+```
+
+The runner refuses an existing resource group, requires the `rg-sam-disposable-` prefix and a unique resource prefix, captures a transcript, verifies rollback and restore, and removes the deployment twice. It never purges Key Vault.
+
 ## CI/CD controls
 
-- `validate.yml`: Node 24, dependency install, 170 tests, JavaScript/PowerShell syntax, and Bicep build.
+- `validate.yml`: Node 24, dependency install, 173 tests, JavaScript/PowerShell syntax, and Bicep build.
 - `release.yml`: semantic `vX.Y.Z` tags, immutable GitHub release, SHA-256 checksum, and GitHub OIDC build-provenance attestation.
 - `deploy.yml`: OIDC Azure login and GitHub Environment approval. Keep `preflight_only` enabled until reviewers approve the production change.
 

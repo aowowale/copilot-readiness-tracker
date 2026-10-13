@@ -32,7 +32,7 @@ export async function collectAgents(graph, { evidenceAgents = [] } = {}) {
   return { agents: [...agents.values()], sourcesRead, warnings };
 }
 
-export async function collectCopilot(graph, config, now = new Date()) {
+export async function collectCopilot(graph, config, now = new Date(), evidenceUsageReport = null) {
   const sources = [];
   let skus;
   try {
@@ -69,9 +69,9 @@ export async function collectCopilot(graph, config, now = new Date()) {
     `${config.graphBaseUrl}/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D30')`,
     `${betaBase}/reports/getMicrosoft365CopilotUsageUserDetail(period='D30')`
   ];
-  let report = null;
+  let report = evidenceUsageReport;
   let lastError = null;
-  for (const url of attempts) {
+  for (const url of report ? [] : attempts) {
     try {
       report = parseUsageReport(await graph.getText(url));
       break;
@@ -86,6 +86,7 @@ export async function collectCopilot(graph, config, now = new Date()) {
   }
 
   const adoption = buildAdoption({ licensedUsers, report, now });
-  sources.push({ source: "copilot-usage", status: adoption.joinable ? "ok" : "partial", detail: adoption.reason });
+  const evidenceDetail = evidenceUsageReport ? "Customer-approved Copilot usage export from the fresh evidence feed." : null;
+  sources.push({ source: "copilot-usage", status: adoption.joinable ? "ok" : "partial", detail: adoption.reason || evidenceDetail });
   return { licences, adoption, licensedUsers, sources };
 }

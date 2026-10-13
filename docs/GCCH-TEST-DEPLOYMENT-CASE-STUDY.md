@@ -106,7 +106,7 @@ The deployment test passed all 20 checks:
 - The operator-protected manual collector endpoint completed one real read-only Graph run.
 - Eight workspaces were collected and stored, eight owner tasks were created, and all eight workspaces received risk scores.
 
-The repository regression suite also passed all 170 tests with no failures or skips. Storage-backed tests launch Azurite from an isolated local temporary directory so repositories stored under OneDrive do not block emulator startup.
+The repository regression suite also passed all 173 tests with no failures or skips. Storage-backed tests launch Azurite services from isolated local temporary directories so repositories stored under OneDrive do not block emulator startup.
 
 The deployed component list and planning estimate are maintained in [COST-AND-COMPONENTS.md](COST-AND-COMPONENTS.md). This B1 pilot remains in the documented **$25-$40/month Azure planning range**, excluding Microsoft 365 licensing and optional customer network/security services. Replace that estimate with Azure Cost Management actuals after 7 and 30 days.
 

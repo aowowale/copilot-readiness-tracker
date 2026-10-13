@@ -7,7 +7,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$stateFile = Join-Path $repoRoot ".install\$TenantId.json"
+$stateDirectory = if ($env:SAM_INSTALL_STATE_DIR) { [IO.Path]::GetFullPath($env:SAM_INSTALL_STATE_DIR) } else { Join-Path $repoRoot '.install' }
+$stateFile = Join-Path $stateDirectory "$TenantId.json"
 if (-not (Test-Path -LiteralPath $stateFile)) { throw 'Install state not found.' }
 $state = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
 $token = az account get-access-token --tenant $TenantId --scope "api://$($state.apiClientId)/user_impersonation" --query accessToken --output tsv

@@ -50,7 +50,7 @@ if ($Initialize) {
     if ($cloud -notin 'AzureCloud', 'AzureUSGovernment') { throw 'Cloud must be AzureCloud or AzureUSGovernment.' }
     $configuration = [ordered]@{
         schemaVersion = 1
-        releaseVersion = '1.1.0'
+        releaseVersion = '1.2.0'
         azure = [ordered]@{
             tenantId = Read-Required 'Customer tenant ID'
             subscriptionId = Read-Required 'Azure subscription ID'
@@ -84,6 +84,7 @@ if ($Initialize) {
         execution = [ordered]@{
             enabled = $false; mode = 'dry-run'; enableProvisioning = $false; enableLinkRevocation = $false
             enableOneDriveSharingRevocation = $false; enableLifecycleExecution = $false
+            enableSensitivityLabels = $false; sensitivityLabelIds = [ordered]@{}
             notificationMode = 'dry-run'; notificationSender = ''; notificationOperatorEmail = ''
         }
     }
@@ -140,6 +141,8 @@ $installerParameters = @{
     EnableLinkRevocation = [bool]$config.execution.enableLinkRevocation
     EnableOneDriveSharingRevocation = [bool]$config.execution.enableOneDriveSharingRevocation
     EnableLifecycleExecution = [bool]$config.execution.enableLifecycleExecution
+    EnableSensitivityLabels = [bool]$config.execution.enableSensitivityLabels
+    SensitivityLabelIdsJson = ($config.execution.sensitivityLabelIds | ConvertTo-Json -Depth 5 -Compress)
     PrivateNetworking = [bool]$config.network.privateNetworking
     DisablePublicIngress = [bool]$config.network.disablePublicIngress
     PrivateDeploymentAgentReady = [bool]$config.network.privateDeploymentAgentReady

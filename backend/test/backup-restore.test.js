@@ -24,28 +24,41 @@ const canConnect = (port) => new Promise((resolve) => {
 
 test("backup and restore round-trip tables and blobs with checksums", async (context) => {
   const ports = new Set();
-  while (ports.size < 3) ports.add(await freePort());
-  const [blobPort, queuePort, tablePort] = ports;
+  while (ports.size < 2) ports.add(await freePort());
+  const [blobPort, tablePort] = ports;
   const workingDirectory = await mkdtemp(join(tmpdir(), "sam-backup-azurite-"));
+  const blobDirectory = await mkdtemp(join(tmpdir(), "sam-backup-blob-"));
+  const tableDirectory = await mkdtemp(join(tmpdir(), "sam-backup-table-"));
   const backupDirectory = await mkdtemp(join(tmpdir(), "sam-backup-data-"));
-  const executable = fileURLToPath(new URL("../node_modules/azurite/dist/src/azurite.js", import.meta.url));
-  const child = spawn(process.execPath, [executable, "--blobHost", "127.0.0.1", "--blobPort", String(blobPort), "--queueHost", "127.0.0.1", "--queuePort", String(queuePort), "--tableHost", "127.0.0.1", "--tablePort", String(tablePort), "--silent", "--skipApiVersionCheck", "--inMemoryPersistence"], { cwd: workingDirectory, stdio: ["ignore", "pipe", "pipe"] });
+  const blobExecutable = fileURLToPath(new URL("../node_modules/azurite/dist/src/blob/main.js", import.meta.url));
+  const tableExecutable = fileURLToPath(new URL("../node_modules/azurite/dist/src/table/main.js", import.meta.url));
+  const children = [
+    spawn(process.execPath, [blobExecutable, "--blobHost", "127.0.0.1", "--blobPort", String(blobPort), "--silent", "--skipApiVersionCheck", "--inMemoryPersistence", "--disableTelemetry"], { cwd: blobDirectory, stdio: ["ignore", "pipe", "pipe"] }),
+    spawn(process.execPath, [tableExecutable, "--tableHost", "127.0.0.1", "--tablePort", String(tablePort), "--silent", "--skipApiVersionCheck", "--inMemoryPersistence", "--disableTelemetry"], { cwd: tableDirectory, stdio: ["ignore", "pipe", "pipe"] })
+  ];
   let startupError = "";
-  child.stdout.on("data", (chunk) => { startupError += chunk.toString(); });
-  child.stderr.on("data", (chunk) => { startupError += chunk.toString(); });
+  for (const child of children) {
+    child.stdout.on("data", (chunk) => { startupError += chunk.toString(); });
+    child.stderr.on("data", (chunk) => { startupError += chunk.toString(); });
+  }
   context.after(async () => {
-    if (child.exitCode === null) {
-      const exited = new Promise((resolve) => child.once("exit", resolve));
-      child.kill();
-      await exited;
+    for (const child of children) {
+      if (child.exitCode === null) {
+        const exited = new Promise((resolve) => child.once("exit", resolve));
+        child.kill();
+        await exited;
+      }
     }
     await rm(workingDirectory, { recursive: true, force: true });
+    await rm(blobDirectory, { recursive: true, force: true });
+    await rm(tableDirectory, { recursive: true, force: true });
     await rm(backupDirectory, { recursive: true, force: true });
   });
-  const deadline = Date.now() + 15_000;
-  while (Date.now() < deadline && child.exitCode === null && !(await canConnect(tablePort))) await new Promise((resolve) => setTimeout(resolve, 100));
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline && children.every((child) => child.exitCode === null) && (!(await canConnect(tablePort)) || !(await canConnect(blobPort)))) await new Promise((resolve) => setTimeout(resolve, 100));
   assert.equal(await canConnect(tablePort), true, `Azurite table service did not start: ${startupError.trim()}`);
-  const connectionString = `DefaultEndpointsProtocol=http;AccountName=${account};AccountKey=${key};BlobEndpoint=http://127.0.0.1:${blobPort}/${account};QueueEndpoint=http://127.0.0.1:${queuePort}/${account};TableEndpoint=http://127.0.0.1:${tablePort}/${account};`;
+  assert.equal(await canConnect(blobPort), true, `Azurite blob service did not start: ${startupError.trim()}`);
+  const connectionString = `DefaultEndpointsProtocol=http;AccountName=${account};AccountKey=${key};BlobEndpoint=http://127.0.0.1:${blobPort}/${account};TableEndpoint=http://127.0.0.1:${tablePort}/${account};`;
   const sdkOptions = { allowInsecureConnection: true };
   const tables = TableServiceClient.fromConnectionString(connectionString, sdkOptions);
   await tables.createTable("workspaces");

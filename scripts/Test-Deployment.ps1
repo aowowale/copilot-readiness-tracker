@@ -21,7 +21,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$stateFile = Join-Path $repoRoot ".install\$TenantId.json"
+$stateDirectory = if ($env:SAM_INSTALL_STATE_DIR) { [IO.Path]::GetFullPath($env:SAM_INSTALL_STATE_DIR) } else { Join-Path $repoRoot '.install' }
+$stateFile = Join-Path $stateDirectory "$TenantId.json"
 if (-not (Test-Path -LiteralPath $stateFile)) { throw "No install record for tenant $TenantId. Run Install-Governance.ps1 first." }
 $state = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
 $appUrl = $state.appUrl.TrimEnd('/')

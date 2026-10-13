@@ -529,17 +529,23 @@ if (-not $SkipCodeDeploy) {
 }
 
 # ------------------------------------------------------------------ record the result
-$stateDir = Join-Path $repoRoot '.install'
+$stateDir = if ($env:SAM_INSTALL_STATE_DIR) { [IO.Path]::GetFullPath($env:SAM_INSTALL_STATE_DIR) } else { Join-Path $repoRoot '.install' }
 New-Item -ItemType Directory -Force -Path $stateDir | Out-Null
 $state = [ordered]@{
     installedAt = (Get-Date).ToUniversalTime().ToString('o'); cloud = $Cloud; tenantId = $TenantId; subscriptionId = $SubscriptionId
     resourceGroup = $ResourceGroup; functionApp = $functionApp; appUrl = $appUrl; apiClientId = $apiClientId
     collectorIdentityPrincipalId = $identityPrincipalId; storageAccount = $outputs.storageAccountName.value
+    executorIdentityPrincipalId = if ($EnableExecution) { $outputs.executorIdentityPrincipalId.value } else { '' }
     keyVault = $outputs.keyVaultName.value; logAnalyticsWorkspace = $outputs.logAnalyticsWorkspaceName.value
     privateNetworkingEnabled = [bool]$PrivateNetworking; disablePublicIngress = [bool]$DisablePublicIngress
     roleGroupObjectIds = $roleGroupMap
     graphPermissionsGranted = if ($SkipGraphGrants) { @() } else { $graphPermissions }
     executionEnabled = [bool]$EnableExecution; executionMode = $(if ($EnableExecution) { $ExecutionMode } else { 'off' })
+    executorPermissionsGranted = if ($EnableExecution -and -not $SkipGraphGrants) { @($executorPermissions) } else { @() }
+    provisioningEnabled = [bool]$EnableProvisioning; linkRevocationEnabled = [bool]$EnableLinkRevocation
+    oneDriveSharingRevocationEnabled = [bool]$EnableOneDriveSharingRevocation
+    lifecycleExecutionEnabled = [bool]$EnableLifecycleExecution; sensitivityLabelsEnabled = [bool]$EnableSensitivityLabels
+    notificationMode = $NotificationMode; notificationSender = $NotificationSender
 }
 $stateFile = Join-Path $stateDir "$TenantId.json"
 $state | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $stateFile -Encoding utf8

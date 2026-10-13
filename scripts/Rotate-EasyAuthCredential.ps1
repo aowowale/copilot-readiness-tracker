@@ -7,7 +7,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$stateFile = Join-Path $repoRoot ".install\$TenantId.json"
+$stateDirectory = if ($env:SAM_INSTALL_STATE_DIR) { [IO.Path]::GetFullPath($env:SAM_INSTALL_STATE_DIR) } else { Join-Path $repoRoot '.install' }
+$stateFile = Join-Path $stateDirectory "$TenantId.json"
 if (-not (Test-Path -LiteralPath $stateFile)) { throw 'Install state not found.' }
 $state = Get-Content -LiteralPath $stateFile -Raw | ConvertFrom-Json
 if (-not $state.keyVault) { throw 'This deployment predates Key Vault-backed Easy Auth. Upgrade it before rotating.' }

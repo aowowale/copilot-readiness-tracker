@@ -25,7 +25,7 @@ try {
     }
     $rollbackState = Join-Path $releaseRoot.FullName ".install\$($config.azure.tenantId).json"
     if (Test-Path -LiteralPath $rollbackState) {
-        $currentStateDirectory = Join-Path (Split-Path -Parent $PSScriptRoot) '.install'
+        $currentStateDirectory = if ($env:SAM_INSTALL_STATE_DIR) { [IO.Path]::GetFullPath($env:SAM_INSTALL_STATE_DIR) } else { Join-Path (Split-Path -Parent $PSScriptRoot) '.install' }
         New-Item -ItemType Directory -Path $currentStateDirectory -Force | Out-Null
         Copy-Item -LiteralPath $rollbackState -Destination $currentStateDirectory -Force
     }

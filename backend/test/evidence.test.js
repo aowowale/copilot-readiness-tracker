@@ -79,3 +79,11 @@ test("OneDrive admin metadata is validated without requiring or inspecting file 
   assert.throws(() => parseEvidenceFeed(feedText({ onedrive: [{ ...site, url: "http://contoso.sharepoint.com/personal/user" }] })), /HTTPS SharePoint URL/);
   assert.throws(() => parseEvidenceFeed(feedText({ onedrive: [{ ...site, storageMb: -1 }] })), /storageMb/);
 });
+
+test("Copilot usage CSV is parsed as freshness-governed evidence", () => {
+  const csv = "Report Refresh Date,User Principal Name,Display Name,Last Activity Date,Microsoft Teams Copilot Last Activity Date\n2026-10-08,user@contoso.com,User,2026-10-07,2026-10-07\n";
+  const feed = parseEvidenceFeed(feedText({ copilotUsageCsv: csv }));
+  assert.equal(feed.copilotUsage.people.length, 1);
+  assert.equal(feed.copilotUsage.people[0].userPrincipalName, "user@contoso.com");
+  assert.throws(() => parseEvidenceFeed(feedText({ copilotUsageCsv: 42 })), /must be a string/);
+});
