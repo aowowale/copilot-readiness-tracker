@@ -4,6 +4,16 @@ This guide describes the production path for installing the dashboard in a custo
 
 Use [docs/COST-AND-COMPONENTS.md](docs/COST-AND-COMPONENTS.md) for the current cost model and [docs/PUSH-BUTTON-READINESS.md](docs/PUSH-BUTTON-READINESS.md) for the remaining customer-handoff work.
 
+## Build the customer release
+
+Generate the versioned source, documentation, permission manifest, checksums, and sanitized pilot evidence from the repository root:
+
+```powershell
+.\scripts\New-CustomerRelease.ps1 -Version 1.0.0
+```
+
+The command writes `artifacts/m365-copilot-readiness-v1.0.0.zip` and a companion `.zip.sha256` file. Verify the companion hash before extracting the archive. The package excludes install state, Azure CLI profiles, local settings, credentials, dependencies, and live tenant identifiers. Its default deployment posture is read-only and dry-run.
+
 ## Recommended architecture
 
 Deploy the solution into a customer-owned Azure Government subscription:

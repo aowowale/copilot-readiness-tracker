@@ -14,6 +14,9 @@ The target experience is a customer-owned, parameter-driven deployment that perf
 - Installing-user Reader/Operator app-role assignments.
 - End-to-end deployment smoke test, authenticated route checks, collector trigger, storage verification, and risk/task verification.
 - Idempotent synthetic test-tenant seeding and prefixed cleanup.
+- Reproducible customer guide and presentation generation, including native speaker notes and PDF previews.
+- Versioned v1 customer release packaging with source commit, permission manifest, safe-default feature posture, per-file SHA-256 checksums, and an archive checksum.
+- Fail-closed, GET-only read-only pilot validation with sanitized acceptance evidence.
 
 ## Required human gates
 
@@ -34,13 +37,13 @@ These should remain explicit even in a polished installer:
 
 ### P0: required
 
-- Create one supported entry script or deployment package that generates a customer parameter file, runs preflight, displays the permission manifest, deploys, assigns customer-provided role groups, and runs validation.
+- Consolidate the v1 release package, installer, preflight, permission review, customer-group assignment, and validation into one supported entry command. The v1 release package and manifest are complete; orchestration remains separate.
 - Add a deterministic prerequisite check for Microsoft 365 SKU/service plans used by selected features.
 - Replace the generated dashboard client secret in plain app settings with an approved secret lifecycle, such as a Key Vault reference and rotation procedure, or another supported App Service Authentication credential design.
 - Add explicit Log Analytics workspace, retention, sampling, daily cap, budget, and alerts to infrastructure parameters.
 - Add a tested uninstall/rollback command for Azure resources, app registrations, service principals, role assignments, and optional seed data.
 - Package module/tool prerequisites with version checks and installation guidance for Azure CLI, Node.js, Graph PowerShell, and SharePoint Online PowerShell.
-- Add a deployment manifest containing versions, enabled features, granted permissions, outputs, and verification results without secrets.
+- Extend the v1 release manifest with post-deployment resource outputs. Version, source commit, default feature posture, permission documentation, checksums, and sanitized pilot evidence are included today.
 - Resolve SharePoint automation authentication for customer environments: supported certificate/managed-identity path where possible, documented delegated admin fallback otherwise.
 
 ### P1: production hardening
@@ -51,7 +54,7 @@ These should remain explicit even in a polished installer:
 - Add app-role assignment for pre-existing customer groups during install rather than a separate seed pass.
 - Add feature-by-feature consent bundles so enabling Copilot, usage reports, OneDrive review, provisioning, notifications, sharing revocation, or lifecycle execution grants only the required permissions.
 - Add post-deployment cost-budget creation and a 7/30-day actual-cost report.
-- Add a customer acceptance report covering authentication, role boundaries, collection completeness, data freshness, dry-run evidence, and unsupported cloud APIs.
+- Expand the GET-only pilot acceptance report with explicit collection-completeness, freshness, and unsupported-API assertions. Authentication, role enforcement, route health, dry-run settings, and identifier sanitization are covered today.
 
 ### P2: scale and operations
 
@@ -76,6 +79,9 @@ The default package should stop after validated dry-run deployment. Live mutatio
 A customer-ready release should include:
 
 - Versioned source package and checksum.
+- Machine-readable release manifest and per-file checksums.
+- Sanitized GET-only pilot acceptance output.
+- Customer guide, presentation, speaker notes, and PDF previews.
 - Architecture and data-flow diagram.
 - Parameter schema and worked GCC High example without tenant secrets.
 - Permission manifest by feature.
