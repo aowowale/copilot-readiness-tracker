@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install and test
+        working-directory: backend
+        run: npm ci; npm test
+      - name: Build versioned source release
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          .\scripts\New-CustomerRelease.ps1 -Version $version -SkipCollateral
+          "RELEASE_VERSION=$version" | Out-File $env:GITHUB_ENV -Append
+      - name: Attest release provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: artifacts/m365-copilot-readiness-v${{ env.RELEASE_VERSION }}.zip
+      - name: Publish immutable release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create '${{ github.ref_name }}' `
+            "artifacts/m365-copilot-readiness-v$env:RELEASE_VERSION.zip" `
+            "artifacts/m365-copilot-readiness-v$env:RELEASE_VERSION.zip.sha256" `
+            --verify-tag --generate-notes --title "Microsoft 365 Copilot Readiness ${{ github.ref_name }}"

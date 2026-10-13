@@ -17,7 +17,7 @@ This is an engineering estimate, not a quote. Azure retail rates can change and 
 | Entra app registration and enterprise application | Dashboard sign-in, API audience, scopes, and app roles | No direct Azure resource charge; Entra licensing is separate |
 | Azure role assignments | Managed-identity access to Tables, Blobs, and Queues | No direct charge |
 
-The Bicep template does not currently deploy Key Vault, private endpoints, Azure Firewall, Front Door, backup vaults, or an explicit Log Analytics workspace. Customer policy may require these, and they must be estimated separately.
+The Bicep template deploys Key Vault, an explicit Log Analytics workspace, Application Insights sampling, a daily ingestion cap, alerts, and a resource-group budget. Optional private networking adds VNet integration, four private endpoints, and private DNS zones. Azure Firewall, Front Door, Private DNS Resolver, immutable external backup storage, premium support, and customer connectivity remain separate customer architecture and cost decisions.
 
 ## Current Azure retail inputs
 
@@ -93,6 +93,6 @@ The variables that should be captured during customer intake are:
 - Use telemetry sampling and a daily cap.
 - Set explicit data retention for Tables, evidence blobs, and logs.
 - Tag every resource with customer, environment, owner, cost center, and data classification.
-- Configure a resource-group budget and alerts after deployment.
+- Review the deployed resource-group budget, recipients, Log Analytics daily cap, retention, sampling, and alert thresholds after deployment.
 - Export actual Azure Cost Management data after 7 and 30 days and replace estimates with observed run rates.
 - Keep customer licensing as a separate line item backed by a reseller or Microsoft quote.

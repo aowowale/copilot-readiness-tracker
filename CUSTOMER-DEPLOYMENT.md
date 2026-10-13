@@ -9,10 +9,24 @@ Use [docs/COST-AND-COMPONENTS.md](docs/COST-AND-COMPONENTS.md) for the current c
 Generate the versioned source, documentation, permission manifest, checksums, and sanitized pilot evidence from the repository root:
 
 ```powershell
-.\scripts\New-CustomerRelease.ps1 -Version 1.0.0
+.\scripts\New-CustomerRelease.ps1 -Version 1.1.0
 ```
 
-The command writes `artifacts/m365-copilot-readiness-v1.0.0.zip` and a companion `.zip.sha256` file. Verify the companion hash before extracting the archive. The package excludes install state, Azure CLI profiles, local settings, credentials, dependencies, and live tenant identifiers. Its default deployment posture is read-only and dry-run.
+The command writes `artifacts/m365-copilot-readiness-v1.1.0.zip` and a companion `.zip.sha256` file. Verify the companion hash before extracting the archive. The package excludes install state, Azure CLI profiles, local settings, credentials, dependencies, and live tenant identifiers. Its default deployment posture is read-only and dry-run.
+
+## Unified customer deployment
+
+Use the wizard instead of manually assembling installer switches:
+
+```powershell
+.\scripts\Deploy-Customer.ps1 -Initialize -ConfigPath customer-deployment.json
+.\scripts\Deploy-Customer.ps1 -ConfigPath customer-deployment.json -PreflightOnly
+.\scripts\Deploy-Customer.ps1 -ConfigPath customer-deployment.json
+```
+
+Preflight checks Azure/tool access, target tenant and region, Azure RBAC, Microsoft Graph administration, Microsoft 365 Teams/SharePoint plans, and selected Copilot/OneDrive prerequisites. Customer security groups in `access.roleGroupObjectIds` are assigned directly to app roles during installation. Use `-SkipLicenseChecks` only when an approved licensing report is attached to the change record.
+
+See [docs/PRODUCTION-OPERATIONS.md](docs/PRODUCTION-OPERATIONS.md), [docs/PRIVATE-NETWORKING.md](docs/PRIVATE-NETWORKING.md), and [docs/SCALE-TESTING.md](docs/SCALE-TESTING.md) for operations, recovery, private DNS, and capacity acceptance.
 
 ## Recommended architecture
 

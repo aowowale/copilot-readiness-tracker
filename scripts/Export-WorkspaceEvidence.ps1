@@ -16,8 +16,8 @@
         a delete request to reach a second approver. Unknown keeps delete blocked.
       - activityDays here is SharePoint content activity, not Teams chat or meeting activity.
 
-    Requirements: SharePoint Online Management Shell (Connect-SPOService already signed in), and
-    for -Upload the Azure CLI signed in with Storage Blob Data Contributor on the account.
+    Requirements: SharePoint Online Management Shell and either an existing connection or the
+    certificate parameters below. For -Upload, Azure CLI must hold Storage Blob Data Contributor.
 
 .PARAMETER OverridesJson
     Optional JSON file: { "<teamId>": { "exposure": "High", "exposureCount": 3,
@@ -52,11 +52,21 @@ param(
     [string]$OutFile = 'evidence.json',
     [switch]$Upload,
     [string]$StorageAccount,
-    [switch]$IncludeOneDrive
+    [switch]$IncludeOneDrive,
+    [string]$SharePointAdminUrl,
+    [string]$TenantId,
+    [string]$ClientId,
+    [string]$CertificateThumbprint
 )
 
 $ErrorActionPreference = 'Stop'
 if ($Upload -and -not $StorageAccount) { throw '-Upload needs -StorageAccount.' }
+$connectionValues = @($SharePointAdminUrl, $TenantId, $ClientId, $CertificateThumbprint) | Where-Object { $_ }
+if ($connectionValues.Count -notin 0, 4) { throw 'SharePointAdminUrl, TenantId, ClientId, and CertificateThumbprint must be supplied together for unattended authentication.' }
+if ($connectionValues.Count -eq 4) {
+    Import-Module Microsoft.Online.SharePoint.PowerShell -MinimumVersion 16.0.24810.12000 -DisableNameChecking
+    Connect-SPOService -Url $SharePointAdminUrl -TenantId $TenantId -ClientId $ClientId -CertificateThumbprint $CertificateThumbprint
+}
 
 $allowedFields = @('exposure', 'exposureCount', 'highRiskObjects', 'activityDays', 'activeChannels', 'legalHold', 'retentionLocked', 'rcd', 'sitePrincipals')
 $now = (Get-Date).ToUniversalTime()

@@ -1,0 +1,46 @@
+name: Deploy customer environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: GitHub environment with required reviewers and Azure federated credentials
+        type: environment
+        required: true
+      preflight_only:
+        description: Stop after customer preflight
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    environment: ${{ inputs.environment }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          environment: ${{ vars.AZURE_ENVIRONMENT }}
+      - name: Materialize reviewed deployment configuration
+        shell: pwsh
+        env:
+          DEPLOYMENT_CONFIG: ${{ vars.SAM_DEPLOYMENT_CONFIG }}
+        run: |
+          if (-not $env:DEPLOYMENT_CONFIG) { throw 'SAM_DEPLOYMENT_CONFIG environment variable is required.' }
+          $env:DEPLOYMENT_CONFIG | Set-Content customer-deployment.json -Encoding UTF8
+      - name: Deploy reviewed version
+        shell: pwsh
+        run: |
+          $arguments = @{ ConfigPath = '.\customer-deployment.json' }
+          if ('${{ inputs.preflight_only }}' -eq 'true') { $arguments.PreflightOnly = $true }
+          .\scripts\Deploy-Customer.ps1 @arguments

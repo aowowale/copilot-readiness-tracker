@@ -17,6 +17,13 @@ The target experience is a customer-owned, parameter-driven deployment that perf
 - Reproducible customer guide and presentation generation, including native speaker notes and PDF previews.
 - Versioned v1 customer release packaging with source commit, permission manifest, safe-default feature posture, per-file SHA-256 checksums, and an archive checksum.
 - Fail-closed, GET-only read-only pilot validation with sanitized acceptance evidence.
+- Unified JSON-backed customer wizard and preflight entry point.
+- Selected-feature Microsoft 365 SKU checks and customer group-to-app-role assignment.
+- Key Vault-backed Easy Auth credential rotation with post-rotation validation.
+- Log Analytics retention/cap/sampling, alerts, monthly budget, and optional private endpoints/DNS.
+- Plan-first uninstall, checksummed rollback, manifest/checksum backup and restore, and scale profiles.
+- PR validation, environment-approved OIDC deployment, semantic releases, checksums, and provenance attestations.
+- Certificate-backed unattended SharePoint evidence export with explicit tenant-wide consent.
 
 ## Required human gates
 
@@ -37,29 +44,24 @@ These should remain explicit even in a polished installer:
 
 ### P0: required
 
-- Consolidate the v1 release package, installer, preflight, permission review, customer-group assignment, and validation into one supported entry command. The v1 release package and manifest are complete; orchestration remains separate.
-- Add a deterministic prerequisite check for Microsoft 365 SKU/service plans used by selected features.
-- Replace the generated dashboard client secret in plain app settings with an approved secret lifecycle, such as a Key Vault reference and rotation procedure, or another supported App Service Authentication credential design.
-- Add explicit Log Analytics workspace, retention, sampling, daily cap, budget, and alerts to infrastructure parameters.
-- Add a tested uninstall/rollback command for Azure resources, app registrations, service principals, role assignments, and optional seed data.
+- Validate the unified entry point and Key Vault migration against a fresh customer-like subscription before declaring general availability.
+- Add Azure Monitor alerts for stale collector sources and permission drift after enough production telemetry exists to set defensible thresholds.
+- Exercise uninstall/rollback in a disposable Azure subscription; local plan and checksum paths are tested today, but destructive production testing remains an explicit customer change.
 - Package module/tool prerequisites with version checks and installation guidance for Azure CLI, Node.js, Graph PowerShell, and SharePoint Online PowerShell.
 - Extend the v1 release manifest with post-deployment resource outputs. Version, source commit, default feature posture, permission documentation, checksums, and sanitized pilot evidence are included today.
-- Resolve SharePoint automation authentication for customer environments: supported certificate/managed-identity path where possible, documented delegated admin fallback otherwise.
+- Decide whether each customer accepts SharePoint `Sites.FullControl.All` for unattended tenant administration; otherwise retain the documented delegated administrator export.
 
 ### P1: production hardening
 
-- Parameterize public ingress versus private networking and document DNS/private-endpoint requirements.
-- Add resource locks, diagnostic settings, customer policy tags, and optional zone/resilience tiers.
-- Add CI/CD with signed/reviewed artifacts, Bicep validation, backend tests, and environment approvals.
-- Add app-role assignment for pre-existing customer groups during install rather than a separate seed pass.
+- Add resource locks and optional premium/zone-resilient compute tiers; diagnostic settings, policy tags, GRS/GZRS storage, and private networking are parameterized today.
 - Add feature-by-feature consent bundles so enabling Copilot, usage reports, OneDrive review, provisioning, notifications, sharing revocation, or lifecycle execution grants only the required permissions.
 - Add post-deployment cost-budget creation and a 7/30-day actual-cost report.
 - Expand the GET-only pilot acceptance report with explicit collection-completeness, freshness, and unsupported-API assertions. Authentication, role enforcement, route health, dry-run settings, and identifier sanitization are covered today.
 
 ### P2: scale and operations
 
-- Load-test collection and API behavior at documented tenant-size bands.
-- Define backup/restore and disaster-recovery objectives.
+- Run department and enterprise profiles with representative customer-sized data; the harness and acceptance thresholds are implemented, and the read-only pilot profile is the first gate.
+- Validate customer-specific RPO/RTO by quarterly isolated restore exercises; scripts and recommended objectives are documented.
 - Add operational dashboards and alerts for collector failure, stale sources, permission drift, storage errors, and executor uncertainty.
 - Add upgrade/migration handling for storage schema, app roles, and permission changes.
 - Publish support ownership, incident response, and release/compatibility policy.

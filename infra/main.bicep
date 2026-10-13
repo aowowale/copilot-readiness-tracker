@@ -1,7 +1,14 @@
 // Read-only collector + API infrastructure for the Copilot Readiness dashboard.
 // Deploys to Azure Government or commercial Azure; pass the cloud-specific endpoints as parameters.
-// The only secret is the sign-in client secret, passed as a secure parameter. The collector uses a
-// user-assigned managed identity.
+// The sign-in client secret is written to Key Vault and referenced by App Service Authentication.
+// The collector and secret reader use separate user-assigned managed identities.
+
+type alertEmail = {
+  @description('Unique receiver name within the action group.')
+  name: string
+  @description('Email address that receives production alerts.')
+  emailAddress: string
+}
 
 @description('Azure region, e.g. usgovvirginia, usgovtexas or eastus.')
 param location string = resourceGroup().location
@@ -24,8 +31,61 @@ param apiAudience string = 'api://${apiClientId}'
 @secure()
 param authClientSecret string
 
+@description('Log Analytics retention in days.')
+@minValue(30)
+@maxValue(730)
+param logRetentionDays int = 30
+
+@description('Log Analytics daily ingestion cap in GB. Use -1 for no cap.')
+param logDailyQuotaGb int = 1
+
+@description('Application Insights sampling percentage.')
+@minValue(1)
+@maxValue(100)
+param telemetrySamplingPercentage int = 20
+
+@description('Email receivers for production alerts.')
+param alertEmails alertEmail[] = []
+
+@description('Total HTTP 5xx responses within 15 minutes that trigger an alert.')
+@minValue(0)
+param http5xxAlertThreshold int = 5
+
+@description('Monthly resource-group budget. Set to 0 to omit the budget.')
+@minValue(0)
+param monthlyBudgetAmount int = 40
+
+@description('Budget notification recipients.')
+param budgetContactEmails string[] = []
+
+@description('Budget start date. Defaults to the first day of the current month.')
+param budgetStartDate string = utcNow('yyyy-MM-01')
+
+@description('Create VNet integration, private endpoints, and linked private DNS zones.')
+param privateNetworkingEnabled bool = false
+
+@description('Disable public Function App ingress. Enable only after private DNS and deployment-agent connectivity are verified.')
+param disablePublicIngress bool = false
+
+@description('Address space for the deployment VNet.')
+param vnetAddressPrefix string = '10.42.0.0/16'
+
+@description('Dedicated Function App integration subnet.')
+param integrationSubnetPrefix string = '10.42.1.0/24'
+
+@description('Private endpoint subnet.')
+param privateEndpointSubnetPrefix string = '10.42.2.0/24'
+
 @description('Dedicated Linux App Service plan SKU. Basic (B1) or higher; the collector timer needs Always On.')
 param planSkuName string = 'B1'
+
+@description('Storage redundancy. Use GRS or GZRS for production recovery objectives.')
+@allowed([
+  'Standard_LRS'
+  'Standard_GRS'
+  'Standard_GZRS'
+])
+param storageSkuName string = 'Standard_GRS'
 
 @description('Optional comma-separated Team (group) IDs. Leave empty to enumerate the entire tenant.')
 param pilotTeamIds string = ''
@@ -100,12 +160,25 @@ var identityName = '${namePrefix}-collector-id'
 var planName = '${namePrefix}-plan'
 var functionAppName = '${namePrefix}-func-${uniqueString(resourceGroup().id)}'
 var insightsName = '${namePrefix}-ai'
+var logAnalyticsName = '${namePrefix}-law'
+var keyVaultName = take(toLower('${replace(namePrefix, '-', '')}kv${uniqueString(resourceGroup().id)}'), 24)
 var tableName = 'workspaces'
 var storageTableEndpoint = 'https://${storageName}.table.${environment().suffixes.storage}'
 var storageBlobEndpoint = 'https://${storageName}.blob.${environment().suffixes.storage}'
+var isGovernmentCloud = contains(toLower(authorityHost), 'microsoftonline.us')
+var appServicePrivateDnsZoneName = isGovernmentCloud ? 'privatelink.azurewebsites.us' : 'privatelink.azurewebsites.net'
+var blobPrivateDnsZoneName = 'privatelink.blob.${environment().suffixes.storage}'
+var tablePrivateDnsZoneName = 'privatelink.table.${environment().suffixes.storage}'
+var keyVaultPrivateDnsZoneName = isGovernmentCloud ? 'privatelink.vaultcore.usgovcloudapi.net' : 'privatelink.vaultcore.azure.net'
 
 resource collectorIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
+  location: location
+  tags: tags
+}
+
+resource authSecretIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${namePrefix}-auth-secret-id'
   location: location
   tags: tags
 }
@@ -121,13 +194,50 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   location: location
   tags: tags
   sku: {
-    name: 'Standard_LRS'
+    name: storageSkuName
   }
   kind: 'StorageV2'
   properties: {
     minimumTlsVersion: 'TLS1_2'
     allowBlobPublicAccess: false
     supportsHttpsTrafficOnly: true
+    publicNetworkAccess: privateNetworkingEnabled ? 'Disabled' : 'Enabled'
+  }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: keyVaultName
+  location: location
+  tags: tags
+  properties: {
+    tenantId: tenantId
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    enableRbacAuthorization: true
+    enablePurgeProtection: true
+    softDeleteRetentionInDays: 90
+    publicNetworkAccess: privateNetworkingEnabled ? 'Disabled' : 'Enabled'
+  }
+}
+
+resource easyAuthSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'easy-auth-client-secret'
+  properties: {
+    value: authClientSecret
+    contentType: 'App Service Authentication client credential'
+  }
+}
+
+resource authSecretReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(keyVault.id, authSecretIdentity.id, 'Key Vault Secrets User')
+  scope: keyVault
+  properties: {
+    principalId: authSecretIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
   }
 }
 
@@ -269,6 +379,21 @@ resource feedsContainer 'Microsoft.Storage/storageAccounts/blobServices/containe
   }
 }
 
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+  name: logAnalyticsName
+  location: location
+  tags: tags
+  properties: {
+    retentionInDays: logRetentionDays
+    features: {
+      enableLogAccessUsingOnlyResourcePermissions: true
+    }
+    workspaceCapping: {
+      dailyQuotaGb: logDailyQuotaGb
+    }
+  }
+}
+
 resource insights 'Microsoft.Insights/components@2020-02-02' = {
   name: insightsName
   location: location
@@ -276,6 +401,23 @@ resource insights 'Microsoft.Insights/components@2020-02-02' = {
   kind: 'web'
   properties: {
     Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+    SamplingPercentage: telemetrySamplingPercentage
+  }
+}
+
+resource alertActionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
+  name: '${namePrefix}-alerts'
+  location: 'global'
+  tags: tags
+  properties: {
+    groupShortName: take('${namePrefix}Ops', 12)
+    enabled: true
+    emailReceivers: [for receiver in alertEmails: {
+      name: receiver.name
+      emailAddress: receiver.emailAddress
+      useCommonAlertSchema: true
+    }]
   }
 }
 
@@ -292,6 +434,44 @@ resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   }
 }
 
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = if (privateNetworkingEnabled) {
+  name: '${namePrefix}-vnet'
+  location: location
+  tags: tags
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        vnetAddressPrefix
+      ]
+    }
+  }
+}
+
+resource integrationSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-11-01' = if (privateNetworkingEnabled) {
+  parent: virtualNetwork
+  name: 'function-integration'
+  properties: {
+    addressPrefix: integrationSubnetPrefix
+    delegations: [
+      {
+        name: 'Microsoft.Web.serverFarms'
+        properties: {
+          serviceName: 'Microsoft.Web/serverFarms'
+        }
+      }
+    ]
+  }
+}
+
+resource privateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-11-01' = if (privateNetworkingEnabled) {
+  parent: virtualNetwork
+  name: 'private-endpoints'
+  properties: {
+    addressPrefix: privateEndpointSubnetPrefix
+    privateEndpointNetworkPolicies: 'Disabled'
+  }
+}
+
 resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
@@ -301,12 +481,17 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
     type: 'UserAssigned'
     userAssignedIdentities: union({
       '${collectorIdentity.id}': {}
+      '${authSecretIdentity.id}': {}
     }, enableExecution ? {
       '${executorIdentity.id}': {}
     } : {})
   }
   properties: {
     serverFarmId: plan.id
+    keyVaultReferenceIdentity: authSecretIdentity.id
+    publicNetworkAccess: disablePublicIngress ? 'Disabled' : 'Enabled'
+    virtualNetworkSubnetId: privateNetworkingEnabled ? integrationSubnet.id : null
+    vnetRouteAllEnabled: privateNetworkingEnabled
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'Node|24'
@@ -340,7 +525,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET'
-          value: authClientSecret
+          value: '@Microsoft.KeyVault(SecretUri=https://${keyVault.name}.${environment().suffixes.keyvaultDns}/secrets/${easyAuthSecret.name}/)'
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -447,6 +632,313 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   }
 }
 
+resource appServicePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (privateNetworkingEnabled) {
+  name: appServicePrivateDnsZoneName
+  location: 'global'
+  tags: tags
+}
+
+resource blobPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (privateNetworkingEnabled) {
+  name: blobPrivateDnsZoneName
+  location: 'global'
+  tags: tags
+}
+
+resource tablePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (privateNetworkingEnabled) {
+  name: tablePrivateDnsZoneName
+  location: 'global'
+  tags: tags
+}
+
+resource keyVaultPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = if (privateNetworkingEnabled) {
+  name: keyVaultPrivateDnsZoneName
+  location: 'global'
+  tags: tags
+}
+
+resource appServicePrivateDnsLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = if (privateNetworkingEnabled) {
+  parent: appServicePrivateDnsZone
+  name: '${namePrefix}-vnet-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: virtualNetwork.id
+    }
+  }
+}
+
+resource blobPrivateDnsLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = if (privateNetworkingEnabled) {
+  parent: blobPrivateDnsZone
+  name: '${namePrefix}-vnet-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: virtualNetwork.id
+    }
+  }
+}
+
+resource tablePrivateDnsLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = if (privateNetworkingEnabled) {
+  parent: tablePrivateDnsZone
+  name: '${namePrefix}-vnet-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: virtualNetwork.id
+    }
+  }
+}
+
+resource keyVaultPrivateDnsLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = if (privateNetworkingEnabled) {
+  parent: keyVaultPrivateDnsZone
+  name: '${namePrefix}-vnet-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: virtualNetwork.id
+    }
+  }
+}
+
+resource functionPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = if (privateNetworkingEnabled) {
+  name: '${namePrefix}-function-pe'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: privateEndpointSubnet.id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'function'
+        properties: {
+          privateLinkServiceId: functionApp.id
+          groupIds: [
+            'sites'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource storageBlobPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = if (privateNetworkingEnabled) {
+  name: '${namePrefix}-blob-pe'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: privateEndpointSubnet.id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'blob'
+        properties: {
+          privateLinkServiceId: storage.id
+          groupIds: [
+            'blob'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource storageTablePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = if (privateNetworkingEnabled) {
+  name: '${namePrefix}-table-pe'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: privateEndpointSubnet.id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'table'
+        properties: {
+          privateLinkServiceId: storage.id
+          groupIds: [
+            'table'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = if (privateNetworkingEnabled) {
+  name: '${namePrefix}-vault-pe'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: privateEndpointSubnet.id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'vault'
+        properties: {
+          privateLinkServiceId: keyVault.id
+          groupIds: [
+            'vault'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource functionPrivateDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-11-01' = if (privateNetworkingEnabled) {
+  parent: functionPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'appservice'
+        properties: {
+          privateDnsZoneId: appServicePrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource blobPrivateDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-11-01' = if (privateNetworkingEnabled) {
+  parent: storageBlobPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'blob'
+        properties: {
+          privateDnsZoneId: blobPrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource tablePrivateDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-11-01' = if (privateNetworkingEnabled) {
+  parent: storageTablePrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'table'
+        properties: {
+          privateDnsZoneId: tablePrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource vaultPrivateDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-11-01' = if (privateNetworkingEnabled) {
+  parent: keyVaultPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'vault'
+        properties: {
+          privateDnsZoneId: keyVaultPrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource functionDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'send-to-log-analytics'
+  scope: functionApp
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource keyVaultDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'send-to-log-analytics'
+  scope: keyVault
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [
+      {
+        categoryGroup: 'audit'
+        enabled: true
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
+    ]
+  }
+}
+
+resource http5xxAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+  name: '${namePrefix}-http5xx'
+  location: 'global'
+  tags: tags
+  properties: {
+    description: 'Function App returned repeated HTTP 5xx responses.'
+    severity: 2
+    enabled: true
+    scopes: [
+      functionApp.id
+    ]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT15M'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+      allOf: [
+        {
+          name: 'Http5xxThreshold'
+          criterionType: 'StaticThresholdCriterion'
+          metricName: 'Http5xx'
+          metricNamespace: 'Microsoft.Web/sites'
+          operator: 'GreaterThan'
+          threshold: http5xxAlertThreshold
+          timeAggregation: 'Total'
+        }
+      ]
+    }
+    autoMitigate: true
+    actions: [
+      {
+        actionGroupId: alertActionGroup.id
+      }
+    ]
+  }
+}
+
+module costBudget 'budget.bicep' = if (monthlyBudgetAmount > 0) {
+  scope: subscription()
+  params: {
+    resourceGroupName: resourceGroup().name
+    budgetName: '${namePrefix}-monthly-budget'
+    amount: max(monthlyBudgetAmount, 1)
+    startDate: budgetStartDate
+    contactEmails: budgetContactEmails
+  }
+}
+
 resource functionAuth 'Microsoft.Web/sites/config@2022-09-01' = {
   parent: functionApp
   name: 'authsettingsV2'
@@ -512,4 +1004,8 @@ output collectorIdentityClientId string = collectorIdentity.properties.clientId
 output collectorIdentityPrincipalId string = collectorIdentity.properties.principalId
 output executorIdentityPrincipalId string = executorIdentity.?properties.principalId ?? ''
 output storageAccountName string = storage.name
+output keyVaultName string = keyVault.name
+output logAnalyticsWorkspaceName string = logAnalytics.name
+output privateNetworkingEnabled bool = privateNetworkingEnabled
+output privateDnsZones string[] = privateNetworkingEnabled ? [appServicePrivateDnsZoneName, blobPrivateDnsZoneName, tablePrivateDnsZoneName, keyVaultPrivateDnsZoneName] : []
 output workspacesApiPath string = 'https://${functionApp.properties.defaultHostName}/api/workspaces'

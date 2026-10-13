@@ -47,6 +47,8 @@
                     -EnableExecution, -NotificationSender, and grants the executor identity Mail.Send.
 .PARAMETER NotificationSender  Mailbox the messages come from, for example governance@contoso.com.
 .PARAMETER NotificationOperatorEmail  Governance team address that receives governance-queue escalations.
+.PARAMETER RoleGroupObjectIdsJson  JSON object mapping governance app-role values to customer Entra group object IDs.
+.PARAMETER SkipLicenseChecks  Explicitly bypass Microsoft 365 SKU checks when a separate customer process supplies evidence.
 
 .EXAMPLE
     .\Install-Governance.ps1 -TenantId <tenant> -SubscriptionId <sub> -Location eastus
@@ -80,6 +82,18 @@ param(
     [ValidateSet('off', 'dry-run', 'live')][string]$NotificationMode = 'dry-run',
     [string]$NotificationSender = '',
     [string]$NotificationOperatorEmail = '',
+    [string]$RoleGroupObjectIdsJson = '{}',
+    [switch]$SkipLicenseChecks,
+    [ValidateSet('Standard_LRS', 'Standard_GRS', 'Standard_GZRS')][string]$StorageSkuName = 'Standard_GRS',
+    [ValidateRange(30, 730)][int]$LogRetentionDays = 30,
+    [ValidateRange(-1, 5000)][int]$LogDailyQuotaGb = 1,
+    [ValidateRange(1, 100)][int]$TelemetrySamplingPercentage = 20,
+    [string[]]$AlertEmail = @(),
+    [ValidateRange(0, 1000000)][int]$MonthlyBudgetAmount = 40,
+    [string[]]$BudgetContactEmail = @(),
+    [switch]$PrivateNetworking,
+    [switch]$DisablePublicIngress,
+    [switch]$PrivateDeploymentAgentReady,
     [switch]$SkipCodeDeploy
 )
 
@@ -88,6 +102,8 @@ if (($EnableProvisioning -or $EnableLinkRevocation -or $EnableLifecycleExecution
 if ($EnableOneDriveSharingRevocation -and (-not $EnableExecution -or -not $EnableOneDriveSharingReview)) { throw '-EnableOneDriveSharingRevocation requires -EnableExecution and -EnableOneDriveSharingReview.' }
 if ($EnableSensitivityLabels -and -not $EnableProvisioning) { throw '-EnableSensitivityLabels needs -EnableProvisioning.' }
 if ($NotificationMode -eq 'live' -and (-not $EnableExecution -or -not $NotificationSender)) { throw '-NotificationMode live needs -EnableExecution (the executor identity sends the mail) and -NotificationSender.' }
+if ($DisablePublicIngress -and -not $PrivateNetworking) { throw '-DisablePublicIngress requires -PrivateNetworking.' }
+if ($DisablePublicIngress -and -not $SkipCodeDeploy -and -not $PrivateDeploymentAgentReady) { throw 'Code deployment to a private Function App requires -PrivateDeploymentAgentReady or -SkipCodeDeploy.' }
 $labelMap = $SensitivityLabelIdsJson | ConvertFrom-Json -AsHashtable
 if ($null -eq $labelMap -or $labelMap -isnot [System.Collections.IDictionary]) { throw '-SensitivityLabelIdsJson must be a JSON object mapping label names to GUIDs.' }
 if ($EnableSensitivityLabels) {
@@ -95,6 +111,16 @@ if ($EnableSensitivityLabels) {
     foreach ($entry in $labelMap.GetEnumerator()) {
         $parsedLabelId = [guid]::Empty
         if (-not $entry.Key -or -not [guid]::TryParse([string]$entry.Value, [ref]$parsedLabelId)) { throw "Invalid sensitivity-label mapping for '$($entry.Key)' (expected a label GUID)." }
+    }
+}
+$roleGroupMap = $RoleGroupObjectIdsJson | ConvertFrom-Json -AsHashtable
+if ($null -eq $roleGroupMap -or $roleGroupMap -isnot [System.Collections.IDictionary]) { throw '-RoleGroupObjectIdsJson must be a JSON object mapping role values to group IDs.' }
+$allowedGovernanceRoles = 'Governance.Reader', 'Governance.Operator', 'Approver', 'Executor', 'Auditor', 'Workspace.Owner'
+foreach ($mapping in $roleGroupMap.GetEnumerator()) {
+    if ($mapping.Key -notin $allowedGovernanceRoles) { throw "Unknown governance app role '$($mapping.Key)' in -RoleGroupObjectIdsJson." }
+    foreach ($groupId in @($mapping.Value)) {
+        $parsedGroupId = [guid]::Empty
+        if (-not [guid]::TryParse([string]$groupId, [ref]$parsedGroupId)) { throw "Invalid group object ID '$groupId' for role '$($mapping.Key)'." }
     }
 }
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -193,9 +219,15 @@ if ($account) {
 }
 
 $signedInId = $null
+$signedInPrincipalType = $null
 if ($subscription -and $subscription.tenantId -eq $TenantId) {
     # No 'az account set': that would change the default subscription for every window sharing this profile.
-    $signedInId = try { az ad signed-in-user show --query id --output tsv 2>$null } catch { $null }
+    $signedInPrincipalType = if ($account.user.type -eq 'servicePrincipal') { 'ServicePrincipal' } else { 'User' }
+    $signedInId = if ($signedInPrincipalType -eq 'ServicePrincipal') {
+        try { az ad sp show --id $account.user.name --query id --output tsv 2>$null } catch { $null }
+    } else {
+        try { az ad signed-in-user show --query id --output tsv 2>$null } catch { $null }
+    }
     $roleNames = @()
     if ($signedInId) {
         $roleNames = @(az role assignment list --assignee $signedInId --include-inherited --scope "/subscriptions/$SubscriptionId" --query '[].roleDefinitionName' --output tsv 2>$null)
@@ -208,9 +240,29 @@ if ($subscription -and $subscription.tenantId -eq $TenantId) {
     $org = try { Invoke-GraphRest -Method GET -Path '/v1.0/organization?$select=displayName,id' } catch { $null }
     Add-Check 'Microsoft Graph reachable' ([bool]$org) $(if ($org) { "$($org.value[0].displayName)" } else { 'Cannot reach Graph from this machine (secure-session or conditional access?)' })
 
+    if ($SkipLicenseChecks) {
+        Add-Check 'Microsoft 365 licensing prerequisites' $true 'explicitly skipped; attach customer licensing evidence to the change record' $false
+    } else {
+        $subscribedSkus = $null
+        try { $subscribedSkus = @((Invoke-GraphRest -Method GET -Path '/v1.0/subscribedSkus?$select=skuPartNumber,capabilityStatus,consumedUnits,prepaidUnits,servicePlans').value) } catch { }
+        Add-Check 'Microsoft 365 SKU inventory is readable' ($null -ne $subscribedSkus) $(if ($null -ne $subscribedSkus) { "$($subscribedSkus.Count) subscribed SKUs" } else { 'Needs permission to read subscribedSkus, or use -SkipLicenseChecks with separately approved evidence' })
+        if ($null -ne $subscribedSkus) {
+            $enabledPlans = @($subscribedSkus | Where-Object capabilityStatus -eq 'Enabled' | ForEach-Object servicePlans | Where-Object provisioningStatus -in 'Success', 'Warning')
+            $hasSharePoint = [bool]($enabledPlans | Where-Object servicePlanName -match 'SHAREPOINT')
+            $hasTeams = [bool]($enabledPlans | Where-Object servicePlanName -match 'TEAMS')
+            $hasCopilot = [bool]($subscribedSkus | Where-Object { $_.capabilityStatus -eq 'Enabled' -and ($_.skuPartNumber -match 'COPILOT' -or $_.servicePlans.servicePlanName -match 'COPILOT') })
+            Add-Check 'Microsoft Teams service plan is available' $hasTeams 'required for Teams and group governance'
+            Add-Check 'SharePoint service plan is available' $hasSharePoint 'required for workspace sites and evidence'
+            if ($IncludeCopilot) { Add-Check 'Microsoft 365 Copilot SKU is available' $hasCopilot 'required because -IncludeCopilot was selected' }
+            if ($EnableOneDriveSharingReview) { Add-Check 'OneDrive/SharePoint prerequisite is available' $hasSharePoint 'required because -EnableOneDriveSharingReview was selected' }
+        }
+    }
+
     $directoryRoles = @()
     $rolesReadable = $false
-    try { $directoryRoles = @((Invoke-GraphRest -Method GET -Path '/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole?$select=displayName').value.displayName); $rolesReadable = $true } catch { }
+    if ($signedInPrincipalType -eq 'User') {
+        try { $directoryRoles = @((Invoke-GraphRest -Method GET -Path '/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole?$select=displayName').value.displayName); $rolesReadable = $true } catch { }
+    }
     $canRegister = [bool]($directoryRoles | Where-Object { $_ -in 'Global Administrator', 'Application Administrator', 'Cloud Application Administrator' })
     $canConsent = [bool]($directoryRoles | Where-Object { $_ -in 'Global Administrator', 'Privileged Role Administrator' })
     $unverified = 'Could not read your directory roles; the install will fail later if you lack them'
@@ -225,7 +277,7 @@ if ($PreflightOnly) { Write-Host "`nPreflight passed. Nothing was changed." -For
 
 # ------------------------------------------------------------------ providers and group
 Step 'Resource providers and resource group'
-foreach ($provider in 'Microsoft.Web', 'Microsoft.Storage', 'Microsoft.Insights', 'Microsoft.OperationalInsights', 'Microsoft.ManagedIdentity', 'Microsoft.Authorization') {
+foreach ($provider in 'Microsoft.Web', 'Microsoft.Storage', 'Microsoft.Insights', 'Microsoft.OperationalInsights', 'Microsoft.ManagedIdentity', 'Microsoft.Authorization', 'Microsoft.KeyVault', 'Microsoft.Network', 'Microsoft.Consumption') {
     $state = az provider show --namespace $provider --subscription $SubscriptionId --query registrationState --output tsv 2>$null
     if ($state -ne 'Registered') {
         Write-Host "Registering $provider..."
@@ -245,7 +297,7 @@ $roleDefinitions = @(
     @{ Value = 'Auditor';             Name = 'Auditor';             Description = 'Read audit records.' }
     @{ Value = 'Workspace.Owner';     Name = 'Workspace owner';     Description = 'Work on the workspaces assigned to the signed-in owner.' }
 ) | ForEach-Object {
-    @{ id = (New-StableGuid "sam-governance-role:$($_.Value)").ToString(); allowedMemberTypes = @('User'); displayName = $_.Name; description = $_.Description; value = $_.Value; isEnabled = $true }
+    @{ id = (New-StableGuid "sam-governance-role:$($_.Value)").ToString(); allowedMemberTypes = @('User', 'Group'); displayName = $_.Name; description = $_.Description; value = $_.Value; isEnabled = $true }
 }
 $scopeId = (New-StableGuid 'sam-governance-scope:user_impersonation').ToString()
 
@@ -312,6 +364,15 @@ try {
             pilotTeamIds   = @{ value = $PilotTeamIds }
             maxWorkspaces  = @{ value = $MaxWorkspaces }
             planSkuName    = @{ value = $PlanSkuName }
+            storageSkuName = @{ value = $StorageSkuName }
+            logRetentionDays = @{ value = $LogRetentionDays }
+            logDailyQuotaGb = @{ value = $LogDailyQuotaGb }
+            telemetrySamplingPercentage = @{ value = $TelemetrySamplingPercentage }
+            alertEmails = @{ value = @($AlertEmail | ForEach-Object -Begin { $index = 0 } -Process { $index++; @{ name = "operations-$index"; emailAddress = $_ } }) }
+            monthlyBudgetAmount = @{ value = $MonthlyBudgetAmount }
+            budgetContactEmails = @{ value = @($BudgetContactEmail) }
+            privateNetworkingEnabled = @{ value = [bool]$PrivateNetworking }
+            disablePublicIngress = @{ value = [bool]$DisablePublicIngress }
             enableExecution = @{ value = [bool]$EnableExecution }
             executionMode  = @{ value = $ExecutionMode }
             enableLifecycleExecution = @{ value = [bool]$EnableLifecycleExecution }
@@ -390,13 +451,25 @@ if ($EnableExecution) {
 # The link in each message needs the dashboard address, which is only known after deployment.
 Invoke-Az { az functionapp config appsettings set --name $functionApp --resource-group $ResourceGroup --subscription $SubscriptionId --settings "APP_URL=$appUrl" --output none } 'Set APP_URL' | Out-Null
 
-if ($signedInId) {
+if ($signedInId -and $signedInPrincipalType -eq 'User') {
     $held = @((Invoke-GraphRest -Method GET -Path "/v1.0/users/$signedInId/appRoleAssignments").value | Where-Object { $_.resourceId -eq $apiSp.id }).appRoleId
     foreach ($roleValue in 'Governance.Reader', 'Governance.Operator') {
         $roleId = ($roleDefinitions | Where-Object { $_.value -eq $roleValue }).id
         if ($held -contains $roleId) { continue }
         Invoke-GraphRest -Method POST -Path "/v1.0/users/$signedInId/appRoleAssignments" -Body @{ principalId = $signedInId; resourceId = $apiSp.id; appRoleId = $roleId } | Out-Null
         Write-Host "Assigned $roleValue to the installing user"
+    }
+}
+
+foreach ($mapping in $roleGroupMap.GetEnumerator()) {
+    $role = $roleDefinitions | Where-Object value -eq $mapping.Key | Select-Object -First 1
+    foreach ($groupId in @($mapping.Value)) {
+        $group = Invoke-GraphRest -Method GET -Path "/v1.0/groups/$groupId?`$select=id,displayName,securityEnabled"
+        if (-not $group.securityEnabled) { throw "Group '$($group.displayName)' is not security-enabled and cannot receive app role '$($mapping.Key)'." }
+        $existingRoleIds = @((Invoke-GraphRest -Method GET -Path "/v1.0/groups/$groupId/appRoleAssignments").value | Where-Object resourceId -eq $apiSp.id | Select-Object -ExpandProperty appRoleId)
+        if ($existingRoleIds -contains $role.id) { Write-Host "Already assigned $($mapping.Key) to group $($group.displayName)"; continue }
+        Invoke-GraphRest -Method POST -Path "/v1.0/servicePrincipals/$($apiSp.id)/appRoleAssignedTo" -Body @{ principalId = $groupId; resourceId = $apiSp.id; appRoleId = $role.id } | Out-Null
+        Write-Host "Assigned $($mapping.Key) to group $($group.displayName)"
     }
 }
 
@@ -462,6 +535,9 @@ $state = [ordered]@{
     installedAt = (Get-Date).ToUniversalTime().ToString('o'); cloud = $Cloud; tenantId = $TenantId; subscriptionId = $SubscriptionId
     resourceGroup = $ResourceGroup; functionApp = $functionApp; appUrl = $appUrl; apiClientId = $apiClientId
     collectorIdentityPrincipalId = $identityPrincipalId; storageAccount = $outputs.storageAccountName.value
+    keyVault = $outputs.keyVaultName.value; logAnalyticsWorkspace = $outputs.logAnalyticsWorkspaceName.value
+    privateNetworkingEnabled = [bool]$PrivateNetworking; disablePublicIngress = [bool]$DisablePublicIngress
+    roleGroupObjectIds = $roleGroupMap
     graphPermissionsGranted = if ($SkipGraphGrants) { @() } else { $graphPermissions }
     executionEnabled = [bool]$EnableExecution; executionMode = $(if ($EnableExecution) { $ExecutionMode } else { 'off' })
 }

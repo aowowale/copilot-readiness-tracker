@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "1.1.0",
+  "azure": {
+    "tenantId": "00000000-0000-0000-0000-000000000000",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "cloud": "AzureUSGovernment",
+    "location": "usgovvirginia",
+    "resourceGroup": "rg-sam-governance",
+    "namePrefix": "samgov",
+    "planSkuName": "B1",
+    "storageSkuName": "Standard_GRS",
+    "azureConfigDirectory": "~/.azure-sam-customer"
+  },
+  "collection": {
+    "pilotTeamIds": "",
+    "maxWorkspaces": 0,
+    "includeUsageReports": true,
+    "includeCopilot": true,
+    "enableOneDriveSharingReview": false
+  },
+  "access": {
+    "roleGroupObjectIds": {
+      "Governance.Reader": [],
+      "Governance.Operator": [],
+      "Approver": [],
+      "Executor": [],
+      "Auditor": [],
+      "Workspace.Owner": []
+    }
+  },
+  "operations": {
+    "logRetentionDays": 30,
+    "logDailyQuotaGb": 1,
+    "telemetrySamplingPercentage": 20,
+    "alertEmails": [],
+    "monthlyBudgetAmount": 40,
+    "budgetContactEmails": []
+  },
+  "network": {
+    "privateNetworking": false,
+    "disablePublicIngress": false,
+    "privateDeploymentAgentReady": false
+  },
+  "execution": {
+    "enabled": false,
+    "mode": "dry-run",
+    "enableProvisioning": false,
+    "enableLinkRevocation": false,
+    "enableOneDriveSharingRevocation": false,
+    "enableLifecycleExecution": false,
+    "notificationMode": "dry-run",
+    "notificationSender": "",
+    "notificationOperatorEmail": ""
+  }
+}

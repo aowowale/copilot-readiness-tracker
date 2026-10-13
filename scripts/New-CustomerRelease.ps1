@@ -1,8 +1,9 @@
 [CmdletBinding()]
 param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
-    [string]$Version = '1.0.0',
-    [string]$OutputDirectory = (Join-Path (Split-Path -Parent $PSScriptRoot) 'artifacts')
+    [string]$Version = '1.1.0',
+    [string]$OutputDirectory = (Join-Path (Split-Path -Parent $PSScriptRoot) 'artifacts'),
+    [switch]$SkipCollateral
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,6 +17,7 @@ $rootFiles = @(
     'README.md'
     'START-HERE.md'
     'CUSTOMER-DEPLOYMENT.md'
+    'customer-deployment.example.json'
     'CLOUD-SYNC-SETUP.md'
     'MANUAL-IMPORT.md'
     'index.html'
@@ -28,31 +30,21 @@ $backendFiles = @(
     'backend/package-lock.json'
     'backend/local.settings.json.example'
 )
-$scriptFiles = @(
-    'scripts/Add-PresentationNotes.ps1'
-    'scripts/Deploy-Backend.ps1'
-    'scripts/Export-GovernanceData.ps1'
-    'scripts/Export-WorkspaceEvidence.ps1'
-    'scripts/Finalize-WordGuide.ps1'
-    'scripts/Generate-CustomerCollateral.js'
-    'scripts/Get-TenantInventory.ps1'
-    'scripts/Install-Governance.ps1'
-    'scripts/New-CustomerPrepPackage.ps1'
-    'scripts/New-CustomerRelease.ps1'
-    'scripts/Test-Deployment.ps1'
-    'scripts/Test-ReadOnlyPilot.ps1'
-)
+$scriptFiles = Get-ChildItem -LiteralPath (Join-Path $projectRoot 'scripts') -File | ForEach-Object {
+    [IO.Path]::GetRelativePath($projectRoot, $_.FullName).Replace('\', '/')
+}
 $collateralFiles = @(
     'artifacts/Microsoft-365-Copilot-Readiness-Customer-Guide.docx'
     'artifacts/Microsoft-365-Copilot-Readiness-Customer-Guide.pdf'
     'artifacts/Microsoft-365-Copilot-Readiness-Customer-Presentation.pptx'
     'artifacts/Microsoft-365-Copilot-Readiness-Customer-Presentation.pdf'
 )
+if ($SkipCollateral) { $collateralFiles = @() }
 $pilotEvidence = @(
     'artifacts/read-only-pilot-2-acceptance.json'
     'artifacts/read-only-pilot-2-validation.txt'
 ) | Where-Object { Test-Path -LiteralPath (Join-Path $projectRoot $_) -PathType Leaf }
-$sourceDirectories = @('backend/src', 'backend/test', 'docs', 'infra')
+$sourceDirectories = @('.github', 'backend/src', 'backend/test', 'docs', 'infra')
 $requiredFiles = $rootFiles + $backendFiles + $scriptFiles + $collateralFiles
 $missing = @($requiredFiles | Where-Object { -not (Test-Path -LiteralPath (Join-Path $projectRoot $_) -PathType Leaf) })
 if ($missing.Count) { throw "Required release files are missing: $($missing -join ', ')" }

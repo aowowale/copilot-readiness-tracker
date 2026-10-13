@@ -76,9 +76,9 @@
     tenant and AzureUSGovernment cloud before using this option. Cannot be combined with device auth.
 
 .EXAMPLE
-    .\Seed-TestTenant.ps1 -TenantId 1ee4bc9c-318f-4587-916b-da787d606b90 -ThisIsATestTenant
+    .\Seed-TestTenant.ps1 -TenantId 00000000-0000-0000-0000-000000000000 -ThisIsATestTenant
 .EXAMPLE
-    .\Seed-TestTenant.ps1 -TenantId 1ee4bc9c-318f-4587-916b-da787d606b90 -ThisIsATestTenant -Remove
+    .\Seed-TestTenant.ps1 -TenantId 00000000-0000-0000-0000-000000000000 -ThisIsATestTenant -Remove
 #>
 [CmdletBinding()]
 param(
